@@ -2,6 +2,8 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// I've updated the schema, please compare to the old one.
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -15,91 +17,183 @@ model User {
   lastName     String
   profileImage String?
   bookings     Booking[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model BusCompany {
-  id      String @id @unique @default(uuid())
-  name    String
-  email   String @unique
-  password String
-  logoUrl String?
-  buses   Bus[]
-  routes  Route[]
-  admins  Admin[]
-  drivers Driver[]
+  id        String   @id @unique @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  logoUrl   String?
+  branches  Branch[]
+  buses     Bus[]
+  drivers   BusDriver[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Branch {
+  id        String     @id @unique @default(uuid())
+  name      String
+  address   String
+  location  String
+  company   BusCompany @relation(fields: [companyId], references: [id])
+  companyId String
+  admins    Admin[]
+  routes    Route[]
+  trips     Trip[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Permission {
+  id        String   @id @unique @default(uuid())
+  entity    String
+  canCreate Int      @default(0)
+  canRead   Int      @default(0)
+  canUpdate Int      @default(0)
+  canDelete Int      @default(0)
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  adminId   String
+  createdAt DateTime @default(now())
+}
+
+model Blog {
+  id        String   @id @unique @default(uuid())
+  title     String
+  content   String
+  imageUrl  String?
+  admin     Admin    @relation(fields: [adminId], references: [id])
+  adminId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Gallery {
+  id          String   @id @unique @default(uuid())
+  title       String
+  imageUrl    String
+  description String?
+  admin       Admin    @relation(fields: [adminId], references: [id])
+  adminId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Admin {
-  id          String     @id @unique @default(uuid())
-  email       String     @unique
+  id          String       @id @unique @default(uuid())
+  email       String       @unique
   password    String
   firstName   String
   lastName    String
-  company     BusCompany @relation(fields: [companyId], references: [id])
-  companyId   String
+  branch      Branch       @relation(fields: [branchId], references: [id])
+  branchId    String
+  blogs       Blog[]
+  galleries   Gallery[]
+  permissions Permission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Bus {
-  id          String     @id @unique @default(uuid())
-  plateNumber String
-  capacity    Int
-  busType     String
-  imageUrl    String?   
-  company     BusCompany @relation(fields: [companyId], references: [id])
-  companyId   String
-  trips       Trip[]
+  id               Int      @id @default(autoincrement())
+  busNumber        String
+  busCompany       String
+  busType          String
+  busCapacity      Int
+  busImage         String
+  busRoute         String
+  tripDuration     Int
+  tripDepartureTime DateTime
+  tripArrivalTime  DateTime
+  busExtras        String[] 
+  busDriverID      Int
+  busFare          Float
+  currency         String
+  selectedSeats    String[]
+  isBooked         Boolean
+  currentDate      DateTime  @default(now())
+  tickets          Ticket[]  @relation("BusTickets")
+  driver           BusDriver @relation(fields: [busDriverID], references: [id])
+  
+  trips            Trip[]
+
+  BusCompany BusCompany[]
+
+  BusDriver BusDriver[] @relation("DriverBuses")
 }
 
+model Ticket {
+  id        Int      @id @default(autoincrement())
+  ticketId  String   @unique 
+  bus       Bus      @relation("BusTickets", fields: [busId], references: [id])
+  busId     Int
+  createdAt DateTime  @default(now())
 
-model Driver {
-  id            String     @id @unique @default(uuid())
-  firstName     String
-  lastName      String
-  licenseNumber String     @unique
-  email         String     @unique
-  mobile        String
-  company       BusCompany @relation(fields: [companyId], references: [id])
-  companyId     String
-  trips         Trip[]
-}
-
-
-model Location {
-  id                String       @id @unique @default(uuid())
-  name              String
-  routesFrom        Route[]      @relation("routesFrom")
-  routesTo          Route[]      @relation("routesTo")
-  cargoRoutesFrom   CargoRoute[] @relation("cargoRoutesFrom")
-  cargoRoutesTo     CargoRoute[] @relation("cargoRoutesTo")
-}
-
-model Route {
-  id             String     @id @unique @default(uuid())
-  startLocation  Location   @relation("routesFrom", fields: [startLocationId], references: [id])
-  startLocationId String
-  endLocation    Location   @relation("routesTo", fields: [endLocationId], references: [id])
-  endLocationId  String
-  duration       Int      
-  distance       Int        
-  company        BusCompany @relation(fields: [companyId], references: [id])
-  companyId      String
-  trips          Trip[]
-}
-
-model Trip {
-  id         String   @id @unique @default(uuid())
-  date       DateTime
-  price      Float
-  departureTime  String 
-  bus        Bus      @relation(fields: [busId], references: [id])
-  busId      String
-  route      Route    @relation(fields: [routeId], references: [id])
-  routeId    String
-  driver     Driver   @relation(fields: [driverId], references: [id])
-  driverId   String
   bookings   Booking[]
 }
 
+model BusDriver {
+  id            Int      @id @default(autoincrement())
+  name          String
+  license       String
+  buses         Bus[]    @relation("DriverBuses")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  trips         Trip[]    @relation("DriverTrips") 
+
+  BusCompany BusCompany[]
+
+  Bus Bus[]
+
+  Trip Trip[]
+}
+
+model Trip {
+  id            String    @id @unique @default(uuid())
+  date          DateTime
+  price         Float
+  departureTime String
+  bus           Bus       @relation(fields: [busId], references: [id])
+  busId         Int       
+  route         Route     @relation(fields: [routeId], references: [id])
+  routeId       String
+  driver        BusDriver @relation(fields: [driverId], references: [id])
+  driverId      Int       
+  branch        Branch    @relation(fields: [branchId], references: [id])
+  branchId      String
+  bookings      Booking[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  BusDriver BusDriver[] @relation("DriverTrips")
+}
+
+model Location {
+  id         String  @id @unique @default(uuid())
+  name       String
+  routesFrom Route[] @relation("routesFrom")
+  routesTo   Route[] @relation("routesTo")
+}
+
+model Route {
+  id              String   @id @unique @default(uuid())
+  startLocation   Location @relation("routesFrom", fields: [startLocationId], references: [id])
+  startLocationId String
+  endLocation     Location @relation("routesTo", fields: [endLocationId], references: [id])
+  endLocationId   String
+  duration        Int
+  distance        Int
+  companyId       String
+  branch          Branch   @relation(fields: [branchId], references: [id])
+  branchId        String
+  trips           Trip[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
 
 model Booking {
   id         String   @id @unique @default(uuid())
@@ -108,48 +202,9 @@ model Booking {
   userId     String
   trip       Trip     @relation(fields: [tripId], references: [id])
   tripId     String
-  seatNumber Int
-}
-
-model CargoCompany {
-  id      String @id @unique @default(uuid())
-  name    String
-  email   String @unique
-  password String
-  logoUrl String?
-  cargos  Cargo[]
-  routes  CargoRoute[]
-}
-
-model Cargo {
-  id            String       @id @unique @default(uuid())
-  trackingNumber String
-  weight        Float
-  description   String
-  company       CargoCompany @relation(fields: [companyId], references: [id])
-  companyId     String
-  trip          CargoTrip    @relation(fields: [tripId], references: [id])
-  tripId        String
-}
-
-model CargoRoute {
-  id             String       @id @unique @default(uuid())
-  startLocation  Location     @relation("cargoRoutesFrom", fields: [startLocationId], references: [id])
-  startLocationId String
-  endLocation    Location     @relation("cargoRoutesTo", fields: [endLocationId], references: [id])
-  endLocationId  String
-  duration       Int          
-  distance       Int          
-  company        CargoCompany @relation(fields: [companyId], references: [id])
-  companyId      String
-  trips          CargoTrip[]
-}
-
-model CargoTrip {
-  id       String   @id @unique @default(uuid())
-  date     DateTime
-  price    Float
-  route    CargoRoute @relation(fields: [routeId], references: [id])
-  routeId  String
-  cargos   Cargo[]
+  ticket     Ticket   @relation(fields: [ticketId], references: [id]) // Foreign key for Ticket
+  ticketId   Int      
+  seatCode String[]     //eg: BL-2
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

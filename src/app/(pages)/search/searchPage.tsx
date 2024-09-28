@@ -9,6 +9,9 @@ import NoBusFound from '@/app/admin/components/NoBusFound';
 import { useSearchParams } from 'next/navigation';
 import { Bus } from 'lucide-react';
 import { BookingFilterAccordion } from '@/components/FilterComponent';
+import { v4 as uuidv4 } from "uuid";
+import Link from "next/link";
+import { useSearchContext } from '../bookings/context/useSearchContext';
 
 type BusType = {
   id: string;
@@ -78,6 +81,8 @@ const SearchResults: React.FC = () => {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [buses, setBuses] = useState<BusType[]>([]);
   const [companyData, setCompanyData] = useState<CompanyData[]>([]);
+  const randomUUID:string = uuidv4();
+   const { searchResults, setSearchResults } = useSearchContext();
 
   const fetchData = useCallback(async () => {
     try {
@@ -154,6 +159,7 @@ const SearchResults: React.FC = () => {
       });
 
       setResults(mappedResults);
+            setSearchResults(mappedResults); // useSearchContext.tsx
     } catch (error) {
       setError('An error occurred while fetching results');
     } finally {
@@ -178,95 +184,153 @@ const SearchResults: React.FC = () => {
   }
 
   return (
-    <Suspense fallback={<CircularProgress/>}>
-    <div>
-      <div className="relative w-full overflow-hidden">
-        <FormBus />
-      </div>
-      {results.length > 0 ? (
-        <div className='grid grid-cols-3'>
-          <div className='grid grid-cols-1'>
-            <div className='flex-col flex ml-5'>
-              <h2 className='font-bold text-gray-400 text-[11px]'>SELECT YOUR TRIP</h2>
-              <h1 className='font-bold text-[#48A0FF] text-[15px]'>Available Trips: {results.length} results</h1>
+    <Suspense fallback={<CircularProgress />}>
+      <div>
+        <div className='relative w-full overflow-hidden'>
+          <FormBus />
+        </div>
+        {results.length > 0 ? (
+          <div className='grid grid-cols-3'>
+            <div className='grid grid-cols-1'>
+              <div className='flex-col flex ml-5'>
+                <h2 className='font-bold text-gray-400 text-[11px]'>
+                  SELECT YOUR TRIP
+                </h2>
+                <h1 className='font-bold text-[#48A0FF] text-[15px]'>
+                  Available Trips: {results.length} results
+                </h1>
+              </div>
             </div>
-          </div>
-          <div className='grid grid-cols-1 col-span-2'>
-            <div className='max-lg:hidden'>
-              <div className='value flex bg-white items-center p-[2vh] rounded-md mr-[2vw]'>
-                <div>
-                  <h2 className='mr-3 font-semibold'>Sort By</h2>
-                </div>
-                <div className='flex items-center space-x-4 max-md:flex-row'>
-                  <button className='px-2 font-semibold rounded-[0.4pc]' style={{ backgroundColor: '#48A0FF', color: '#F2F4F7' }}>
-                    Cheapest
-                  </button>
-                  <button className='px-2 font-semibold rounded-[0.4pc]' style={{ backgroundColor: '#F2F4F7', color: '#48A0FF' }}>
-                    Fastest
-                  </button>
-                  <button className='px-2 font-semibold rounded-[0.4pc]' style={{ backgroundColor: '#F2F4F7', color: '#48A0FF' }}>
-                    Earliest
-                  </button>
+            <div className='grid grid-cols-1 col-span-2'>
+              <div className='max-lg:hidden'>
+                <div className='value flex bg-white items-center p-[2vh] rounded-md mr-[2vw]'>
+                  <div>
+                    <h2 className='mr-3 font-semibold'>Sort By</h2>
+                  </div>
+                  <div className='flex items-center space-x-4 max-md:flex-row'>
+                    <button
+                      className='px-2 font-semibold rounded-[0.4pc]'
+                      style={{
+                        backgroundColor: "#48A0FF",
+                        color: "#F2F4F7",
+                      }}>
+                      Cheapest
+                    </button>
+                    <button
+                      className='px-2 font-semibold rounded-[0.4pc]'
+                      style={{
+                        backgroundColor: "#F2F4F7",
+                        color: "#48A0FF",
+                      }}>
+                      Fastest
+                    </button>
+                    <button
+                      className='px-2 font-semibold rounded-[0.4pc]'
+                      style={{
+                        backgroundColor: "#F2F4F7",
+                        color: "#48A0FF",
+                      }}>
+                      Earliest
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className='grid max-lg:hidden grid-cols-1 items-start justify-center'>
-            <div className='booking-filter-accordion'>
-              <BookingFilterAccordion />
+            <div className='grid max-lg:hidden grid-cols-1 items-start justify-center'>
+              <div className='booking-filter-accordion'>
+                <BookingFilterAccordion />
+              </div>
             </div>
-          </div>
-          <div className='grid grid-cols-1 col-span-2 max-lg:col-span-3 items-start justify-center'>
-            <div>
-              {results.map(trip => (
-                <div className='grid grid-cols-1 mb-5 w-full border border-gray-200 rounded-[1pc]' key={trip.id}>
-                  <div className='flex max-md:flex-col'>
-                    <div className='flex w-full p-[2vh] justify-between'>
-                      <div className='flex flex-col justify-between'>
-                        <div className='sectiontop'>
-                          <div className='buspic'>
-                            <img className='w-full rounded-full h-24 object-fill' src={trip.logoUrl ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.imageUrl}` : defaultLogoUrl} alt='' />
+            <div className='grid grid-cols-1 col-span-2 max-lg:col-span-3 items-start justify-center'>
+              <div>
+                {results.map((trip) => (
+                  <div
+                    className='grid grid-cols-1 mb-5 w-full border border-gray-200 rounded-[1pc]'
+                    key={trip.id}>
+                    <div className='flex max-md:flex-col'>
+                      <div className='flex w-full p-[2vh] justify-between'>
+                        <div className='flex flex-col justify-between'>
+                          <div className='sectiontop'>
+                            <div className='buspic'>
+                              <img
+                                className='w-full rounded-full h-24 object-fill'
+                                src={
+                                  trip.logoUrl
+                                    ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.imageUrl}`
+                                    : defaultLogoUrl
+                                }
+                                alt=''
+                              />
+                            </div>
+                            <h2>
+                              <PanoramaFishEyeSharp className='ic' />
+                              {trip.startLocationName}
+                            </h2>
+                            <h3>
+                              <AccessTimeSharp className='ic' />{" "}
+                              7:00am | Selected Date:{" "}
+                              {trip.formattedDate ||
+                                "No date selected"}
+                            </h3>
                           </div>
-                          <h2>
-                            <PanoramaFishEyeSharp className='ic' />
-                            {trip.startLocationName}
-                          </h2>
-                          <h3>
-                            <AccessTimeSharp className='ic' /> 7:00am | Selected Date: {trip.formattedDate || 'No date selected'}
-                          </h3>
+                          <div className='sectionbottom'>
+                            <h2>
+                              <LocationOnSharp className='ic' />
+                              {trip.endLocationName}
+                            </h2>
+                            <h3>
+                              <AccessTimeSharp className='ic' />{" "}
+                              7:00am | Selected Date:{" "}
+                              {trip.formattedDate ||
+                                "No date selected"}
+                            </h3>
+                          </div>
                         </div>
-                        <div className='sectionbottom'>
-                          <h2>
-                            <LocationOnSharp className='ic' />
-                            {trip.endLocationName}
-                          </h2>
-                          <h3>
-                            <AccessTimeSharp className='ic' /> 7:00am | Selected Date: {trip.formattedDate || 'No date selected'}
-                          </h3>
-                        </div>
-                      </div>
-                      <div className='rightloca flex flex-col items-center justify-between'>
-                        <div className='flex items-center flex-col text-[2vh]'>
+                        <div className='rightloca flex flex-col items-center justify-between'>
+                          <div className='flex items-center flex-col text-[2vh]'>
+                            <div>
+                              <img
+                                className='w-full rounded-full h-8 object-fill'
+                                src={
+                                  trip.logoUrl
+                                    ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.logoUrl}`
+                                    : defaultLogoUrl
+                                }
+                                alt=''
+                              />
+                            </div>
+                            <h2 className='font-semibold flex items-center text-[#48A0FF]'>
+                              <Bus /> {trip.busType}
+                            </h2>
+                          </div>
+                          <h6 className='font-semibold'>
+                            GH₵{trip.price}
+                          </h6>
                           <div>
-                            <img className='w-full rounded-full h-8 object-fill' src={trip.logoUrl ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.logoUrl}` : defaultLogoUrl} alt='' />
+                            {/* *** bus selection */}
+                            {/* <button className='bg-[#48A0FF] p-2 rounded-[0.4pc] text-white font-bold'>
+                              Book
+                            </button> */}
+                            <Link
+                              href={`/bookings/u/${randomUUID}/seatPicker`}
+                              className='bg-[#48A0FF] p-2 rounded-[0.4pc] text-white font-bold'>
+                              Book
+                            </Link>
                           </div>
-                          <h2 className='font-semibold flex items-center text-[#48A0FF]'><Bus /> {trip.busType}</h2>
-                        </div>
-                        <h6 className='font-semibold'>GH₵{trip.price}</h6>
-                        <div>
-                          <button className='bg-[#48A0FF] p-2 rounded-[0.4pc] text-white font-bold'>Book</button>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <NoBusFound />
-      )}
-    </div></Suspense>
+        ) : (
+          <NoBusFound />
+        )}
+      </div>
+    </Suspense>
   );
 };
+
+// export {result};

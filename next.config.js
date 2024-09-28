@@ -13,7 +13,9 @@ module.exports = {
           port: '',
           pathname: '/**/**'
         },
-      ],
+    
+          
+      ],domains: ['lh3.googleusercontent.com'],
     },
   }
   // next.config.js
