@@ -89,8 +89,8 @@ export function Priveleges() {
     },
     {
       accessorKey: "logoUrl",
-      header: "Logo URL",
-      cell: ({ row }) => <div>{row.getValue("logoUrl") || 'N/A'}</div>,
+      header: "Logo",
+      cell: ({ row }) => <img className='h-24 w-24' src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${row.getValue("logoUrl") || 'N/A'}`} alt=''/>,
     },
   ];
 

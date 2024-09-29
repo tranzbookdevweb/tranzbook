@@ -21,6 +21,12 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 
+type Branch = {
+  id: string;
+  name: string;
+  companyId: string;
+};
+
 type BusCompany = {
   id: string;
   name: string;
@@ -34,9 +40,12 @@ function BusSheet({ onAddSuccess }: Props) {
   const [plateNumber, setPlateNumber] = useState('');
   const [capacity, setCapacity] = useState(0);
   const [busType, setBusType] = useState('');
-  const [imageUrl, setImageUrl] = useState<File | null>(null); // Add this line
-  const [companyId, setCompanyId] = useState('');
+  const [imageUrl, setImageUrl] = useState<File | null>(null);
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [branchId, setBranchId] = useState('');
   const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,13 +64,38 @@ function BusSheet({ onAddSuccess }: Props) {
       }
     };
 
+    // Fetch the list of branches
+    const fetchBranches = async () => {
+      try {
+        const response = await fetch('/api/GET/getBranches');
+        if (!response.ok) {
+          throw new Error('Failed to fetch branches');
+        }
+        const data = await response.json();
+        setBranches(data);
+      } catch (error) {
+        console.error('Error fetching branches:', error);
+      }
+    };
+
     fetchBusCompanies();
+    fetchBranches();
   }, []);
+
+  useEffect(() => {
+    if (companyId) {
+      // Filter branches based on the selected company
+      const filtered = branches.filter(branch => branch.companyId === companyId);
+      setFilteredBranches(filtered);
+    } else {
+      setFilteredBranches([]);
+    }
+  }, [companyId, branches]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!plateNumber || !capacity || !busType || !companyId || !imageUrl) {
+    if (!plateNumber || !capacity || !busType || !companyId|| !imageUrl) {
       setError('All fields are required.');
       return;
     }
@@ -161,10 +195,10 @@ function BusSheet({ onAddSuccess }: Props) {
               />
             </div>
             <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="companyId" className="text-left">
+              <Label htmlFor="company" className="text-left">
                 Company
               </Label>
-              <Select value={companyId} onValueChange={setCompanyId}>
+              <Select value={companyId ?? ''} onValueChange={(value) => setCompanyId(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a company" />
                 </SelectTrigger>
@@ -172,6 +206,23 @@ function BusSheet({ onAddSuccess }: Props) {
                   {busCompanies.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-1 items-center gap-4">
+              <Label htmlFor="branchId" className="text-left">
+                Branch
+              </Label>
+              <Select value={branchId} onValueChange={setBranchId} disabled={!companyId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a branch" />
+                </SelectTrigger>
+                <SelectContent className='z-[99999]'>
+                  {filteredBranches.map((branch) => (
+                    <SelectItem key={branch.id} value={branch.id}>
+                      {branch.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

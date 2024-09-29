@@ -26,6 +26,12 @@ type Location = {
   name: string;
 };
 
+type Branch = {
+  id: string;
+  name: string;
+  companyId: string;
+};
+
 type BusCompany = {
   id: string;
   name: string;
@@ -35,15 +41,15 @@ type Props = {
   onAddSuccess: () => void;
 };
 
-async function fetchBusCompanies() {
+async function fetchBranches() {
   try {
-    const response = await fetch('/api/GET/getbusCompany');
+    const response = await fetch('/api/GET/getBranches');
     if (!response.ok) {
-      throw new Error('Failed to fetch bus companies');
+      throw new Error('Failed to fetch branches');
     }
     return await response.json();
   } catch (error) {
-    console.error('Error fetching bus companies:', error);
+    console.error('Error fetching branches:', error);
     return [];
   }
 }
@@ -61,35 +67,63 @@ async function fetchLocations() {
   }
 }
 
+async function fetchBusCompanies() {
+  try {
+    const response = await fetch('/api/GET/getbusCompany');
+    if (!response.ok) {
+      throw new Error('Failed to fetch bus companies');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching bus companies:', error);
+    return [];
+  }
+}
+
 function ServiceLocation({ onAddSuccess }: Props) {
   const [startLocationId, setStartLocationId] = useState('');
   const [endLocationId, setEndLocationId] = useState('');
   const [duration, setDuration] = useState(0);
   const [distance, setDistance] = useState(0);
-  const [companyId, setCompanyId] = useState('');
-  const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
+  const [branchId, setBranchId] = useState('');
+  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch bus companies and locations
+    // Fetch branches, locations, and bus companies
     const fetchData = async () => {
-      const [companiesData, locationsData] = await Promise.all([
-        fetchBusCompanies(),
-        fetchLocations()
+      const [branchesData, locationsData, companiesData] = await Promise.all([
+        fetchBranches(),
+        fetchLocations(),
+        fetchBusCompanies()
       ]);
-      setBusCompanies(companiesData);
+      setBranches(branchesData);
       setLocations(locationsData);
+      setBusCompanies(companiesData);
     };
 
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (selectedCompany) {
+      // Filter branches based on the selected company
+      const filtered = branches.filter(branch => branch.companyId === selectedCompany);
+      setFilteredBranches(filtered);
+    } else {
+      setFilteredBranches([]);
+    }
+  }, [selectedCompany, branches]);
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!startLocationId || !endLocationId || !duration || !distance || !companyId) {
+    if (!startLocationId || !endLocationId || !duration || !distance || !branchId) {
       setError('All fields are required.');
       return;
     }
@@ -103,7 +137,7 @@ function ServiceLocation({ onAddSuccess }: Props) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ startLocationId, endLocationId, duration, distance, companyId }),
+        body: JSON.stringify({ startLocationId, endLocationId, duration, distance, branchId }),
       });
 
       if (!response.ok) {
@@ -197,10 +231,10 @@ function ServiceLocation({ onAddSuccess }: Props) {
               />
             </div>
             <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="companyId" className="text-left">
+              <Label htmlFor="company" className="text-left">
                 Company
               </Label>
-              <Select value={companyId} onValueChange={setCompanyId}>
+              <Select value={selectedCompany ?? ''} onValueChange={(value) => setSelectedCompany(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a company" />
                 </SelectTrigger>
@@ -208,6 +242,23 @@ function ServiceLocation({ onAddSuccess }: Props) {
                   {busCompanies.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-1 items-center gap-4">
+              <Label htmlFor="branchId" className="text-left">
+                Branch
+              </Label>
+              <Select value={branchId} onValueChange={setBranchId} disabled={!selectedCompany}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a branch" />
+                </SelectTrigger>
+                <SelectContent className="z-[99999]">
+                  {filteredBranches.map((branch) => (
+                    <SelectItem key={branch.id} value={branch.id}>
+                      {branch.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

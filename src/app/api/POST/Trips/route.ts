@@ -1,13 +1,15 @@
-// pages/api/trip.js
 import prisma from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { date, price, busId, routeId,driverId,departureTime } = await req.json();
+    const { date, price, busId, routeId, driverId, departureTime, branchId } = await req.json();
 
-    if (!date || !price || !busId || !routeId) {
-      return NextResponse.json({ error: "Date, price, bus ID, and route ID are required" }, { status: 400 });
+    if (!date || !price || !busId || !routeId || !driverId || !departureTime || !branchId) {
+      return NextResponse.json(
+        { error: "Date, price, bus ID, route ID, driver ID, departure time, and branch ID are required" }, 
+        { status: 400 }
+      );
     }
 
     const newTrip = await prisma.trip.create({
@@ -15,9 +17,10 @@ export async function POST(req: NextRequest) {
         date,
         price,
         busId,
-        departureTime,
         routeId,
-        driverId
+        driverId,
+        departureTime,
+        branchId // Added branchId to the data model
       },
     });
 

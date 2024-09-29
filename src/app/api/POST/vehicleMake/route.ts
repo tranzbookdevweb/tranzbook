@@ -1,4 +1,3 @@
-// /src/app/api/POST/vehicleMake/route.ts
 import prisma from "@/app/lib/db";
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from "@/lib/supabase";
@@ -32,8 +31,8 @@ export async function POST(req: NextRequest) {
         plateNumber,
         capacity,
         busType,
-        companyId,
-        imageUrl: imageData?.fullPath,
+        companyId,  // Corrected from companyId to companyId
+        imageUrl: imageData?.path, // Adjusted to store the correct image path
       },
     });
 

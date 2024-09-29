@@ -16,38 +16,64 @@ import {
 import { PlusCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type Branch = {
+type Company = {
   id: string;
   name: string;
 };
 
-async function fetchBranches() {
+type Location = {
+    id: string;
+    name: string;
+  };
+
+async function fetchCompanies() {
   try {
-    const response = await fetch('/api/GET/getBranches');
+    const response = await fetch('/api/GET/getbusCompany');
     if (!response.ok) {
-      throw new Error('Failed to fetch branches');
+      throw new Error('Failed to fetch companies');
     }
     return await response.json();
   } catch (error) {
-    console.error('Error fetching branches:', error);
+    console.error('Error fetching companies:', error);
     return [];
   }
 }
 
-function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
-  const [email, setEmail] = useState('');
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [branchId, setBranchId] = useState('');
-  const [password, setPassword] = useState('');
+async function fetchLocations() {
+    try {
+      const response = await fetch('/api/GET/getLocation');
+      if (!response.ok) {
+        throw new Error('Failed to fetch companies');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+      return [];
+    }
+  }
+function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [location, setLocation] = useState('');
+  const [companyId, setCompanyId] = useState('');
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [locationData, setLocations] = useState<Location[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [branchesData] = await Promise.all([fetchBranches()]);
-      setBranches(branchesData);
+      const companiesData = await fetchCompanies();
+      setCompanies(companiesData);
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const locationsData = await fetchLocations();
+      setLocations(locationsData);
     };
 
     fetchData();
@@ -56,8 +82,8 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!email || !password || !firstName || !lastName || !branchId) {
-      setError('First name, last name, email, password, and branch are required.');
+    if (!name || !address || !location || !companyId) {
+      setError('Name, address, location, and company are required.');
       return;
     }
 
@@ -65,12 +91,17 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
     setError(null);
 
     try {
-      const response = await fetch('/api/POST/Admin', {
+      const response = await fetch('/api/POST/Branch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, firstName, lastName, branchId }),
+        body: JSON.stringify({
+          name,
+          address,
+          location,
+          companyId,
+        }),
       });
 
       if (!response.ok) {
@@ -80,10 +111,10 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
       const data = await response.json();
       console.log('Data received:', data);
       onAddSuccess();
-      alert('Admin added successfully!');
+      alert('Branch added successfully!');
     } catch (error) {
       console.error('Error:', error);
-      setError('Failed to add admin.');
+      setError('Failed to add Branch.');
     } finally {
       setIsSubmitting(false);
     }
@@ -98,72 +129,55 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
       </SheetTrigger>
       <SheetContent className='z-[999]'>
         <SheetHeader>
-          <SheetTitle>Add Admin</SheetTitle>
+          <SheetTitle>Add Branch</SheetTitle>
           <SheetDescription>Click save when you&apos;re done.</SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="FirstName" className="text-left">
-                First Name
-              </Label>
+              <Label htmlFor="Name" className="text-left">Name</Label>
               <Input
-                id="FirstName"
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                id="Name"
+                placeholder="Branch Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="lastName" className="text-left">
-                Last Name
-              </Label>
+              <Label htmlFor="Address" className="text-left">Address</Label>
               <Input
-                id="lastName"
-                placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                id="Address"
+                placeholder="Address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
                 className="col-span-3"
               />
             </div>
             <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="Email" className="text-left">
-                Email
-              </Label>
-              <Input
-                id="Email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="Password" className="text-left">
-                Password
-              </Label>
-              <Input
-                id="Password"
-                placeholder="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="branchId" className="text-left">
-                Branch
-              </Label>
-              <Select value={branchId} onValueChange={setBranchId}>
+            <Select value={location} onValueChange={setLocation}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a branch" />
+                  <SelectValue placeholder="Select a Location" />
+                </SelectTrigger>
+                <SelectContent className="z-[999]">
+                  {locationData.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-1 items-center gap-4">
+              <Label htmlFor="CompanyId" className="text-left">Company</Label>
+              <Select value={companyId} onValueChange={setCompanyId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a company" />
                 </SelectTrigger>
                 <SelectContent className="z-[99999]">
-                  {branches.map((branch) => (
-                    <SelectItem key={branch.id} value={branch.id}>
-                      {branch.name}
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -184,4 +198,4 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
   );
 }
 
-export default AdminSheet;
+export default BranchSheet;

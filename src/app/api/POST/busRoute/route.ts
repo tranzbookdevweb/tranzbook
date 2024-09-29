@@ -7,9 +7,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { startLocationId, endLocationId, duration, distance, companyId } = await req.json();
+    const { startLocationId, endLocationId, duration, distance, branchId } = await req.json();
 
-    if (!startLocationId || !endLocationId || !duration || !distance || !companyId) {
+    if (!startLocationId || !endLocationId || !duration || !distance || !branchId) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
         endLocationId,
         duration,
         distance,
-        companyId,
+        branchId,  // Corrected from companyId to branchId
       },
     });
 

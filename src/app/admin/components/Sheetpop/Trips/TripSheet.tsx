@@ -48,6 +48,11 @@ type Driver = {
   lastName: string;
 };
 
+type Branch = {
+  id: string;
+  name: string;
+};
+
 type Props = {
   onAddSuccess: () => void;
 };
@@ -104,6 +109,19 @@ async function fetchDrivers() {
   }
 }
 
+async function fetchBranches() {
+  try {
+    const response = await fetch('/api/GET/getBranches');
+    if (!response.ok) {
+      throw new Error('Failed to fetch branches');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching branches:', error);
+    return [];
+  }
+}
+
 function TripSheet({ onAddSuccess }: Props) {
   const [date, setDate] = useState('');
   const [departureTime, setDepartureTime] = useState('');
@@ -111,24 +129,28 @@ function TripSheet({ onAddSuccess }: Props) {
   const [busId, setBusId] = useState('');
   const [routeId, setRouteId] = useState('');
   const [driverId, setDriverId] = useState('');
+  const [branchId, setBranchId] = useState('');
   const [buses, setBuses] = useState<Bus[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [busesData, routesData, locationsData, driversData] = await Promise.all([
+      const [busesData, routesData, locationsData, driversData, branchesData] = await Promise.all([
         fetchBuses(),
         fetchRoutes(),
         fetchLocations(),
-        fetchDrivers()
+        fetchDrivers(),
+        fetchBranches()
       ]);
       setBuses(busesData);
       setLocations(locationsData);
       setDrivers(driversData);
+      setBranches(branchesData);
 
       const mappedRoutes = routesData.map((route: Route) => ({
         ...route,
@@ -150,7 +172,7 @@ function TripSheet({ onAddSuccess }: Props) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!date || !departureTime || !price || !busId || !routeId || !driverId) {
+    if (!date || !departureTime || !price || !busId || !routeId || !driverId || !branchId) {
       setError('All fields are required.');
       return;
     }
@@ -164,7 +186,7 @@ function TripSheet({ onAddSuccess }: Props) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ date, departureTime, price, busId, routeId, driverId }),
+        body: JSON.stringify({ date, departureTime, price, busId, routeId, driverId, branchId }),
       });
 
       if (!response.ok) {
@@ -277,12 +299,28 @@ function TripSheet({ onAddSuccess }: Props) {
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-1 items-center gap-4">
+              <Label htmlFor="branchId" className="text-left">
+                Branch
+              </Label>
+              <Select value={branchId} onValueChange={setBranchId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a branch" />
+                </SelectTrigger>
+                <SelectContent className="z-[99999]">
+                  {branches.map((branch) => (
+                    <SelectItem key={branch.id} value={branch.id}>
+                      {branch.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          {error && <p className="text-red-500">{error}</p>}
-          <SheetFooter>
+          <SheetFooter className="mt-4">
             <SheetClose asChild>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Adding...' : 'Save changes'}
+                {isSubmitting ? 'Adding...' : 'Add Trip'}
               </Button>
             </SheetClose>
           </SheetFooter>

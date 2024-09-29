@@ -1,6 +1,7 @@
 import { Bus, Car, GitBranch, LocateFixed, LucideSidebarClose, Speaker, Ticket } from "lucide-react";
 import { BsCash, BsChat, BsDoorClosed, BsEnvelope, BsFile, BsGear, BsHouseDoor, BsKanban, BsListUl, BsPeople, BsPersonFillCheck, BsPersonFillGear, BsPersonGear, BsQuestionCircle, BsX } from "react-icons/bs";
 import { SideNavItemGroup } from "./components/type/sidebar-nav-item";
+import { PostAdd } from "@mui/icons-material";
 
 
 
@@ -22,8 +23,8 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
             submenu: true,
             subMenuItems: [
                 { title: 'Companies', path: '/admin/Configurations/companies' },
-                { title: 'System Settings', path: '/admin/Configurations/system-settings' },
-                // { title: 'Translations', path: 'admin/Configurations/translations' },
+                // { title: 'System Settings', path: '/admin/Configurations/system-settings' },
+                { title: 'Branches', path: '/admin/Configurations/branch' },
             ],
         },
     
@@ -42,7 +43,7 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                     { title: 'Vehicle Make', path: '/admin/MasterData/VehicleMake' },
                     // { title: 'Vehicle Model', path: 'admin/MasterData/VehicleModel' },
                     { title: 'Country', path: '/admin/MasterData/Country' },
-                    { title: 'Driver Needed Documentation', path: '/admin/MasterData/DriverNeededDocumentation' },
+                    // { title: 'Driver Needed Documentation', path: '/admin/MasterData/DriverNeededDocumentation' },
                 
                 ],
             },
@@ -50,6 +51,18 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                 title: 'Service Locations',
                 path: '/admin/serviceLocations',
                 icon: <LocateFixed size={20} />,
+            },
+            {
+                title: 'Manage Drivers',
+                path: '/admin/manageDrivers',
+                icon: <BsPeople size={20} />,
+                submenu: true,
+                subMenuItems: [
+                    {title: ' Drivers', path: '/admin/manageDrivers/ApprovedDrivers' },
+            //         {title: 'Approve Pending Drivers', path: '/admin/manageDrivers/ApprovePendingDrivers' },
+            //         {title: 'Driver Ratings', path: '/admin/manageDrivers/DriverRatings' },
+            //         {title: 'Negative Balance Drivers', path: '/admin/manageDrivers/NegativeBalanceDrivers' },
+          ],
             },
             {
                 title: 'Trips',
@@ -83,11 +96,11 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                 icon: <BsPeople size={20} />,
                 submenu: true,
                 subMenuItems: [
-                    {title: 'Approved Drivers', path: '/admin/manageDrivers/ApprovedDrivers' },
-                    {title: 'Approve Pending Drivers', path: '/admin/manageDrivers/ApprovePendingDrivers' },
-                    {title: 'Driver Ratings', path: '/admin/manageDrivers/DriverRatings' },
-                    {title: 'Negative Balance Drivers', path: '/admin/manageDrivers/NegativeBalanceDrivers' },
-               ],
+                    {title: ' Drivers', path: '/admin/manageDrivers/ApprovedDrivers' },
+            //         {title: 'Approve Pending Drivers', path: '/admin/manageDrivers/ApprovePendingDrivers' },
+            //         {title: 'Driver Ratings', path: '/admin/manageDrivers/DriverRatings' },
+            //         {title: 'Negative Balance Drivers', path: '/admin/manageDrivers/NegativeBalanceDrivers' },
+          ],
             },
             {
                 title: 'Manage Users',
@@ -116,6 +129,11 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
     {
         title: "Others",
                 menuList: [
+                    {
+                        title: 'Blog Posts',
+                        path: 'admin/BlogPosts',
+                        icon: <PostAdd />,
+                    },
                  
             {
                 title: 'Chat',

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -34,94 +34,65 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import BusSheet from '@/app/admin/components/Sheetpop/MasterDataPop/VehicleMakeSheet';
+import BranchSheet from '@/app/admin/components/Sheetpop/Priveleges/BranchSheet';
 
-interface Data {
+interface Branch {
   id: string;
-  plateNumber: string;
-  capacity: number;
-  busType: string;
-  imageUrl?: string;  // Adjusted to match model
-  branchId: string;   // Adjusted to match model
+  name: string;
+  address: string;
+  location: string;
 }
 
-export function VehicleMakeDataTable() {
-  const [data, setData] = useState<Data[]>([]);
+export function BranchDataTable() {
+  const [data, setData] = useState<Branch[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const columns: ColumnDef<Data>[] = [
+  const getBranches = useCallback(async () => {
+    try {
+      const response = await fetch('/api/GET/getBranches');
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const data = await response.json();
+      setData(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    getBranches();
+  }, [getBranches]);
+
+  const handleAddSuccess = () => {
+    getBranches();
+  };
+
+  const columns: ColumnDef<Branch>[] = [
     {
       accessorKey: "Sno",
       header: "Sr No",
       cell: ({ row }) => <div>{row.index + 1}</div>,
     },
     {
-      accessorKey: "plateNumber",
-      header: "Plate Number",
-      cell: ({ row }) => <div>{row.getValue("plateNumber")}</div>,
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => <div>{row.getValue("name")}</div>,
     },
     {
-      accessorKey: "busType",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Bus Type
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => <div>{row.getValue("busType")}</div>,
+      accessorKey: "address",
+      header: "Address",
+      cell: ({ row }) => <div>{row.getValue("address")}</div>,
     },
     {
-      accessorKey: "capacity",
-      header: "Capacity",
-      cell: ({ row }) => <div>{row.getValue("capacity")}</div>,
-    },
-    {
-      accessorKey: "imageUrl",
-      header: "Image",
-      cell: ({ row }) =>
-         <img className='h-24 w-24' src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${row.getValue("imageUrl") || 'N/A'}`} alt=''/>
-      ,
-    },
-    {
-      accessorKey: "branchId",
-      header: "Branch ID",
-      cell: ({ row }) => <div>{row.getValue("branchId")}</div>,
+      accessorKey: "location",
+      header: "Location",
+      cell: ({ row }) => <div>{row.getValue("location")}</div>,
     },
   ];
-
-  const getVehicle = async () => {
-    try {
-      const response = await fetch('/api/GET/getBuses');
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data = await response.json();
-      setData(data.map((item: any) => ({
-        id: item.id,
-        plateNumber: item.plateNumber,
-        capacity: item.capacity,
-        busType: item.busType,
-        imageUrl: item.imageUrl,  // Adjusted to match model
-        branchId: item.branchId,   // Adjusted to match model
-      })));
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
-  useEffect(() => {
-    getVehicle();
-  }, []);
-
-  const handleAddSuccess = () => {
-    getVehicle();
-  };
 
   const table = useReactTable({
     data,
@@ -144,14 +115,14 @@ export function VehicleMakeDataTable() {
 
   return (
     <div>
-      <BusSheet onAddSuccess={handleAddSuccess} />
+      <BranchSheet onAddSuccess={handleAddSuccess} />
       <div className="w-full">
         <div className="flex items-center py-4">
           <Input
-            placeholder="Filter Plate Number..."
-            value={(table.getColumn("plateNumber")?.getFilterValue() as string) ?? ""}
+            placeholder="Filter Name..."
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("plateNumber")?.setFilterValue(event.target.value)
+              table.getColumn("name")?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
           />
@@ -184,20 +155,22 @@ export function VehicleMakeDataTable() {
         </div>
         <div className="rounded-md border">
           <Table>
-            <TableCaption>A list of buses.</TableCaption>
+            <TableCaption>A list of branches.</TableCaption>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableHeader>
@@ -257,4 +230,4 @@ export function VehicleMakeDataTable() {
   );
 }
 
-export default VehicleMakeDataTable;
+export default BranchDataTable;

@@ -30,14 +30,16 @@ type BusCompany = {
 type Props = {
   onAddSuccess: () => void;
 };
+
 function ApprovedDriversSheet({ onAddSuccess }: Props) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [licenseNumber, setLicenseNumber] = useState('');
-  const [email, setEmail] = useState(''); // New field
-  const [mobile, setMobile] = useState(''); // New field
-  const [companyId, setCompanyId] = useState('');
+  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [companyId, setcompanyId] = useState('');
   const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch the list of bus companies
@@ -56,9 +58,17 @@ function ApprovedDriversSheet({ onAddSuccess }: Props) {
 
     fetchBusCompanies();
   }, []);
+
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
-    
+
+    if (!firstName || !lastName || !licenseNumber || !email || !mobile || !companyId) {
+      setError('All fields are required.');
+      return;
+    }
+
+    setError(null);
+
     const driverData = { firstName, lastName, licenseNumber, email, mobile, companyId };
 
     try {
@@ -165,21 +175,23 @@ function ApprovedDriversSheet({ onAddSuccess }: Props) {
 
           <div className="grid grid-cols-1 items-center gap-4">
             <Label htmlFor="companyId" className="text-left">
-              Company ID
+              Branch
             </Label>
-            <Select value={companyId} onValueChange={setCompanyId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a company" />
-                </SelectTrigger>
-                <SelectContent className='z-[99999]'>
-                  {busCompanies.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <Select value={companyId} onValueChange={setcompanyId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a branch" />
+              </SelectTrigger>
+              <SelectContent className='z-[99999]'>
+                {busCompanies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {error && <p className="text-red-500">{error}</p>}
 
           <SheetFooter>
             <SheetClose asChild>
