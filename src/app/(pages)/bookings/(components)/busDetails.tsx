@@ -4,13 +4,15 @@ import {
   FiMapPin,
   FiClock,
   FiDollarSign,
-  FiUser,FiCalendar
+  FiUser,
+  FiCalendar,
 } from "react-icons/fi";
 import PaymentButton from "../(buttons)/paymentButton";
 import { useSearchContext } from "../context/useSearchContext";
+import { StaticImport } from "next/dist/shared/lib/get-img-props";
 
 interface BusDetailsProps {
-  busImage: string;
+  busImage: string | undefined;
   busNumber: string | number;
   busCompany: string | number;
   busType: string | number;
@@ -24,10 +26,10 @@ interface BusDetailsProps {
   busFare: number;
   currency: string;
   selectedSeats: string[];
-  currentDate:Date;
-  id:string|string[];
-  handleBooking:()=>void;
-  isBooked:boolean;
+  currentDate: Date;
+  id: string | string[];
+  handleBooking: () => void;
+  isBooked: boolean;
 }
 
 const BusDetails: React.FC<BusDetailsProps> = ({
@@ -45,7 +47,10 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   busFare,
   currency,
   selectedSeats,
-  currentDate,id,handleBooking,isBooked
+  currentDate,
+  id,
+  handleBooking,
+  isBooked,
 }) => {
   const totalCost: number = busFare * selectedSeats.length;
   const { searchResults } = useSearchContext();
@@ -77,16 +82,12 @@ const BusDetails: React.FC<BusDetailsProps> = ({
     handleBooking();
   };
 
-  // please make use of useSearchContext to get the details
-  // of what the user searched for
-  //since I cant properly  access the db and I cant tell if
-  //whether I've made some mistakes or not
 
   return (
     <aside className='bg-white dark:text-black shadow-lg w-72 max-sm:w-full sm:max-md:w-full h-screen p-5 flex flex-col items-start border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg'>
       <div className='flex items-center w-full mb-6'>
         <Image
-          src={busImage}
+          src={`${busImage}`}
           alt='Bus'
           height={100}
           width={100}
@@ -187,15 +188,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
             {/* <p>ID: {id}</p>  */}
           </div>
         </div>
-        {/* test if searchResultsContext works and replace 
-        the dummy data with the data needed from it {searchResults.map((result) => (
-          <div key={result.id}>
-            <p>
-              {result.startLocationName} to {result.endLocationName}
-            </p>
-            <p>Price: GH₵{result.price}</p>
-          </div>
-        ))} */}
+
         <PaymentButton
           busFare={busFare}
           selectedSeats={selectedSeats}
