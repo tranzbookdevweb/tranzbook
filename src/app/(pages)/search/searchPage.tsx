@@ -18,6 +18,7 @@ import { useSearchParams } from "next/navigation";
 import { Bus } from "lucide-react";
 import { BookingFilterAccordion } from "@/components/FilterComponent";
 import { useSearchContext } from "../bookings/context/useSearchContext";
+import Link from "next/link";
 
 type BusType = {
   id: string;
@@ -349,9 +350,10 @@ const SearchResults: React.FC = () => {
                             GH₵{trip.price}
                           </h6>
                           <div>
-                            <button className='bg-[#48A0FF] p-2 rounded-[0.4pc] text-white font-bold'>
+                            <Link href={"/bookings/seatPicker"}
+                             className='bg-[#48A0FF] p-2 rounded-[0.4pc] text-white font-bold'>
                               Book
-                            </button>
+                            </Link>
                           </div>
                         </div>
                       </div>
