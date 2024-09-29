@@ -51,7 +51,7 @@ export async function Navbar() {
               {/* I intially made it /bookings/u/${randomUUID}/seatPicker to 
               test the seatSelection and ticket generation since I couldnt access the db
                */}
-              <Link href={`/bookings/u/manage`}>Bookings</Link>
+              <Link href={`/bookings/manage/trips`}>Bookings</Link>
             </div>
           )}
         </div>

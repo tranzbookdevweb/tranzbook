@@ -96,13 +96,13 @@ const dashboardItems = [
     name: "Trips",
     activeIcon: <IoCarSport size={25} />,
     inActiveIcon: <IoCarSportOutline size={25} />,
-    href: "/bookings/u/manage/trips",
+    href: "/bookings/manage/trips",
   },
   {
     id: 2,
     name: "Tickets",
     activeIcon: <HiTicket size={25} />,
     inActiveIcon: <HiOutlineTicket size={25} />,
-    href: "/bookings/u/manage/tickets",
+    href: "/bookings/manage/tickets",
   },
 ];
