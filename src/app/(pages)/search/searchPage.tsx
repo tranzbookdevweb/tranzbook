@@ -6,7 +6,7 @@ import React, {
   useCallback,
   Suspense,
 } from "react";
-import { CircularProgress } from "@mui/material"; // Import CircularProgress from Material-UI
+import { CircularProgress, Skeleton } from "@mui/material"; // Import CircularProgress from Material-UI
 import {
   AccessTimeSharp,
   LocationOnSharp,
@@ -90,8 +90,11 @@ const SearchResults: React.FC = () => {
   const [companyData, setCompanyData] = useState<CompanyData[]>([]);
   const { searchResults, setSearchResults } = useSearchContext();
 
+  // Fetching data from multiple APIs
   const fetchData = useCallback(async () => {
     try {
+      setLoading(true); // Start loading
+
       const [
         tripResponse,
         locationResponse,
@@ -106,6 +109,7 @@ const SearchResults: React.FC = () => {
         fetch("/api/GET/getbusCompany"),
       ]);
 
+      // Check for response errors
       if (
         !tripResponse.ok ||
         !locationResponse.ok ||
@@ -121,24 +125,27 @@ const SearchResults: React.FC = () => {
       const busData = await busResponse.json();
       const companyData = await companyResponse.json();
 
+      // Set fetched data
       setLocations(Array.isArray(locationData) ? locationData : []);
       setRoutes(Array.isArray(routeData) ? routeData : []);
       setBuses(Array.isArray(busData) ? busData : []);
       setCompanyData(Array.isArray(companyData) ? companyData : []);
+
     } catch (error) {
       console.error("Error fetching initial data:", error);
-      setError("Failed to fetch data. Please try again later."); // Set error state on failure
+      setError("Failed to fetch data. Please try again later.");
     } finally {
-      setLoading(false); // Set loading state to false regardless of success or failure
+      setLoading(false); // Finish loading after all data is fetched
     }
   }, []);
 
   useEffect(() => {
-    fetchData(); // Fetch initial data when component mounts
+    fetchData(); // Fetch data when the component mounts
   }, [fetchData]);
 
+  // Fetching search results based on query
   const fetchResults = useCallback(async () => {
-    setLoading(true); // Start loading state
+    setLoading(true); // Start loading
     const fromLocation = searchParams.get("fromLocation");
     const toLocation = searchParams.get("toLocation");
     const date = searchParams.get("date");
@@ -160,79 +167,113 @@ const SearchResults: React.FC = () => {
       );
 
       // Map TripData to ExtendedTripData
-      const mappedResults: ExtendedTripData[] = tripData.map(
-        (trip) => {
-          const route = routes.find((r) => r.id === trip.routeId);
-          const bus = buses.find((b) => b.id === trip.busId);
-          const company = bus?.companyId
-            ? companyMap.get(bus.companyId)
-            : undefined;
+      const mappedResults: ExtendedTripData[] = tripData.map((trip) => {
+        const route = routes.find((r) => r.id === trip.routeId);
+        const bus = buses.find((b) => b.id === trip.busId);
+        const company = bus?.companyId
+          ? companyMap.get(bus.companyId)
+          : undefined;
 
-          const logoUrl = company?.logoUrl || defaultLogoUrl; // Use defaultLogoUrl if logoUrl is undefined
+        const logoUrl = company?.logoUrl || defaultLogoUrl; // Use defaultLogoUrl if logoUrl is undefined
 
-          return {
-            ...trip,
-            startLocationName: route
-              ? locations.find((l) => l.id === route.startLocationId)
-                  ?.name || route.startLocationId
-              : trip.startLocationId,
-            endLocationName: route
-              ? locations.find((l) => l.id === route.endLocationId)
-                  ?.name || route.endLocationId
-              : trip.endLocationId,
-            busType: bus ? bus.busType : trip.busId,
-            imageUrl: bus ? bus.imageUrl : "",
-            formattedDate: new Date(trip.date).toLocaleDateString(),
-            logoUrl,
-          };
-        }
-      );
+        return {
+          ...trip,
+          startLocationName: route
+            ? locations.find((l) => l.id === route.startLocationId)?.name ||
+              route.startLocationId
+            : trip.startLocationId,
+          endLocationName: route
+            ? locations.find((l) => l.id === route.endLocationId)?.name ||
+              route.endLocationId
+            : trip.endLocationId,
+          busType: bus ? bus.busType : trip.busId,
+          imageUrl: bus ? bus.imageUrl : "",
+          formattedDate: new Date(trip.date).toLocaleDateString(),
+          logoUrl,
+        };
+      });
 
       setResults(mappedResults);
       setSearchResults(mappedResults);
     } catch (error) {
       setError("An error occurred while fetching results");
     } finally {
-      setLoading(false); // Set loading state to false regardless of success or failure
+      setLoading(false); // Set loading to false after data fetching
     }
-  }, [
-    searchParams,
-    routes,
-    buses,
-    locations,
-    companyData,
-    setSearchResults,
-  ]);
+  }, [searchParams, routes, buses, locations, companyData, setSearchResults]);
 
   useEffect(() => {
-    fetchResults(); // Fetch results whenever searchParams or dependencies change
+    fetchResults(); // Fetch search results on search params change
   }, [fetchResults]);
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}>
-        <CircularProgress />
+      <div className='grid grid-cols-3'>
+      <div className='grid grid-cols-1'>
+        <div className='flex-col flex ml-5'>
+          <Skeleton width={100} height={20} />
+          <Skeleton width={150} height={30} />
+        </div>
       </div>
+      <div className='grid grid-cols-1 col-span-2'>
+        <div className='max-lg:hidden'>
+          <div className='value flex bg-white items-center p-[2vh] rounded-md mr-[2vw]'>
+            <Skeleton variant="text" width={60} />
+            <div className='flex items-center space-x-4 max-md:flex-row'>
+              <Skeleton variant="rectangular" width={80} height={30} />
+              <Skeleton variant="rectangular" width={80} height={30} />
+              <Skeleton variant="rectangular" width={80} height={30} />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className='grid max-lg:hidden grid-cols-1 items-start justify-center'>
+        <Skeleton variant="rectangular" height={150} width="100%" />
+      </div>
+      <div className='grid grid-cols-1 col-span-2 max-lg:col-span-3 items-start justify-center'>
+        <div>
+          {[...Array(3)].map((_, index) => (
+            <div key={index} className='grid grid-cols-1 mb-5 w-full border border-gray-200 rounded-[1pc]'>
+              <div className='flex max-md:flex-col'>
+                <div className='flex w-full p-[2vh] justify-between'>
+                  <div className='flex flex-col justify-between'>
+                    <div className='sectiontop'>
+                      <Skeleton variant="circular" width={96} height={96} />
+                      <Skeleton width={150} />
+                      <Skeleton width={100} />
+                    </div>
+                    <div className='sectionbottom'>
+                      <Skeleton width={150} />
+                      <Skeleton width={100} />
+                    </div>
+                  </div>
+                  <div className='rightloca flex flex-col items-center justify-between'>
+                    <Skeleton variant="circular" width={32} height={32} />
+                    <Skeleton width={100} height={20} />
+                    <Skeleton width={80} height={30} />
+                    <Skeleton variant="rectangular" width={100} height={30} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
     );
   }
-
   if (error) {
     return <p>{error}</p>;
   }
 
   return (
-    <Suspense fallback={<CircularProgress />}>
+   
       <div>
         <div className='relative w-full overflow-hidden'>
           <FormBus />
         </div>
-        {results.length > 0 ? (
+       <Suspense>
+          {results.length > 0 ? (
           <div className='grid grid-cols-3'>
             <div className='grid grid-cols-1'>
               <div className='flex-col flex ml-5'>
@@ -365,8 +406,8 @@ const SearchResults: React.FC = () => {
           </div>
         ) : (
           <NoBusFound />
-        )}
+        )}</Suspense>
       </div>
-    </Suspense>
+    
   );
 };
