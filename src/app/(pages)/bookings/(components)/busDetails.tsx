@@ -9,7 +9,10 @@ import {
 } from "react-icons/fi";
 import PaymentButton from "../(buttons)/paymentButton";
 import { useSearchContext } from "../context/useSearchContext";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
+import { RiCircleLine, RiMapPin2Fill } from "react-icons/ri";
+import { PiLineVerticalLight } from "react-icons/pi";
+import { TbTemperatureSnow } from "react-icons/tb";
+import { ImSwitch } from "react-icons/im";
 
 interface BusDetailsProps {
   busImage: string | undefined;
@@ -21,7 +24,7 @@ interface BusDetailsProps {
   tripDuration: string | number;
   tripDepartureTime: string | number;
   tripArrivalTime: string | number;
-  busExtras: string;
+  busExtras: string | string[];
   busDriverID: string;
   busFare: number;
   currency: string;
@@ -55,36 +58,8 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   const totalCost: number = busFare * selectedSeats.length;
   const { searchResults } = useSearchContext();
 
-  // kindly correct this esp the body
-  const createTicketAndBooking = async () => {
-    const response = await fetch("/api/tickets", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ticketId: `TICKET-${Date.now()}`,
-        busId: id,
-        userId: "USER123",
-        tripId: "TRIP123",
-        seatNumber: selectedSeats,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Error:", errorData.error);
-      return;
-    }
-
-    const data = await response.json();
-    console.log("Created Ticket and Booking:", data);
-    handleBooking();
-  };
-
-
   return (
-    <aside className='bg-white dark:text-black shadow-lg w-72 max-sm:w-full sm:max-md:w-full h-screen p-5 flex flex-col items-start border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg'>
+    <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg overflow-y-scroll custom-scrollbar'>
       <div className='flex items-center w-full mb-6'>
         <Image
           src={`${busImage}`}
@@ -116,11 +91,17 @@ const BusDetails: React.FC<BusDetailsProps> = ({
           </span>
         </div>
 
-        <div className='flex items-center'>
-          <FiMapPin className='text-blue-600 mr-2' />
-          <span className='text-sm font-semibold text-gray-700'>
-            {busRoute.origin} → {busRoute.destination}
-          </span>
+        <div className='flex items-center bg-white rounded-xl border border-slate-100 p-2'>
+          {/* <FiMapPin className='text-blue-600 mr-2' /> */}
+          <div className='flex flex-col gap-1'>
+            <RiCircleLine />
+            <PiLineVerticalLight />
+            <RiMapPin2Fill />
+          </div>
+          <div className='text-sm mx-2 font-semibold text-blue-600 flex flex-col justify-between min-h-full space-y-5'>
+            <p>{busRoute.origin}</p>
+            <p>{busRoute.destination}</p>
+          </div>
         </div>
 
         <div className='flex items-center'>
@@ -155,9 +136,30 @@ const BusDetails: React.FC<BusDetailsProps> = ({
 
         <div>
           <p className='text-xs text-gray-500'>Extras</p>
-          <p className='text-sm font-semibold text-gray-700'>
-            {busExtras}
-          </p>
+          <div >
+            {busExtras
+              .toLocaleString()
+              .split(",")
+              .map((item, index) => {
+                return (
+                  <div key={index} className='text-sm font-semibold text-gray-700 text-wrap flex flex-row flex-wrap gap-1'>
+                    {item === "Air Conditioning" && (
+                      <div className='flex flex-row rounded-xl text-xs my-1 justify-center items-center gap-2 p-1 px-2 border border-slate-200 w-fit'>
+                        {item}
+                        <TbTemperatureSnow />
+                      </div>
+                    )}
+                    {item === "Power Outlets" && (
+                      <div className='flex flex-row rounded-xl text-xs justify-center items-center gap-2 p-1 px-2 border border-slate-200 w-fit'>
+                        {item}
+                        <ImSwitch />
+                      </div>
+                    )}
+                  
+                  </div>
+                );
+              })}
+          </div>
         </div>
 
         <div className='flex items-center'>
@@ -188,19 +190,30 @@ const BusDetails: React.FC<BusDetailsProps> = ({
             {/* <p>ID: {id}</p>  */}
           </div>
         </div>
-
-        <PaymentButton
-          busFare={busFare}
-          selectedSeats={selectedSeats}
-          handleBooking={handleBooking}
-          className={`w-full mt-5 py-2  text-white text-sm font-semibold rounded-[5px] ${
-            selectedSeats.length !== 0 && !isBooked
-              ? "bg-blue-500 hover:bg-blue-700 hover:scale-105"
-              : "bg-blue-200"
-          } transition-transform transform  `}
-          disabled={selectedSeats.length !== 0 && isBooked}
-        />
       </div>
+      <PaymentButton
+        busFare={busFare}
+        selectedSeats={selectedSeats}
+        handleBooking={handleBooking}
+        className={`w-full mt-5 py-2  text-white text-sm font-semibold rounded-[5px] ${
+          selectedSeats.length !== 0 && !isBooked
+            ? "bg-[#fc9a1a] hover:bg-[#F79009] hover:scale-105"
+            : "bg-[#ffcd5993]"
+        } transition-transform transform  `}
+        disabled={selectedSeats.length !== 0 && isBooked}
+      />
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: #b7ebf8;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background-color: #ffffff;
+        }
+      `}</style>
     </aside>
   );
 };
