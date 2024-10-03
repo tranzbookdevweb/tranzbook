@@ -4,6 +4,8 @@ import BusDetails from "../(components)/busDetails";
 import SeatSelection from "../(components)/seatSelection";
 import Ticket from "../(components)/ticket";
 // import { useSearchParams } from "next/navigation";
+import { BusDetailsSkeleton } from "../(components)/Skeletons/busDetailsSkeleton";
+import { SeatSelectionSkeleton } from "../(components)/Skeletons/seatSelectionSkeleton";
 
 interface Bus {
   id: string;
@@ -40,7 +42,7 @@ interface Route {
     name: string;
   };
   duration: number;
-  distance:number
+  distance: number;
 }
 
 interface Trip {
@@ -61,8 +63,10 @@ const Page: React.FC = () => {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isBooked, setBooked] = useState<boolean>(false);
   const [tripData, setTripData] = useState<Trip | null>(null);
-  const [busImage, setBusImage] = useState<string>("default-logo-url"); // State for bus image
-  const tripId= '2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4'
+  const [busImage, setBusImage] = useState<string>(
+    "default-logo-url"
+  ); // State for bus image
+  const tripId = "2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4";
   const apiUrl = `/api/GET/getTripById?id=${tripId}`;
 
   useEffect(() => {
@@ -71,7 +75,7 @@ const Page: React.FC = () => {
         const response = await fetch(apiUrl);
         const data: Trip = await response.json();
         setTripData(data);
-        
+
         // Set the bus image after trip data is fetched
         if (data.bus.imageUrl) {
           const imageUrl = `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${data.bus.imageUrl}`;
@@ -86,7 +90,16 @@ const Page: React.FC = () => {
   }, [apiUrl]);
 
   if (!tripData) {
-    return <div>Loading...</div>;
+    return (
+      <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
+        <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse'>
+          <BusDetailsSkeleton />
+          <section className='bg-white flex flex-col items-center p-5 w-full rounded-lg overflow-auto'>
+            <SeatSelectionSkeleton />
+          </section>
+        </div>
+      </main>
+    );
   }
 
   const {
@@ -108,7 +121,10 @@ const Page: React.FC = () => {
   }); // Assuming you have logic to calculate arrival time based on duration
   const busExtras = "Wi-Fi, AC";
   const busDriverID = `${driver.firstName} ${driver.lastName}`;
-  const busRoute = { origin: route.startLocation.name, destination: route.endLocation.name };
+  const busRoute = {
+    origin: route.startLocation.name,
+    destination: route.endLocation.name,
+  };
 
   const handleSeatSelection = (seatId: string) => {
     setSelectedSeats((prev) =>
@@ -130,9 +146,8 @@ const Page: React.FC = () => {
   };
 
   return (
-    <main className="flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden">
-      <div className="flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse">
-        
+    <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
+      <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse'>
         <BusDetails
           busImage={busImage}
           busNumber={busNumber}
@@ -144,7 +159,7 @@ const Page: React.FC = () => {
           busCapacity={busCapacity}
           busType={bus.busType}
           busRoute={busRoute}
-          tripDuration={route.duration} 
+          tripDuration={route.duration}
           distance={route.distance}
           busFare={busFare}
           selectedSeats={selectedSeats}
@@ -154,10 +169,12 @@ const Page: React.FC = () => {
           id={tripData.id}
           currentDate={currentDate}
         />
-        <section className="bg-white flex flex-col items-center p-5 w-full rounded-lg overflow-auto">
+        <section className='bg-white flex flex-col items-center p-5 w-full rounded-lg overflow-auto'>
           {isBooked === false ? (
             <>
-              <h2 className="text-lg mb-3">Passenger seats available</h2>
+              <h2 className='text-lg mb-3'>
+                Passenger seats available
+              </h2>
               <SeatSelection
                 busCapacity={busCapacity}
                 selectedSeats={selectedSeats}
@@ -176,7 +193,7 @@ const Page: React.FC = () => {
               busFare={busFare}
               busType={bus.busType}
               currency={currency}
-              tripDuration={route.duration} 
+              tripDuration={route.duration}
               totalCost={totalCost}
               currentDate={currentDate}
               selectedSeats={selectedSeats}

@@ -21,7 +21,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   const numberOfDigits = totalPassengerSeats.toString().length;
 
   const formatSeatNumber = (seatNumber: number) => {
-    return seatNumber.toString().padStart(numberOfDigits, "0");
+    return (seatNumber+1).toString().padStart(numberOfDigits, "0");
   };
 
   const renderSeats = () => {

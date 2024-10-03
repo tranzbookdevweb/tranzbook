@@ -1,20 +1,33 @@
-'use client'
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { usePaystackPayment } from "react-paystack";
 
 interface PaymentButtonProps {
   busFare: number;
   selectedSeats: string[];
   className: string;
-  handleBooking:()=>void;
-  disabled:boolean;
+  handleBooking: () => void;
+  disabled: boolean;
 }
 
 const PaymentButton: React.FC<PaymentButtonProps> = ({
   busFare,
   selectedSeats,
-  className,handleBooking,disabled
+  className,
+  handleBooking,
+  disabled,
 }) => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const handlePayments = usePaystackPayment({
     channels: ["mobile_money"],
     publicKey: "pk_live_ba22e79f57638ea1339bc93a0b40fae25e3814c8",
@@ -30,9 +43,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   };
 
   const onClose = () => {
-    // remove handleBooking later, just testing
-    // handleBooking();
-    console.log("Payment closed");
+    alert("Payment Not Successful");
   };
 
   return (

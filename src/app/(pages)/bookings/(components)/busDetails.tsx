@@ -118,7 +118,9 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         </div>
         <div>
           <p className='text-xs text-gray-500'>Distance</p>
-          <p className='text-sm font-semibold text-gray-700'>{distance}km</p>
+          <p className='text-sm font-semibold text-gray-700'>
+            {distance}km
+          </p>
         </div>
 
         <div>
@@ -137,13 +139,14 @@ const BusDetails: React.FC<BusDetailsProps> = ({
 
         <div>
           <p className='text-xs text-gray-500'>Extras</p>
-          <div >
-            {busExtras
-              .toLocaleString()
-              .split(",")
-              .map((item, index) => {
+          <div>
+            {/* please replace with actual data(busExtras or amenities) from the supabase db */}
+            {["Air Conditioning", "Power Outlets"].map(
+              (item, index) => {
                 return (
-                  <div key={index} className='text-sm font-semibold text-gray-700 text-wrap flex flex-row flex-wrap gap-1'>
+                  <div
+                    key={index}
+                    className='text-sm font-semibold text-gray-700 text-wrap flex flex-row flex-wrap gap-1'>
                     {item === "Air Conditioning" && (
                       <div className='flex flex-row rounded-xl text-xs my-1 justify-center items-center gap-2 p-1 px-2 border border-slate-200 w-fit'>
                         {item}
@@ -156,10 +159,10 @@ const BusDetails: React.FC<BusDetailsProps> = ({
                         <ImSwitch />
                       </div>
                     )}
-                  
                   </div>
                 );
-              })}
+              }
+            )}
           </div>
         </div>
 
