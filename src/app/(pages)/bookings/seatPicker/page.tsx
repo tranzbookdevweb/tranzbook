@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import BusDetails from "../(components)/busDetails";
 import SeatSelection from "../(components)/seatSelection";
 import Ticket from "../(components)/ticket";
+import { useSearchParams } from "next/navigation";
 
 interface Bus {
   id: string;
@@ -53,13 +54,13 @@ interface Trip {
 }
 
 const Page: React.FC = () => {
+  const params=useSearchParams()
+  const tripId= params.get('tripid')
   const [currency, setCurrency] = useState<string>("GHS");
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isBooked, setBooked] = useState<boolean>(false);
   const [tripData, setTripData] = useState<Trip | null>(null);
   const [busImage, setBusImage] = useState<string>("default-logo-url"); // State for bus image
-
-  const tripId = "2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4"; // Example trip ID; this can be dynamic based on routing
   const apiUrl = `/api/GET/getTripById?id=${tripId}`;
 
   useEffect(() => {
