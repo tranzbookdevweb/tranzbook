@@ -57,17 +57,23 @@ const Page: React.FC = () => {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isBooked, setBooked] = useState<boolean>(false);
   const [tripData, setTripData] = useState<Trip | null>(null);
-  const [windowWidth, setWindowWidth] = useState<number>(0);
-  const tripId = "2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4";
+  const [busImage, setBusImage] = useState<string>("default-logo-url"); // State for bus image
+
+  const tripId = "2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4"; // Example trip ID; this can be dynamic based on routing
   const apiUrl = `http://localhost:3000/api/GET/getTripById?id=${tripId}`;
 
-  // Effect for fetching trip data
   useEffect(() => {
     const fetchTripData = async () => {
       try {
         const response = await fetch(apiUrl);
         const data: Trip = await response.json();
         setTripData(data);
+        
+        // Set the bus image after trip data is fetched
+        if (data.bus.imageUrl) {
+          const imageUrl = `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${data.bus.imageUrl}`;
+          setBusImage(imageUrl);
+        }
       } catch (error) {
         console.error("Error fetching trip data:", error);
       }
@@ -75,16 +81,6 @@ const Page: React.FC = () => {
 
     fetchTripData();
   }, [apiUrl]);
-
-  // Effect to handle window width
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setWindowWidth(window.innerWidth);
-      const handleResize = () => setWindowWidth(window.innerWidth);
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }
-  }, []);
 
   if (!tripData) {
     return <div>Loading...</div>;
@@ -99,10 +95,6 @@ const Page: React.FC = () => {
     branch,
     route,
   } = tripData;
-
-  const busImage = bus.imageUrl
-    ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${bus.imageUrl}`
-    : "default-logo-url";
 
   const busCompany = bus.company.name;
   const busNumber = bus.plateNumber;
