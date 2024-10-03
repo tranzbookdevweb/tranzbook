@@ -57,10 +57,12 @@ const Page: React.FC = () => {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isBooked, setBooked] = useState<boolean>(false);
   const [tripData, setTripData] = useState<Trip | null>(null);
+  const [windowWidth, setWindowWidth] = useState<number>(0);
 
   const tripId = "2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4"; // Example trip ID; this can be dynamic based on routing
   const apiUrl = `http://localhost:3000/api/GET/getTripById?id=${tripId}`;
 
+  // Effect for fetching trip data
   useEffect(() => {
     const fetchTripData = async () => {
       try {
@@ -74,6 +76,16 @@ const Page: React.FC = () => {
 
     fetchTripData();
   }, [apiUrl]);
+
+  // Effect to handle window width
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setWindowWidth(window.innerWidth);
+      const handleResize = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, []);
 
   if (!tripData) {
     return <div>Loading...</div>;
@@ -127,7 +139,7 @@ const Page: React.FC = () => {
     <main className="flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden">
       <div className="flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse">
         <BusDetails
-          busImage={`${busImage}`}
+          busImage={busImage}
           busNumber={busNumber}
           busCompany={busCompany}
           tripDepartureTime={tripDepartureTime}
