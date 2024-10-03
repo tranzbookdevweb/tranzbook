@@ -1,6 +1,6 @@
-'use client'
+"use client";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FiMapPin,
   FiClock,
@@ -35,38 +35,49 @@ interface BusDetailsProps {
   isBooked: boolean;
 }
 
-const BusDetails: React.FC<BusDetailsProps> = ({
-  busImage,
-  busNumber,
-  busCompany,
-  busType,
-  busCapacity,
-  busRoute,
-  tripDuration,
-  tripDepartureTime,
-  tripArrivalTime,
-  busExtras,
-  busDriverID,
-  busFare,
-  currency,
-  selectedSeats,
-  currentDate,
-  id,
-  handleBooking,
-  isBooked,
-}) => {
+const BusDetails: React.FC<BusDetailsProps> = (props) => {
+  const {
+    busImage,
+    busNumber,
+    busCompany,
+    busType,
+    busCapacity,
+    busRoute,
+    tripDuration,
+    tripDepartureTime,
+    tripArrivalTime,
+    busExtras,
+    busDriverID,
+    busFare,
+    currency,
+    selectedSeats,
+    currentDate,
+    id,
+    handleBooking,
+    isBooked,
+  } = props;
+
   const totalCost: number = busFare * selectedSeats.length;
 
+  // Check if the component is mounted in the browser
+  const [isBrowser, setIsBrowser] = useState(false);
+
+  useEffect(() => {
+    setIsBrowser(true); // Set to true when component mounts
+  }, []);
+
   return (
-    <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg overflow-y-scroll custom-scrollbar'>
+    <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg overflow-y-scroll custom-scrollbar'>
       <div className='flex items-center w-full mb-6'>
-        <Image
-          src={`${busImage}`}
-          alt='Bus'
-          height={100}
-          width={100}
-          className=' object-cover shadow-sm border border-slate-100 rounded-[5px]'
-        />
+        {isBrowser && busImage && (
+          <Image
+            src={`${busImage}`}
+            alt='Bus'
+            height={100}
+            width={100}
+            className='object-cover shadow-sm border border-slate-100 rounded-[5px]'
+          />
+        )}
         <div className='ml-4'>
           <h2 className='text-lg font-semibold text-gray-800'>
             {busCompany}
@@ -91,7 +102,6 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         </div>
 
         <div className='flex items-center bg-white rounded-xl border border-slate-100 p-2'>
-          {/* <FiMapPin className='text-blue-600 mr-2' /> */}
           <div className='flex flex-col gap-1'>
             <RiCircleLine />
             <PiLineVerticalLight />
@@ -111,7 +121,6 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         </div>
         <div className='flex items-center'>
           <FiCalendar className='text-blue-600 mr-2' />
-          {/* <p className='text-xs text-gray-500'>Date</p> */}
           <p className='text-sm font-semibold text-gray-700'>{` ${currentDate.toDateString()}`}</p>
         </div>
         <div>
@@ -135,7 +144,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
 
         <div>
           <p className='text-xs text-gray-500'>Extras</p>
-          <div >
+          <div>
             {busExtras
               .toLocaleString()
               .split(",")
@@ -154,7 +163,6 @@ const BusDetails: React.FC<BusDetailsProps> = ({
                         <ImSwitch />
                       </div>
                     )}
-                  
                   </div>
                 );
               })}
@@ -168,8 +176,8 @@ const BusDetails: React.FC<BusDetailsProps> = ({
           </span>
         </div>
         <div>
-          <div className='flex flex-col  justify-between border-t border-b py-4 border-gray-300'>
-            <h2 className=' text-xs text-slate-400'>Charges:</h2>
+          <div className='flex flex-col justify-between border-t border-b py-4 border-gray-300'>
+            <h2 className='text-xs text-slate-400'>Charges:</h2>
             <div>
               <p className='text-sm '>
                 Number of seats selected: {selectedSeats.length}
@@ -186,7 +194,6 @@ const BusDetails: React.FC<BusDetailsProps> = ({
             <span className='text-lg font-bold text-gray-900'>
               {currency} {totalCost.toLocaleString("en-US")}
             </span>
-            {/* <p>ID: {id}</p>  */}
           </div>
         </div>
       </div>
