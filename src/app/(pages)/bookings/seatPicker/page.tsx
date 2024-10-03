@@ -141,7 +141,7 @@ const Page: React.FC = () => {
           busCapacity={busCapacity}
           busType={bus.busType}
           busRoute={busRoute}
-          tripDuration={route.tripDuration} // Assuming duration is available in route
+          tripDuration={route.tripDuration} 
           busFare={busFare}
           selectedSeats={selectedSeats}
           currency={currency}
@@ -172,7 +172,7 @@ const Page: React.FC = () => {
               busFare={busFare}
               busType={bus.busType}
               currency={currency}
-              tripDuration={route.tripDuration} // Assuming duration is available in route
+              tripDuration={route.tripDuration} 
               totalCost={totalCost}
               currentDate={currentDate}
               selectedSeats={selectedSeats}
