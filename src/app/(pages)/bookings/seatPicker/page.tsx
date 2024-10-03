@@ -130,7 +130,7 @@ const Page: React.FC = () => {
     <main className="flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden">
       <div className="flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse">
         hi
-        <BusDetails
+        {/* <BusDetails
           busImage={busImage}
           busNumber={busNumber}
           busCompany={busCompany}
@@ -149,8 +149,8 @@ const Page: React.FC = () => {
           isBooked={isBooked}
           id={tripData.id}
           currentDate={currentDate}
-        />
-        {/* <section className="bg-white flex flex-col items-center p-5 w-full rounded-lg overflow-auto">
+        /> */}
+        <section className="bg-white flex flex-col items-center p-5 w-full rounded-lg overflow-auto">
           {isBooked === false ? (
             <>
               <h2 className="text-lg mb-3">Passenger seats available</h2>
@@ -178,7 +178,7 @@ const Page: React.FC = () => {
               selectedSeats={selectedSeats}
             />
           )}
-        </section> */}
+        </section>
       </div>
     </main>
   );
