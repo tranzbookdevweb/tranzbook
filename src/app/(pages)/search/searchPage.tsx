@@ -17,7 +17,6 @@ import NoBusFound from "@/app/admin/components/NoBusFound";
 import { useSearchParams } from "next/navigation";
 import { Bus } from "lucide-react";
 import { BookingFilterAccordion } from "@/components/FilterComponent";
-import { useSearchContext } from "../bookings/context/useSearchContext";
 import Link from "next/link";
 
 type BusType = {
@@ -88,7 +87,6 @@ const SearchResults: React.FC = () => {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [buses, setBuses] = useState<BusType[]>([]);
   const [companyData, setCompanyData] = useState<CompanyData[]>([]);
-  const { searchResults, setSearchResults } = useSearchContext();
 
   // Fetching data from multiple APIs
   const fetchData = useCallback(async () => {
@@ -194,13 +192,13 @@ const SearchResults: React.FC = () => {
       });
 
       setResults(mappedResults);
-      setSearchResults(mappedResults);
+
     } catch (error) {
       setError("An error occurred while fetching results");
     } finally {
       setLoading(false); // Set loading to false after data fetching
     }
-  }, [searchParams, routes, buses, locations, companyData, setSearchResults]);
+  }, [searchParams, routes, buses, locations, companyData, ]);
 
   useEffect(() => {
     fetchResults(); // Fetch search results on search params change

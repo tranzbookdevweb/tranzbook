@@ -30,8 +30,8 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
     allSeats.push(
       <div className='m-2 dark:text-black' key='driver-seat'>
         <button className='flex flex-col items-center justify-center gap-2 border border-slate-200 rounded-xl p-2 px-5  bg-gray-300'>
-          <Image
-            src='/driver-seat.png'
+          <img
+            src='https://i.pinimg.com/564x/50/74/b2/5074b25c710277faaef6304366e1e278.jpg'
             alt='Driver Seat'
             height={50}
             width={50}

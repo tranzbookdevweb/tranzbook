@@ -5,7 +5,6 @@ import { Navbar } from "@/components/Navbar";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Footer } from "@/components/Footer";
-import { SearchProvider } from "./bookings/context/useSearchContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,7 +24,7 @@ export default function RootLayout({
         className={cn(
           "h-full m-0 w-full font-sans antialiased",
           inter.className
-        )}><SearchProvider>
+        )}>
         <ThemeProvider
           attribute='class'
           defaultTheme='system'
@@ -33,7 +32,7 @@ export default function RootLayout({
           <Navbar />
            {children}
           <Footer />
-        </ThemeProvider></SearchProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

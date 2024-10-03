@@ -1,3 +1,4 @@
+'use client'
 import React from "react";
 import { usePaystackPayment } from "react-paystack";
 

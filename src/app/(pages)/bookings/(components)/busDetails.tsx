@@ -9,7 +9,6 @@ import {
   FiCalendar,
 } from "react-icons/fi";
 import PaymentButton from "../(buttons)/paymentButton";
-import { useSearchContext } from "../context/useSearchContext";
 import { RiCircleLine, RiMapPin2Fill } from "react-icons/ri";
 import { PiLineVerticalLight } from "react-icons/pi";
 import { TbTemperatureSnow } from "react-icons/tb";
@@ -57,7 +56,6 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   isBooked,
 }) => {
   const totalCost: number = busFare * selectedSeats.length;
-  const { searchResults } = useSearchContext();
 
   return (
     <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg overflow-y-scroll custom-scrollbar'>
