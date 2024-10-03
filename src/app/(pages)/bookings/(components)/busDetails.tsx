@@ -29,6 +29,7 @@ interface BusDetailsProps {
   busFare: number;
   currency: string;
   selectedSeats: string[];
+  distance: number;
   currentDate: Date;
   id: string | string[];
   handleBooking: () => void;
@@ -52,6 +53,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   selectedSeats,
   currentDate,
   id,
+  distance,
   handleBooking,
   isBooked,
 }) => {
@@ -106,7 +108,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         <div className='flex items-center'>
           <FiClock className='text-blue-600 mr-2' />
           <span className='text-sm font-semibold text-gray-700'>
-            {tripDuration} (Duration)
+            {tripDuration} (min)
           </span>
         </div>
         <div className='flex items-center'>
@@ -116,7 +118,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         </div>
         <div>
           <p className='text-xs text-gray-500'>Distance</p>
-          <p className='text-sm font-semibold text-gray-700'>{`19 km`}</p>
+          <p className='text-sm font-semibold text-gray-700'>{distance}km</p>
         </div>
 
         <div>
