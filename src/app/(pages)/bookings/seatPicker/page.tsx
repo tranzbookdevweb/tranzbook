@@ -60,7 +60,7 @@ const Page: React.FC = () => {
   const [busImage, setBusImage] = useState<string>("default-logo-url"); // State for bus image
 
   const tripId = "2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4"; // Example trip ID; this can be dynamic based on routing
-  const apiUrl = `http://localhost:3000/api/GET/getTripById?id=${tripId}`;
+  const apiUrl = `/api/GET/getTripById?id=${tripId}`;
 
   useEffect(() => {
     const fetchTripData = async () => {
