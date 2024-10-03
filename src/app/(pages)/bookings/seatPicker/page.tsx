@@ -58,8 +58,7 @@ const Page: React.FC = () => {
   const [isBooked, setBooked] = useState<boolean>(false);
   const [tripData, setTripData] = useState<Trip | null>(null);
   const [windowWidth, setWindowWidth] = useState<number>(0);
-
-  const tripId = "2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4"; // Example trip ID; this can be dynamic based on routing
+  const tripId = "2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4";
   const apiUrl = `http://localhost:3000/api/GET/getTripById?id=${tripId}`;
 
   // Effect for fetching trip data
