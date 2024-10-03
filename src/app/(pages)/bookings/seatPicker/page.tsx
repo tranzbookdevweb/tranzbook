@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import BusDetails from "../(components)/busDetails";
 import SeatSelection from "../(components)/seatSelection";
 import Ticket from "../(components)/ticket";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 
 interface Bus {
   id: string;
@@ -55,7 +55,7 @@ interface Trip {
 }
 
 const Page: React.FC = () => {
-  const params=useSearchParams()
+  // const params=useSearchParams()
   // const tripId= params.get('tripid')
   const [currency, setCurrency] = useState<string>("GHS");
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
