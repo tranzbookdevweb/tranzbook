@@ -192,7 +192,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
           </div>
         </div>
       </div>
-      {/* <PaymentButton
+      <PaymentButton
         busFare={busFare}
         selectedSeats={selectedSeats}
         handleBooking={handleBooking}
@@ -202,7 +202,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
             : "bg-[#ffcd5993]"
         } transition-transform transform  `}
         disabled={selectedSeats.length !== 0 && isBooked}
-      /> */}
+      />
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
