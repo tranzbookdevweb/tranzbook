@@ -199,7 +199,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         busFare={busFare}
         selectedSeats={selectedSeats}
         handleBooking={handleBooking}
-        className={`w-full mt-5 py-2  text-white text-sm font-semibold rounded-[5px] ${
+        className={`w-full mt-5 lg:mt-3 py-2  text-white text-sm font-semibold rounded-[5px] ${
           selectedSeats.length !== 0 && !isBooked
             ? "bg-[#fc9a1a] hover:bg-[#F79009] hover:scale-105"
             : "bg-[#ffcd5993]"
