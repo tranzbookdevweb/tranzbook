@@ -60,7 +60,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   const totalCost: number = busFare * selectedSeats.length;
 
   return (
-    <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg overflow-y-scroll custom-scrollbar'>
+    <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen max-sm:min-h-fit p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg overflow-y-scroll custom-scrollbar'>
       <div className='flex items-center w-full mb-6'>
         <Image
           src={`${busImage}`}

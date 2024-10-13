@@ -6,6 +6,7 @@ import Ticket from "../(components)/ticket";
 // import { useSearchParams } from "next/navigation";
 import { BusDetailsSkeleton } from "../(components)/Skeletons/busDetailsSkeleton";
 import { SeatSelectionSkeleton } from "../(components)/Skeletons/seatSelectionSkeleton";
+import { CircularProgress } from "@mui/material";
 
 interface Bus {
   id: string;
@@ -94,8 +95,13 @@ const Page: React.FC = () => {
       <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
         <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse'>
           <BusDetailsSkeleton />
-          <section className='bg-white flex flex-col items-center p-5 w-full rounded-lg overflow-auto'>
-            <SeatSelectionSkeleton />
+          <section className={`bg-white flex flex-col items-center ${isBooked?"justify-center":""} p-5 w-full rounded-lg overflow-auto`}>
+           
+            {isBooked === true ? (
+              <CircularProgress/>
+            ) : (
+              <SeatSelectionSkeleton />
+            )}
           </section>
         </div>
       </main>
@@ -147,7 +153,7 @@ const Page: React.FC = () => {
 
   return (
     <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
-      <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse'>
+      <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse items-center '>
         <BusDetails
           busImage={busImage}
           busNumber={busNumber}
@@ -169,10 +175,11 @@ const Page: React.FC = () => {
           id={tripData.id}
           currentDate={currentDate}
         />
-        <section className='bg-white flex flex-col items-center p-5 w-full rounded-lg overflow-auto'>
+        <section className='bg-white flex flex-col items-center md:justify-start md:min-h-screen lg:px-20 md:px-0 w-full rounded-lg overflow-hidden max-sm:w-screen max-sm:p-3'>
+         
           {isBooked === false ? (
-            <>
-              <h2 className='text-lg mb-3'>
+            <div className=' max-sm:w-full flex flex-col items-center md:min-h-screen lg:min-h-screen '>
+              <h2 className='text-lg mb-3 md:py-5'>
                 Passenger seats available
               </h2>
               <SeatSelection
@@ -181,7 +188,7 @@ const Page: React.FC = () => {
                 handleSeatSelection={handleSeatSelection}
                 handleClearSeats={handleClearSeats}
               />
-            </>
+            </div>
           ) : (
             <Ticket
               ticketId={tripData.id}
@@ -197,6 +204,7 @@ const Page: React.FC = () => {
               totalCost={totalCost}
               currentDate={currentDate}
               selectedSeats={selectedSeats}
+              isBooked={isBooked}
             />
           )}
         </section>

@@ -1,8 +1,12 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Barcode from "react-barcode";
 import { Button } from "@/components/ui/button";
 import generatePDF, { Resolution, Margin } from "react-to-pdf";
+import { useMediaQuery } from "react-responsive";
+import { CircularProgress } from "@mui/material";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 interface TicketProps {
   ticketId: string | string[];
@@ -18,6 +22,7 @@ interface TicketProps {
   totalCost: number;
   currentDate: Date;
   selectedSeats: string[];
+  isBooked: boolean;
 }
 
 const Ticket: React.FC<TicketProps> = ({
@@ -34,6 +39,7 @@ const Ticket: React.FC<TicketProps> = ({
   currency,
   currentDate,
   selectedSeats,
+  isBooked,
 }) => {
   const options = {
     method: "open",
@@ -41,27 +47,50 @@ const Ticket: React.FC<TicketProps> = ({
     format: "letter",
     orientation: "landscape",
   };
+  const [isClicked, setClicked] = useState(false);
+  
+  const handleDownloadTicket = () => {
+    // setClicked(true);
+    try {
+      generatePDF(getTargetElement, {
+        method: "open",
+        resolution: Resolution.HIGH,
+        page: {
+          margin: Margin.NONE,
+          format: "letter",
+          orientation: "l",
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // setClicked(false);
+    }
+  };
 
   const getTargetElement = () => document.getElementById("ticket");
+  const isTablet = useMediaQuery({ minWidth: 768 });
+  const isPhone = useMediaQuery({ maxWidth: 648 });
 
   return (
-    <div className='flex flex-col justify-start min-h-full max-sm:min-w-full items-center p-4 rounded-xl bg-white overflow-auto'>
+    <div className='flex flex-col justify-start min-h-full max-sm:min-w-full items-center p-4 rounded-xl bg-white overflow-hidden '>
       <div>
         Selected seats{" "}
         <p className='p-5 text-center border border-slate-100 rounded-[5px]'>
           {`${selectedSeats}`}
         </p>
       </div>
+
       <div
-        className=' flex flex-col flex-wrap justify-start -mt-20'
+        className=' flex flex-col flex-wrap justify-start lg:-mt-20'
         id='ticket'>
         <svg
           version='1.1'
           viewBox='0 0 2048 1150'
-          width='700px'
+          width={"700px"}
           height='700px'
           xmlns='http://www.w3.org/2000/svg'
-          className='flex justify-between max-sm:scale-75 '
+          className='flex justify-between max-sm:scale-[0.55] md:scale-[0.75] lg:scale-[1] -mt-20'
           fontFamily='Raleway Dots'
           fontWeight='bold'>
           <path
@@ -165,19 +194,11 @@ const Ticket: React.FC<TicketProps> = ({
       </div>
 
       <Button
-        className='bg-blue-500 p-2 rounded-[5px] text-white hover:dark:text-black'
+        className='bg-blue-500 p-2 max-sm:-mt-20 lg:mt-5 rounded-[5px] text-white hover:dark:text-black'
         variant='outline'
-        onClick={() =>
-          generatePDF(getTargetElement, {
-            method: "open",
-            resolution: Resolution.HIGH,
-            page: {
-              margin: Margin.SMALL,
-              format: "letter",
-              orientation: "landscape",
-            },
-          })
-        }>
+        onClick={() => {
+          handleDownloadTicket();
+        }}>
         Download Ticket
       </Button>
     </div>

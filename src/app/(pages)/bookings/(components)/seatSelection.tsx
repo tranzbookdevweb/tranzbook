@@ -1,4 +1,5 @@
-'use client'
+/* eslint-disable @next/next/no-img-element */
+"use client";
 import Image from "next/image";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -21,23 +22,18 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   const numberOfDigits = totalPassengerSeats.toString().length;
 
   const formatSeatNumber = (seatNumber: number) => {
-    return (seatNumber+1).toString().padStart(numberOfDigits, "0");
+    return (seatNumber + 1).toString().padStart(numberOfDigits, "0");
   };
 
   const renderSeats = () => {
     let allSeats: JSX.Element[] = [];
 
     allSeats.push(
-      <div className='m-2 dark:text-black' key='driver-seat'>
-        <button className='flex flex-col items-center justify-center gap-2 border border-slate-200 rounded-xl p-2 px-5  bg-gray-300'>
-          <img
-            src='https://i.pinimg.com/564x/50/74/b2/5074b25c710277faaef6304366e1e278.jpg'
-            alt='Driver Seat'
-            height={50}
-            width={50}
-            className='object-contain'
-          />
-          <p className='text-center text-sm'>Driver</p>
+      <div
+        className='m-2 max-sm:m-1 dark:text-black w-16 lg:w-24 lg:h-28 min-[390px]:w-[70px] max-sm:h-20 min-[390px]:h-[85px] min-[430px]:w-[80px] min-[430px]:h-24'
+        key='driver-seat'>
+        <p className='text-center text-xs text-slate-500'>Driver</p>
+        <button className='w-full flex flex-col items-center justify-center gap-2 border border-slate-200 rounded-xl p-2 px-5  bg-gray-300 bg-[url("/driver.png")] bg-cover bg-no-repeat h-16 min-[390px]:h-[70px] min-[430px]:h-[80px] md:h-20 lg:h-24 bg-center'>
         </button>
       </div>
     );
@@ -58,11 +54,11 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
 
         rowSeats.push(
           <div
-            className='m-2 dark:text-gray-500  font-semibold'
+            className='m-2 max-sm:m-1 dark:text-gray-500  font-semibold '
             key={seatId}>
             <button
               onClick={() => handleSeatSelection(seatId)}
-              className={`flex flex-row items-center justify-center w-44 text-3xl  max-sm:w-20 sm:max-md:w-20 gap-2 border border-slate-200 rounded-xl p-2 max-sm:px-5 sm:max-md:px-5 transition-all duration-300 ${
+              className={`flex flex-row items-center justify-center lg:w-40 min-[540px]:w-24 text-3xl min-[340px]:w-[62px] min-[390px]:w-[70px] min-[430px]:w-[80px] max-sm:w-16 sm:max-md:w-20 gap-2 border border-slate-200 rounded-xl p-2 max-sm:px-5 sm:max-md:px-5 transition-all duration-300 ${
                 isSelected
                   ? "bg-[#FFCC59] text-white"
                   : "bg-white text-gray-500 "
@@ -72,9 +68,9 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
                 alt='seat'
                 height={50}
                 width={50}
-                className='object-contain'
+                className='object-contain max-sm:w-6 max-sm:h-10 w-8 h-10'
               />
-              <p className='text-center text-sm'>{seatId}</p>
+              <p className='text-center text-base lg:text-lg'>{seatId}</p>
             </button>
           </div>
         );
@@ -83,7 +79,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
       allSeats.push(
         <div
           key={`row-${row}`}
-          className='flex flex-row justify-between w-full gap-10'>
+          className='flex flex-row justify-between w-full gap-10 max-sm:gap-0 '>
           <div className='flex'>{rowSeats.slice(0, 2)}</div>
           <div className='flex'>{rowSeats.slice(2, 4)}</div>
         </div>
@@ -94,8 +90,8 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   };
 
   return (
-    <div className='flex flex-col items-center p-4 border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden'>
-      <h2 className='text-xl mb-2 font-semibold'>
+    <div className='flex flex-col items-center lg:justify-center p-5 max-sm:pb-0 border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px]'>
+      <h2 className='text-xl mb-0 font-semibold'>
         Select Your Seats
       </h2>
       {selectedSeats.length > 0 ? (
@@ -110,7 +106,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
       )}
 
       <div
-        className='w-full lg:min-h-full max-h-[400px] overflow-y-auto custom-scrollbar pt-5 pb-20'
+        className='w-full lg:min-h-full max-h-[400px] md:min-h-[720px] overflow-y-auto custom-scrollbar pt-5 pb-28'
         style={{
           scrollbarColor: "#b7ebf8 #ffffff",
           scrollbarWidth: "thin",
