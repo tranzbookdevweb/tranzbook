@@ -90,19 +90,25 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   };
 
   return (
-    <div className='flex flex-col items-center lg:justify-center p-5 max-sm:pb-0 border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px]'>
-      <h2 className='text-xl mb-0 font-semibold'>
-        Select Your Seats
-      </h2>
+    <div className='bg-white flex flex-col items-center lg:justify-center p-5 max-sm:pb-0 border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px]'>
       {selectedSeats.length > 0 ? (
-        <Button
-          className='p-2 rounded-[5px] text-slate-700'
-          variant='ghost'
-          onClick={() => handleClearSeats()}>
-          Clear selection
-        </Button>
+        <div className="flex flex-col items-center md:mt-10">
+          <h3 className='text-center text-xl font-semibold'>{`${
+            selectedSeats.length > 1
+              ? `${selectedSeats.length} seats`
+              : `${selectedSeats.length} seat`
+          } selected`}</h3>
+          <Button
+            className='p-2 rounded-[5px] text-slate-500 text-center text-sm'
+            variant='ghost'
+            onClick={() => handleClearSeats()}>
+            Clear selection
+          </Button>
+        </div>
       ) : (
-        ""
+        <h2 className='text-xl pb-2 font-semibold text-center'>
+          Select Your Seats
+        </h2>
       )}
 
       <div

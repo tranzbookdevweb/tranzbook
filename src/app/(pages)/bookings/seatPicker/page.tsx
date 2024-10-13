@@ -152,7 +152,7 @@ const Page: React.FC = () => {
   };
 
   return (
-    <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
+    <main className='flex-1 border-t border-b bg-white dark:bg- min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
       <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse items-center '>
         <BusDetails
           busImage={busImage}
@@ -178,8 +178,8 @@ const Page: React.FC = () => {
         <section className='bg-white flex flex-col items-center md:justify-start md:min-h-screen lg:px-20 md:px-0 w-full rounded-lg overflow-hidden max-sm:w-screen max-sm:p-3'>
          
           {isBooked === false ? (
-            <div className=' max-sm:w-full flex flex-col items-center md:min-h-screen lg:min-h-screen '>
-              <h2 className='text-lg mb-3 md:py-5'>
+            <div className=' max-sm:w-full flex flex-col items-center md:min-h-screen lg:min-h-screen bg-white'>
+              <h2 className='text-lg mb-3 md:py-5 text-black'>
                 Passenger seats available
               </h2>
               <SeatSelection

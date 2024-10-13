@@ -139,14 +139,14 @@ const BusDetails: React.FC<BusDetailsProps> = ({
 
         <div>
           <p className='text-xs text-gray-500'>Extras</p>
-          <div>
+          <div className='flex flex-row flex-wrap gap-2 items-center'>
             {/* please replace with actual data(busExtras or amenities) from the supabase db */}
             {["Air Conditioning", "Power Outlets"].map(
               (item, index) => {
                 return (
                   <div
                     key={index}
-                    className='text-sm font-semibold text-gray-700 text-wrap flex flex-row flex-wrap gap-1'>
+                    className='text-sm font-semibold text-gray-700 text-wrap gap-1'>
                     {item === "Air Conditioning" && (
                       <div className='flex flex-row rounded-xl text-xs my-1 justify-center items-center gap-2 p-1 px-2 border border-slate-200 w-fit'>
                         {item}
