@@ -17,7 +17,7 @@ import dynamic from "next/dynamic";
 const PaymentButton = dynamic(
   () => import("../(buttons)/paymentButton"),
   {
-    ssr: false,
+    ssr: true,
   }
 );
 
