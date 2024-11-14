@@ -24,6 +24,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
 
   const handlePayments = usePaystackPayment({
     channels: ["mobile_money"],
+    // in .env: NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY="pk_live_9559bad7cb4e0cdbb1570bcfd85c46d9fe8296ee"
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY! as string,
     // phone: "0546871870",
     email: "sknukpezah@gmail.com", //use the user's email from the tranzbook users table from the db
