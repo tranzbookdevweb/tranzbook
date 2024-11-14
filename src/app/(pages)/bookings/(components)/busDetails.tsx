@@ -1,6 +1,6 @@
-'use client'
+"use client";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect,useState } from "react";
 import {
   FiMapPin,
   FiClock,
@@ -8,11 +8,18 @@ import {
   FiUser,
   FiCalendar,
 } from "react-icons/fi";
-import PaymentButton from "../(buttons)/paymentButton";
 import { RiCircleLine, RiMapPin2Fill } from "react-icons/ri";
 import { PiLineVerticalLight } from "react-icons/pi";
 import { TbTemperatureSnow } from "react-icons/tb";
 import { ImSwitch } from "react-icons/im";
+import dynamic from "next/dynamic";
+
+const PaymentButton = dynamic(
+  () => import("../(buttons)/paymentButton"),
+  {
+    ssr: false,
+  }
+);
 
 interface BusDetailsProps {
   busImage: string | undefined;
@@ -57,11 +64,13 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   handleBooking,
   isBooked,
 }) => {
-  const totalCost: number = busFare * selectedSeats.length;
+    const [users, setUsers] = useState();
+    const totalCost: number = busFare * selectedSeats.length;
 
   return (
     <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen max-sm:min-h-fit p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg overflow-y-scroll custom-scrollbar'>
-      <div className='flex items-center w-full mb-6'>
+
+      <div className='flex items-center w-full mb-5'>
         <Image
           src={`${busImage}`}
           alt='Bus'
@@ -199,6 +208,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         busFare={busFare}
         selectedSeats={selectedSeats}
         handleBooking={handleBooking}
+        // onClick={() => handlePayments({ onSuccess, onClose })}
         className={`w-full mt-5 lg:mt-3 py-2  text-white text-sm font-semibold rounded-[5px] ${
           selectedSeats.length !== 0 && !isBooked
             ? "bg-[#fc9a1a] hover:bg-[#F79009] hover:scale-105"
@@ -206,6 +216,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         } transition-transform transform  `}
         disabled={selectedSeats.length !== 0 && isBooked}
       />
+
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;

@@ -60,7 +60,7 @@ interface Trip {
 const Page: React.FC = () => {
   // const params=useSearchParams()
   // const tripId= params.get('tripid')
-  const [currency, setCurrency] = useState<string>("GHS");
+  const [currency, setCurrency] = useState<string>("GHS"); //use currency based on the user's loc from the db
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isBooked, setBooked] = useState<boolean>(false);
   const [tripData, setTripData] = useState<Trip | null>(null);
@@ -95,10 +95,12 @@ const Page: React.FC = () => {
       <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
         <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse'>
           <BusDetailsSkeleton />
-          <section className={`bg-white flex flex-col items-center ${isBooked?"justify-center":""} p-5 w-full rounded-lg overflow-auto`}>
-           
+          <section
+            className={`bg-white flex flex-col items-center ${
+              isBooked ? "justify-center" : ""
+            } p-5 w-full rounded-lg overflow-auto`}>
             {isBooked === true ? (
-              <CircularProgress/>
+              <CircularProgress />
             ) : (
               <SeatSelectionSkeleton />
             )}
@@ -144,10 +146,51 @@ const Page: React.FC = () => {
     setSelectedSeats([]);
   };
 
+  const handleSelectAllSeats = () => {
+    setSelectedSeats(
+      Array.from(
+        { length: busCapacity - 1 },
+        (_, i) =>
+          `${(i + 1)
+            .toString()
+            .padStart((busCapacity - 1).toString().length, "0")}`
+      )
+    );
+  };
+
   const currentDate: Date = new Date();
   const totalCost: number = busFare * selectedSeats.length;
 
-  const handleBooking = () => {
+ 
+  const handleBooking = async () => {
+    // use the try catch block with the trip with valid details
+    // comment out the try block for testing without making a POST
+    try {
+    
+      // please add the isBooked boolean to the prisma schema/db to eventually check the
+      // availability of the seats;
+      const bookingData = {
+        userId: "userId", //please with a valid userId or it wont work
+        tripId: tripId,
+        seatNumber: 1, //should be a string[] but the schema.prisma says Int so I'll leave this to you
+      };
+      const response = await fetch("/api/POST/Booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
+        // store in the db and reflect it in /bookings/manage/tickets
+      });
+      if (response.ok) {
+        alert("Booking successful");
+        // replace with <Toaster/>
+      } else {
+        alert("Booking failed");
+      }
+    } catch (error) {
+      console.error(error);
+    }
     setBooked((prev) => !prev);
   };
 
@@ -176,7 +219,6 @@ const Page: React.FC = () => {
           currentDate={currentDate}
         />
         <section className='bg-white flex flex-col items-center md:justify-start md:min-h-screen lg:px-20 md:px-0 w-full rounded-lg overflow-hidden max-sm:w-screen max-sm:p-3'>
-         
           {isBooked === false ? (
             <div className=' max-sm:w-full flex flex-col items-center md:min-h-screen lg:min-h-screen bg-white'>
               <h2 className='text-lg mb-3 md:py-5 text-black'>
@@ -187,6 +229,7 @@ const Page: React.FC = () => {
                 selectedSeats={selectedSeats}
                 handleSeatSelection={handleSeatSelection}
                 handleClearSeats={handleClearSeats}
+                handleSelectAllSeats={handleSelectAllSeats}
               />
             </div>
           ) : (

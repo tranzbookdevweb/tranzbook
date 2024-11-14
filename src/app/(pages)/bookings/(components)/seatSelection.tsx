@@ -9,6 +9,7 @@ interface SeatSelectionProps {
   selectedSeats: string[];
   handleSeatSelection: (seatId: string) => void;
   handleClearSeats: () => void;
+  handleSelectAllSeats: () =>void;
 }
 
 const SeatSelection: React.FC<SeatSelectionProps> = ({
@@ -16,6 +17,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   selectedSeats,
   handleSeatSelection,
   handleClearSeats,
+  handleSelectAllSeats,
 }) => {
   const totalPassengerSeats = busCapacity - 1;
 
@@ -33,8 +35,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
         className='m-2 max-sm:m-1 dark:text-black w-16 lg:w-24 lg:h-28 min-[390px]:w-[70px] max-sm:h-20 min-[390px]:h-[85px] min-[430px]:w-[80px] min-[430px]:h-24'
         key='driver-seat'>
         <p className='text-center text-xs text-slate-500'>Driver</p>
-        <button className='w-full flex flex-col items-center justify-center gap-2 border border-slate-200 rounded-xl p-2 px-5  bg-gray-300 bg-[url("/driver.png")] bg-cover bg-no-repeat h-16 min-[390px]:h-[70px] min-[430px]:h-[80px] md:h-20 lg:h-24 bg-center'>
-        </button>
+        <button className='w-full flex flex-col items-center justify-center gap-2 border border-slate-200 rounded-xl p-2 px-5  bg-gray-300 bg-[url("/driver.png")] bg-cover bg-no-repeat h-16 min-[390px]:h-[70px] min-[430px]:h-[80px] md:h-20 lg:h-24 bg-center'></button>
       </div>
     );
 
@@ -70,7 +71,9 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
                 width={50}
                 className='object-contain max-sm:w-6 max-sm:h-10 w-8 h-10'
               />
-              <p className='text-center text-base lg:text-lg'>{seatId}</p>
+              <p className='text-center text-base lg:text-lg'>
+                {seatId}
+              </p>
             </button>
           </div>
         );
@@ -88,22 +91,36 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
 
     return allSeats;
   };
+  // NB: the seat selection should be based on the number of seats available from the db
+  // not the bus Capacity... so incase it goes to live correct this semantic
 
   return (
     <div className='bg-white flex flex-col items-center lg:justify-center p-5 max-sm:pb-0 border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px]'>
       {selectedSeats.length > 0 ? (
-        <div className="flex flex-col items-center md:mt-10">
+        <div className='flex flex-col items-center md:mt-10'>
           <h3 className='text-center text-xl font-semibold'>{`${
             selectedSeats.length > 1
-              ? `${selectedSeats.length} seats`
+              ? `${
+                  selectedSeats.length === totalPassengerSeats
+                    ? "All"
+                    : selectedSeats.length
+                } seats`
               : `${selectedSeats.length} seat`
           } selected`}</h3>
-          <Button
-            className='p-2 rounded-[5px] text-slate-500 text-center text-sm'
-            variant='ghost'
-            onClick={() => handleClearSeats()}>
-            Clear selection
-          </Button>
+          <div className='flex flex-row gap-10 justify-center'>
+            <Button
+              className='p-2 rounded-[5px] text-slate-500 text-center text-sm'
+              variant='ghost'
+              onClick={() => handleClearSeats()}>
+              Clear selection
+            </Button>
+            <Button
+              className='p-2 rounded-[5px] text-[#b38f3cbd] text-center text-sm'
+              variant='ghost'
+              onClick={() => handleSelectAllSeats()}>
+              Select all
+            </Button>
+          </div>
         </div>
       ) : (
         <h2 className='text-xl pb-2 font-semibold text-center'>
@@ -112,7 +129,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
       )}
 
       <div
-        className='w-full lg:min-h-full max-h-[400px] md:min-h-[720px] overflow-y-auto custom-scrollbar pt-5 pb-28'
+        className='w-full lg:min-h-full max-h-[400px] md:min-h-[720px] overflow-y-auto custom-scrollbar pt-5 pb-28 '
         style={{
           scrollbarColor: "#b7ebf8 #ffffff",
           scrollbarWidth: "thin",
