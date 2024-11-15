@@ -20,13 +20,13 @@ const widgets: Widget[] = [
   },
   {
     icon: LocalShippingOutlinedIcon,
-    title: 'Concern about your goods?',
-    subtitle: 'Find and book safe and low fare trucks/cargos for your goods.',
+    title: 'Instant Booking, Hassle-Free Travel',
+    subtitle: 'Book tickets easily from your device, anytime, anywhere.',
   },
   {
     icon: CompareArrowsIcon,
     title: 'To and from Ghana?',
-    subtitle: "Find cars to Nigeria, Togo, Benin, Burkina Faso, Côte d'Ivoire, Mali etc",
+    subtitle: "Find buses to Nigeria, Togo, Benin, Burkina Faso, Côte d'Ivoire, Mali etc.",
   },
   {
     icon: RingVolumeOutlinedIcon,
@@ -49,14 +49,32 @@ function Widgets() {
         {widgets.map((widget) => (
           <div
             key={widget.title}
-            className={`flex shadow-[#48a0ff5c] shadow-lg flex-col h-[32vh]  ${theme === 'dark' ? 'bg-slate-700':'bg-white'} rounded-xl p-[1vh] m-[1vh] w-[20vw] max-md:w-full max-lg:max-h-[220px] max-lg:w-full`}
+            className={`flex shadow-[#48a0ff5c] shadow-lg flex-col h-[32vh] ${
+              theme === 'dark' ? 'bg-slate-700' : 'bg-white'
+            } rounded-xl p-[1vh] m-[1vh] w-[20vw] max-md:w-full max-lg:max-h-[220px] max-lg:w-full`}
           >
-            <div className={`text-white bg-[#48A0fF] w-fit max-lg:p-[1.3vw] rounded-2xl p-[0.9vw] ${theme === 'dark' ? 'text-black' : ''}`}>
+            <div
+              className={`text-white bg-[#48A0fF] w-fit max-lg:p-[1.3vw] rounded-2xl p-[0.9vw] ${
+                theme === 'dark' ? 'text-black' : ''
+              }`}
+            >
               <widget.icon />
             </div>
             <div className="caption">
-              <h4 className={`p-[0.5vw] pt-[3vh] ${theme === 'dark' ? 'text-white' : 'text-black'} font-semibold text-[16px]`}>{widget.title}</h4>
-              <h6 className={`px-[0.5vw] text-[14px] text-[#475467] ${theme === 'dark' ? 'text-gray-300' : ''}`}>{widget.subtitle}</h6>
+              <h4
+                className={`p-[0.5vw] pt-[3vh] ${
+                  theme === 'dark' ? 'text-white' : 'text-black'
+                } font-semibold text-[16px]`}
+              >
+                {widget.title}
+              </h4>
+              <h6
+                className={`px-[0.5vw] text-[14px] text-[#475467] ${
+                  theme === 'dark' ? 'text-gray-300' : ''
+                }`}
+              >
+                {widget.subtitle}
+              </h6>
             </div>
           </div>
         ))}

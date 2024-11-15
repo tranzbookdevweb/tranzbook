@@ -11,127 +11,85 @@ interface WhyProps {
 
 const Why: React.FC<WhyProps> = ({ activeButton }) => {
   return (
-    <div className=''> 
-              <h5 className='text-center max-md:text-[4vh] p-6 font-sans font-semibold text-[6vh]'>Why TranzBook</h5>
+    <div className="px-4 py-8 max-w-screen-xl mx-auto">
 
+      <p className="text-center text-lg md:text-xl text-gray-700 mb-10 px-4">
+        Your Comfort, Our Priority. Imagine planning your trip without ever leaving your home. 
+        With TranzBook, you can find and book the best buses right from your couch, saving yourself 
+        the hassle of crowded bus stations. Wherever you're headed, just pull out your phone or laptop, 
+        and let TranzBook bring the journey to you.
+      </p>
 
-    <div className='grid grid-cols-2 gap-10 max-lg:grid-cols-1  max-lg:gap-0 z-10 mx-[10%]'>
-      <div className='left-text'>
-        {activeButton !== 'Cargo' && (
-          <>
-            <h4>Passengers</h4>
-            <div className='facts'>
-              <FactListItem
-                title="Convenience"
-                description="Our amazing platform helps you find comfortable buses for all your travel needs right at the comfort of your house or office. Avoid all the inconvenience and stress of going to a bus station to book your travel ticket, just TranzBook it right on your phone or computer."
-              />
-              <FactListItem
-                title="Affordability"
-                description="Our technology also offers customers the platform to find and compare fares from different buses and find the best fares for their travel. You want to get low fare buses for your next trip? Then just TranzBook it."
-              />
-              <FactListItem
-                title="Safety and security"
-                description="All our partner buses are comfortable, safe and secured. Our drivers are top-notch professionals, well-equipped to give you the best travel experience. Our buses are also being tracked for your safety. Our customers travel in comfortable buses and sleep while we watch over them."
-              />
-              <FactListItem
-                title="Save money while you travel"
-                description="You will enjoy the following when using TranzBook; Enjoy amazing discounts by consistently booking your travel tickets here. Access to referral mind-blowing discounts when you recommend TranzBook to your family and friends."
-              />
-            </div>
-          </>
-        )}
-        {activeButton === 'Cargo' && (
-          <>
-            <h4>Goods Owners</h4>
-            <div className='facts'>
-              <FactListItem
-                title="Increased Efficiency"
-                description="TranzBook streamline the booking process, enabling goods owners to manage their bookings more efficiently. This can reduce the amount of time and resources required to manage bookings, allowing goods owners to focus on other aspects of their business."
-              />
-              <FactListItem
-                title="Cost Savings"
-                description="By providing access to a large network of carriers and trucks, TranzBook helps goods owners to find the most cost-effective shipping options. Additionally, the platform offers pricing optimization tools to ensure that goods owners are paying competitive prices for their goods delivery."
-              />
-              <FactListItem
-                title="Access to a Large Network of Carriers"
-                description="Also, we provide goods owners with access to a large network of carriers and trucks. This can enable goods owners to find the right carrier for their cargo and ensure timely delivery."
-              />
-              <FactListItem
-                title="Real-Time Visibility"
-                description="Our platform provides real-time visibility into movements and tracking. This can enable goods owners to monitor their cargo and track its location and delivery status."
-              />
-            </div>
-          </>
-        )}
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Left Section */}
+        <div>
+          <h4 className="text-2xl font-semibold mb-4">Why Choose TranzBook?</h4>
+          <div className="space-y-6">
+            <FactListItem
+              title="Save More, Every Trip"
+              description="Travel more, pay less. When you book with TranzBook, you unlock exclusive discounts just for being a loyal traveler. Plus, with our referral rewards, every friend or family member you introduce to TranzBook is another opportunity for you to save. Traveling has never felt this rewarding."
+            />
+            <FactListItem
+              title="Affordable Travel Made Easy"
+              description="Your travel budget matters. That’s why we’ve built a platform where you can compare fares from multiple bus providers to find the best deal for your journey. Want to save on your next trip? TranzBook lets you choose the most affordable options, ensuring every journey fits your budget."
+            />
+            <FactListItem
+              title="Safe Journeys, Peace of Mind"
+              description="Every TranzBook partner bus is more than just a ride; it’s a safe, secure space for you to relax as you travel. With professional drivers and 24/7 tracking, you can trust that your safety is a top priority. Rest easy as our team watches over you, so you can focus on the road ahead—or just enjoy the view."
+            />
+          </div>
+        </div>
+
+        {/* Right Section */}
+        <motion.div className="flex justify-center">
+          <Image
+            quality={100}
+            src={man}
+            alt="Man with laptop"
+            className="rounded-xl max-w-full h-auto"
+          />
+        </motion.div>
       </div>
-      <motion.div
-        className='imagepic rounded-b-[2pc]'
-      >
-        <Image quality={100} src={man} alt='' className='imagepic rounded-b-[2pc] ' />
-      </motion.div>
-      <motion.div
 
-        className='imagepic max-lg:hidden rounded-b-[2pc]'
-      >
-        <Image quality={100} src={bus} alt='' className='whyImage rounded-b-[2pc]' />
-      </motion.div>
-      <motion.div
-        initial={{ x: 500, opacity: 0.2 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 2.5 }}
-        className='righttxt ml-[2vw]'
-      >
-        {activeButton !== 'Cargo' && (
-          <>
-            <h4>Bus Owners</h4>
-            <FactListItem
-              title="Hustle free passengers"
-              description="Bus operators will have the opportunity to get consistent passengers to travel in their buses. We help you worry no more about moving an empty bus."
-            />
-            <FactListItem
-              title="Revenue Tracking"
-              description="Our technology helps bus owners get accurate revenue information and not worry anymore about false revenue reports from bus operators."
-            />
-            <FactListItem
-              title="Training"
-              description="Bus drivers and conductors get access to our world-class training on best transport practices and industry changes. This will help them deliver quality services to passengers."
-            />
-            <FactListItem
-              title="Guarantee tracking services"
-              description="We help provide safety and security for bus owners and passengers as we track the movement of buses."
-            />
-          </>
-        )}
-        {activeButton === 'Cargo' && (
-          <>
-            <h4>Truck Owners</h4>
-            <FactListItem
-              title="Competitive Advantage"
-              description="Our platform offers a wider range of vehicle options and provides transparent pricing and availability information. Our customer service team is available 24/7 to ensure a seamless booking experience."
-            />
-            <FactListItem
-              title="Increased Revenue"
-              description="By providing access to more customers and cargo bookings, TranzBook can help truck owners to increase their revenue. Additionally, the platform can offer pricing optimization tools to ensure that truck owners are charging competitive prices for their services."
-            />
-            <FactListItem
-              title="Access to New Business Opportunities"
-              description="TranzBook provides access to new business opportunities, such as connecting truck owners with new customers and cargo bookings. This can help truck owners to expand their business and generate more revenue."
-            />
-            <FactListItem
-              title="Improved Visibility"
-              description="At TranzBook, we also provide real-time visibility into cargo movements and tracking, enabling truck owners to monitor their cargo and vehicles at all times. This can help truck owners to make informed decisions about their operations, such as optimizing routes and improving delivery times."
-            />
-          </>
-        )}
-      </motion.div>
-      <motion.div
+      {/* Ticket Booking Section */}
+      <div className="mt-16">
+        <h4 className="text-center text-2xl font-semibold mb-4">
+          BOOK TICKET IN THREE STEPS:
+        </h4>
+        <ul className="list-decimal list-inside text-lg text-gray-700 space-y-3 px-6">
+          <li>
+            <strong>Search for Your Route:</strong> Enter your departure and destination locations, select your travel date, and find available buses.
+          </li>
+          <li>
+            <strong>Choose Your Bus:</strong> Browse the options, check amenities, prices, and seat availability, then pick the bus that suits you best.
+          </li>
+          <li>
+            <strong>Confirm and Pay:</strong> Enter your details, confirm the booking, and securely make your payment. You’ll receive a ticket confirmation instantly!
+          </li>
+        </ul>
+      </div>
 
-        className='imagepic max-lg:block lg:hidden rounded-b-[2pc]'
-      >
-        <Image quality={100} src={bus} alt='' className='imagepic rounded-b-[2pc]' />
-      </motion.div>
-     
-    </div>    </div>
+      {/* Tips Section */}
+      <div className="mt-16">
+        <h4 className="text-center text-2xl font-semibold mb-4">
+          How to Get Cheap Tickets
+        </h4>
+        <ul className="list-disc list-inside text-lg text-gray-700 space-y-3 px-6">
+          <li>
+            <strong>Book in Advance:</strong> Early bookings typically offer the best discounts. Planning ahead can help you secure the lowest prices.
+          </li>
+          <li>
+            <strong>Search and Compare Prices:</strong> Use the search function to browse available buses, compare their prices, and choose the best deal for your journey.
+          </li>
+          <li>
+            <strong>Refer Friends and Get Discounts:</strong> Invite friends to TranzBook, and earn discounts on your next purchase when they book a ticket.
+          </li>
+          <li>
+            <strong>Sign Up for Alerts:</strong> Subscribe to TranzBook’s notifications for price drops and special deals so you never miss out on discounts.
+          </li>
+        </ul>
+      </div>
+    </div>
   );
 };
 
@@ -141,10 +99,13 @@ interface FactListItemProps {
 }
 
 const FactListItem: React.FC<FactListItemProps> = ({ title, description }) => (
-  <>
-    <h2><CheckCircleIcon className='check' />{title}</h2>
-    <h5>{description}</h5>
-  </>
+  <div>
+    <h2 className="text-xl font-semibold flex items-center mb-2">
+      <CheckCircleIcon className="text-blue-300 mr-2" />
+      {title}
+    </h2>
+    <p className="text-gray-600">{description}</p>
+  </div>
 );
 
 export default Why;
