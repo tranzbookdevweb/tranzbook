@@ -106,7 +106,7 @@ const Faq: React.FC = () => {
         <div className='wrdcontainer'>
           <div className='wrd'>
             <h4>Can I book a ticket for someone else?</h4>
-            {activeButton === 8 && <p>Yes, you can book transportation services for someone else. During the booking process, you can specify the passenger's details and contact information to ensure a smooth experience for the person traveling.</p>}
+            {activeButton === 8 && <p>Yes, you can book transportation services for someone else. During the booking process, you can specify the passenger&apos;s details and contact information to ensure a smooth experience for the person traveling.</p>}
           </div>
           {activeButton === 8 ? (
             <RemoveCircleOutlineOutlinedIcon onClick={() => toggleText(8)} className='minus' />
@@ -130,7 +130,7 @@ const Faq: React.FC = () => {
         <div className='wrdcontainer'>
           <div className='wrd'>
             <h4>How do I sign up for a TranzBook account?</h4>
-            {activeButton === 10 && <p>Signing up for a TranzBook account is simple. Visit our website and click on the "Sign Up" button. Fill in the required information, including your email address and password, and follow the prompts to create your account.</p>}
+            {activeButton === 10 && <p>Signing up for a TranzBook account is simple. Visit our website and click on the &apos;Sign Up&apos; button. Fill in the required information, including your email address and password, and follow the prompts to create your account.</p>}
           </div>
           {activeButton === 10 ? (
             <RemoveCircleOutlineOutlinedIcon onClick={() => toggleText(10)} className='minus' />
@@ -142,7 +142,7 @@ const Faq: React.FC = () => {
         <div className='wrdcontainer'>
           <div className='wrd'>
             <h4>How do I contact TranzBook?</h4>
-            {activeButton === 11 && <p>You can contact our customer support team by visiting the "Contact Us" page on our website 24/7. Contact us through the contact numbers, email or fill out the contact form with your inquiry or issue, and our support team will respond to you as soon as possible.</p>}
+            {activeButton === 11 && <p>You can contact our customer support team by visiting the &quot;Contact Us&quot; page on our website 24/7. Contact us through the contact numbers, email or fill out the contact form with your inquiry or issue, and our support team will respond to you as soon as possible.</p>}
           </div>
           {activeButton === 11 ? (
             <RemoveCircleOutlineOutlinedIcon onClick={() => toggleText(11)} className='minus' />

@@ -17,9 +17,9 @@ function IndexPage() {
                                     <h3 className="text-lg lg:text-xl lg:leading-7 md:leading-10 f-f-r py-4 md:py-8">Why TranzBook?</h3>
                                     <ul className="list-disc ml-6">
                                         <li>Innovative Spirit: We leverage technology to streamline transportation and logistics.</li>
-                                        <li>Customer Focus: We're dedicated to providing seamless, reliable experiences.</li>
+                                        <li>Customer Focus: We&apos;re dedicated to providing seamless, reliable experiences.</li>
                                         <li>Collaborative Culture: Join a passionate, diverse team that values your ideas.</li>
-                                        <li>Growth-Driven: We're paving the way for the future of African transportation and logistics.</li>
+                                        <li>Growth-Driven: We&apos;re paving the way for the future of African transportation and logistics.</li>
                                     </ul>
                                     <h3 className="text-lg lg:text-xl lg:leading-7 md:leading-10 f-f-r py-4 md:py-8">What We Offer</h3>
                                     <ul className="list-disc ml-6">

@@ -16,7 +16,7 @@ const Why: React.FC<WhyProps> = ({ activeButton }) => {
       <p className="text-center text-lg md:text-xl text-gray-700 mb-10 px-4">
         Your Comfort, Our Priority. Imagine planning your trip without ever leaving your home. 
         With TranzBook, you can find and book the best buses right from your couch, saving yourself 
-        the hassle of crowded bus stations. Wherever you're headed, just pull out your phone or laptop, 
+        the hassle of crowded bus stations. Wherever you&apos;re headed, just pull out your phone or laptop, 
         and let TranzBook bring the journey to you.
       </p>
 
