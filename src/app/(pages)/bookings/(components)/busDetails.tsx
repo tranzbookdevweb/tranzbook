@@ -68,9 +68,8 @@ const BusDetails: React.FC<BusDetailsProps> = ({
     const totalCost: number = busFare * selectedSeats.length;
 
   return (
-    <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen max-sm:min-h-fit p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg overflow-y-scroll custom-scrollbar'>
-
-      <div className='flex items-center w-full mb-5'>
+    <aside className='bg-white dark:text-black md:space-y-3 -w-72 max-sm:w-full sm:max-md:w-full min-h-full max-sm:min-h-fit p-5 flex flex-col items-center max-sm:justify-between sm:max-md:justify-between   rounded-lg overflow-y-scroll custom-scrollbar'>
+      <div className='flex items-center w-full mb-5 flex-wrap max-[230px]:justify-center'>
         <Image
           src={`${busImage}`}
           alt='Bus'
@@ -78,7 +77,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
           width={100}
           className=' object-cover shadow-sm border border-slate-100 rounded-[5px]'
         />
-        <div className='ml-4'>
+        <div className='ml-4 max-[230px]:text-center'>
           <h2 className='text-lg font-semibold text-gray-800'>
             {busCompany}
           </h2>
@@ -86,7 +85,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         </div>
       </div>
 
-      <div className='w-full space-y-4'>
+      <div className='w-full flex flex-col md:space-y-5 min-[1366px]:space-y-[0.8em] space-y-[0.65em] md:pb-4'>
         <div className='flex items-center justify-between'>
           <span className='text-xs text-gray-500'>Bus Number</span>
           <span className='text-sm font-semibold text-gray-700'>
@@ -148,7 +147,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
 
         <div>
           <p className='text-xs text-gray-500'>Extras</p>
-          <div className='flex flex-row flex-wrap gap-2 items-center'>
+          <div className='flex flex-row flex-wrap gap-1 items-center'>
             {/* please replace with actual data(busExtras or amenities) from the supabase db */}
             {["Air Conditioning", "Power Outlets"].map(
               (item, index) => {
@@ -209,7 +208,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         selectedSeats={selectedSeats}
         handleBooking={handleBooking}
         // onClick={() => handlePayments({ onSuccess, onClose })}
-        className={`w-full mt-5 lg:mt-3 py-2  text-white text-sm font-semibold rounded-[5px] ${
+        className={`w-full mt-5 lg:mt-5 py-2  text-white text-sm font-semibold rounded-[5px] ${
           selectedSeats.length !== 0 && !isBooked
             ? "bg-[#fc9a1a] hover:bg-[#F79009] hover:scale-105"
             : "bg-[#ffcd5993]"

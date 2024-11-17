@@ -12,7 +12,7 @@ import Image from "next/image";
 
 const BusDetailsSkeleton: React.FC = () => {
   return (
-    <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen max-sm:min-h-screen p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  border-r max-sm:border-t sm:max-md:border-t border-gray-200 rounded-lg overflow-y-scroll custom-scrollbar'>
+    <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen max-sm:min-h-screen p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  rounded-lg overflow-y-scroll custom-scrollbar'>
       <div className='flex items-center min-w-full mb-6 max-sm:mb-2'>
         <Skeleton variant='rectangular' width={100} height={100} />
         <div className='ml-4 w-1/2'>

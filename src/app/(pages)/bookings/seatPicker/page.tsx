@@ -94,7 +94,9 @@ const Page: React.FC = () => {
     return (
       <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
         <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse'>
-          <BusDetailsSkeleton />
+          <section className='min-h-screen border-r max-sm:border-t sm:max-md:border-t border-gray-200'>
+            <BusDetailsSkeleton />
+          </section>
           <section
             className={`bg-white flex flex-col items-center ${
               isBooked ? "justify-center" : ""
@@ -161,12 +163,10 @@ const Page: React.FC = () => {
   const currentDate: Date = new Date();
   const totalCost: number = busFare * selectedSeats.length;
 
- 
   const handleBooking = async () => {
     // use the try catch block with the trip with valid details
     // comment out the try block for testing without making a POST
     try {
-    
       // please add the isBooked boolean to the prisma schema/db to eventually check the
       // availability of the seats;
       const bookingData = {
@@ -196,34 +196,36 @@ const Page: React.FC = () => {
 
   return (
     <main className='flex-1 border-t border-b bg-white dark:bg- min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
-      <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse items-center '>
-        <BusDetails
-          busImage={busImage}
-          busNumber={busNumber}
-          busCompany={busCompany}
-          tripDepartureTime={tripDepartureTime}
-          tripArrivalTime={tripArrivalTime}
-          busExtras={busExtras}
-          busDriverID={busDriverID}
-          busCapacity={busCapacity}
-          busType={bus.busType}
-          busRoute={busRoute}
-          tripDuration={route.duration}
-          distance={route.distance}
-          busFare={busFare}
-          selectedSeats={selectedSeats}
-          currency={currency}
-          handleBooking={handleBooking}
-          isBooked={isBooked}
-          id={tripData.id}
-          currentDate={currentDate}
-        />
-        <section className='bg-white flex flex-col items-center md:justify-start md:min-h-screen lg:px-20 md:px-0 w-full rounded-lg overflow-hidden max-sm:w-screen max-sm:p-3'>
+      <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse '>
+        <section className='min-h-screen max-sm:min-h-fit border-r max-sm:border-t sm:max-md:border-t border-gray-200 custom-scrollbar overflow-y-auto'>
+          <BusDetails
+            busImage={busImage}
+            busNumber={busNumber}
+            busCompany={busCompany}
+            tripDepartureTime={tripDepartureTime}
+            tripArrivalTime={tripArrivalTime}
+            busExtras={busExtras}
+            busDriverID={busDriverID}
+            busCapacity={busCapacity}
+            busType={bus.busType}
+            busRoute={busRoute}
+            tripDuration={route.duration}
+            distance={route.distance}
+            busFare={busFare}
+            selectedSeats={selectedSeats}
+            currency={currency}
+            handleBooking={handleBooking}
+            isBooked={isBooked}
+            id={tripData.id}
+            currentDate={currentDate}
+          />
+        </section>
+        <section className='flex flex-col items-center md:justify-start md:min-h-screen lg:px-20 md:px-0 w-full rounded-lg overflow-hidden max-sm:w-screen max-sm:p-0 md:mx-1 '>
           {isBooked === false ? (
-            <div className=' max-sm:w-full flex flex-col items-center md:min-h-screen lg:min-h-screen bg-white'>
-              <h2 className='text-lg mb-3 md:py-5 text-black'>
+            <div className=' max-sm:w-full flex flex-col items-center md:min-h-screen lg:min-h-screen  p-10 sm:max-md:p-5 max-sm:p-5 max-[320px]:p-1 md:'>
+              {/* <h2 className='text-md mb-3 md:py-5 text-black'>
                 Passenger seats available
-              </h2>
+              </h2> */}
               <SeatSelection
                 busCapacity={busCapacity}
                 selectedSeats={selectedSeats}
@@ -252,6 +254,18 @@ const Page: React.FC = () => {
           )}
         </section>
       </div>
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: #b7ebf8;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background-color: #ffffff;
+        }
+      `}</style>
     </main>
   );
 };
