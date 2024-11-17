@@ -83,8 +83,8 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
         <div
           key={`row-${row}`}
           className='flex flex-row max-[310px]:flex-wrap  max-[310px]:justify-center justify-between w-full gap-10 max-sm:gap-0 '>
-          <div className='flex'>{rowSeats.slice(0, 2)}</div>
-          <div className='flex'>{rowSeats.slice(2, 4)}</div>
+          <div className='flex max-[140px]:flex-wrap max-[140px]:justify-center'>{rowSeats.slice(0, 2)}</div>
+          <div className='flex max-[140px]:flex-wrap max-[140px]:justify-center'>{rowSeats.slice(2, 4)}</div>
         </div>
       );
     }
@@ -95,10 +95,10 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   // not the bus Capacity... so incase it goes to live correct this semantic
 
   return (
-    <div className='bg-white flex flex-col items-center lg:justify-center p-5 max-sm:pb-0 border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px] '>
+    <div className='bg-white flex flex-col items-center lg:justify-center p-5 md:p-2  max-sm:pb-0 border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px] '>
       {selectedSeats.length > 0 ? (
         <div className='flex flex-col items-center justify-center lg:mt-10  '>
-          <h3 className='text-center text-xl font-semibold'>{`${
+          <h3 className='text-center text-xl font-semibold mt-5'>{`${
             selectedSeats.length > 1
               ? `${
                   selectedSeats.length === totalPassengerSeats
@@ -123,13 +123,13 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
           </div>
         </div>
       ) : (
-        <h2 className='text-xl pb-2 font-semibold text-center mt-1'>
+        <h2 className='text-xl pb-2 font-semibold text-center mt-5'>
           Select Your Seats
         </h2>
       )}
 
       <div
-        className='w-full lg:min-h-full max-h-[400px] md:min-h-[720px] overflow-y-auto custom-scrollbar pt-5 pb-28  max-[310px]:flex max-[310px]:flex-col max-[310px]:items-center '
+        className='w-full lg:min-h-full max-h-[400px] md:min-h-[720px] overflow-y-auto custom-scrollbar -pt-5 pb-20  max-[310px]:flex max-[310px]:flex-col max-[310px]:items-center '
         style={{
           scrollbarColor: "#b7ebf8 #ffffff",
           scrollbarWidth: "thin",

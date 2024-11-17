@@ -93,18 +93,20 @@ const Page: React.FC = () => {
   if (!tripData) {
     return (
       <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
-        <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse'>
-          <section className='min-h-screen border-r max-sm:border-t sm:max-md:border-t border-gray-200'>
+        <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse '>
+          <section className='min-h-screen lg:w-72 max-sm:min-h-fit sm:max-md:min-h-fit border-r max-sm:border-t sm:max-md:border-t border-gray-200 custom-scrollbar overflow-y-auto'>
             <BusDetailsSkeleton />
           </section>
           <section
-            className={`bg-white flex flex-col items-center ${
+            className={`bg-white  flex flex-col items-center md:justify-start md:min-h-screen lg:px-20 md:px-0 max-sm:w-screen max-sm:p-0 md:mx-1${
               isBooked ? "justify-center" : ""
-            } p-5 w-full rounded-lg overflow-auto`}>
+            } p-5 w-full rounded-lg overflow-hidden`}>
             {isBooked === true ? (
               <CircularProgress />
             ) : (
-              <SeatSelectionSkeleton />
+              <div className=' max-sm:w-full flex flex-col items-center md:min-h-screen lg:min-h-screen  p-10 sm:max-md:p-5 max-sm:p-5 max-[320px]:p-1 md:'>
+                <SeatSelectionSkeleton />
+              </div>
             )}
           </section>
         </div>
@@ -223,9 +225,7 @@ const Page: React.FC = () => {
         <section className='flex flex-col items-center md:justify-start md:min-h-screen lg:px-20 md:px-0 w-full rounded-lg overflow-hidden max-sm:w-screen max-sm:p-0 md:mx-1 '>
           {isBooked === false ? (
             <div className=' max-sm:w-full flex flex-col items-center md:min-h-screen lg:min-h-screen  p-10 sm:max-md:p-5 max-sm:p-5 max-[320px]:p-1 md:'>
-              {/* <h2 className='text-md mb-3 md:py-5 text-black'>
-                Passenger seats available
-              </h2> */}
+         
               <SeatSelection
                 busCapacity={busCapacity}
                 selectedSeats={selectedSeats}

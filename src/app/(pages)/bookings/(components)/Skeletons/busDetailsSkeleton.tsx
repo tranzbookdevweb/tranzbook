@@ -12,8 +12,8 @@ import Image from "next/image";
 
 const BusDetailsSkeleton: React.FC = () => {
   return (
-    <aside className='bg-white dark:text-black w-72 max-sm:w-full sm:max-md:w-full h-screen max-sm:min-h-screen p-5 flex flex-col items-start max-sm:justify-between sm:max-md:justify-between  rounded-lg overflow-y-scroll custom-scrollbar'>
-      <div className='flex items-center min-w-full mb-6 max-sm:mb-2'>
+    <aside className='bg-white dark:text-black md:space-y-3  max-sm:w-full sm:max-md:w-full min-h-full max-sm:min-h-fit p-5 flex flex-col items-center max-sm:justify-between sm:max-md:justify-between    rounded-lg overflow-y-scroll custom-scrollbar'>
+      <div className='flex items-center w-full mb-5 max-sm:flex-wrap max-[230px]:justify-center'>
         <Skeleton variant='rectangular' width={100} height={100} />
         <div className='ml-4 w-1/2'>
           <h2 className='text-lg font-semibold text-gray-800 min-w-full'>
@@ -25,7 +25,7 @@ const BusDetailsSkeleton: React.FC = () => {
         </div>
       </div>
 
-      <div className='w-full space-y-4'>
+      <div className='w-full flex flex-col md:space-y- min-[1366px]:space-y-[0.8em] space-y-[0.65em] md:pb-4'>
         {[
           "Bus Number",
           "Capacity",

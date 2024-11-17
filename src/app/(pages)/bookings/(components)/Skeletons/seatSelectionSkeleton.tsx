@@ -10,10 +10,10 @@ const SeatSelectionSkeleton: React.FC = () => {
 
     skeletonSeats.push(
       <div
-        className='m-2 max-sm:pb-[28%] pb-10 max-sm:m-1 dark:text-black w-16 lg:w-24 lg:h-24 min-[390px]:w-[70px] max-sm:h-16 min-[390px]:h-[85px] min-[430px]:w-[80px] min-[430px]:h-24'
+        className='m-2 relative  -max-[150px]:pb-[70%] pb-10 max-sm:m-1 dark:text-black w-16 lg:w-24 lg:h-24 min-[390px]:w-[70px] max-sm:h-[5.7em] min-[390px]:h-[85px] min-[430px]:w-[80px] min-[430px]:h-24'
         key='driver-seat-skeleton'>
         <Skeleton variant='text' width={60} animation='wave' />
-        <div className='h-16 min-[390px]:h-[70px] min-[430px]:h-[80px] md:h-16 lg:h-24 w-24 max-sm:w-20'>
+        <div className='h-16 min-[390px]:h-[3.89em] min-[430px]:h-[4.44em] md:h-16 lg:h-24 w-20 max-sm:w-20'>
           <Skeleton
             variant='rectangular'
             width={65}
@@ -57,9 +57,13 @@ const SeatSelectionSkeleton: React.FC = () => {
       skeletonSeats.push(
         <div
           key={`row-skeleton-${row}`}
-          className='flex flex-row justify-between w-full gap-10 max-sm:gap-4 '>
-          <div className='flex'>{rowSkeletons.slice(0, 2)}</div>
-          <div className='flex'>{rowSkeletons.slice(2, 4)}</div>
+          className='flex flex-row max-[310px]:flex-wrap max-[310px]:justify-center justify-between w-full gap-10 max-sm:gap-0 '>
+          <div className='flex max-[140px]:flex-wrap max-[140px]:justify-center'>
+            {rowSkeletons.slice(0, 2)}
+          </div>
+          <div className='flex max-[140px]:flex-wrap max-[140px]:justify-center'>
+            {rowSkeletons.slice(2, 4)}
+          </div>
         </div>
       );
     }
@@ -68,11 +72,13 @@ const SeatSelectionSkeleton: React.FC = () => {
   };
 
   return (
-    <div className='flex flex-col items-center p-4 border border-slate-200 rounded-xl h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px]'>
-      <Skeleton variant='text' width={180} animation='wave' />
+    <div className='bg-white flex flex-col items-center lg:justify-center p-5 md:p-2 max-sm:pb-0 border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px] '>
+      <div className='w-full flex justify-center mt-2'>
+        <Skeleton variant='text' width={180} animation='wave' />
+      </div>
 
       <div
-        className='w-full lg:min-h-full max-h-[400px] md:min-h-[720px] overflow-y-auto custom-scrollbar pt-5 pb-20'
+        className='w-full lg:min-h-full max-h-[400px] md:min-h-[720px] overflow-y-auto custom-scrollbar -pt-5 pb-20  max-[310px]:flex max-[310px]:flex-col max-[310px]:items-center '
         style={{
           scrollbarColor: "#b7ebf8 #ffffff",
           scrollbarWidth: "thin",
