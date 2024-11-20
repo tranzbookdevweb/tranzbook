@@ -45,7 +45,7 @@ function Widgets() {
       transition={{ duration: 2.5 }}
       className="flex items-center -mt-12 mb-[5vh] justify-center w-full"
     >
-      <motion.div className="grid grid-cols-4 max-lg:grid-cols-2 gap-10 items-center max-md:grid-cols-1">
+      <motion.div className="grid grid-cols-4 max-lg:grid-cols-2 gap-4 items-center max-md:grid-cols-2">
         {widgets.map((widget) => (
           <div
             key={widget.title}

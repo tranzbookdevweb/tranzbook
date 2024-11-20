@@ -1,10 +1,13 @@
 import React from 'react'
+import BlogDataTable from './BlogDataTable'
 
 type Props = {}
 
 function page({}: Props) {
   return (
-    <div>page</div>
+    <div>
+      <BlogDataTable/>
+    </div>
   )
 }
 
