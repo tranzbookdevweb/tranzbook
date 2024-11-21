@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import BusDetails from "../(components)/busDetails";
 import SeatSelection from "../(components)/seatSelection";
 import Ticket from "../(components)/ticket";
@@ -199,6 +199,7 @@ const Page: React.FC = () => {
   };
 
   return (
+    <Suspense fallback={<p>Loading...</p>}>
     <main className='flex-1 border-t border-b bg-white dark:bg- min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
       <div className='flex flex-row w-full max-sm:gap-5 min-h-screen max-sm:flex-col-reverse sm:max-md:flex-col-reverse '>
         <section className='min-h-screen max-sm:min-h-fit border-r max-sm:border-t sm:max-md:border-t border-gray-200 custom-scrollbar overflow-y-auto'>
@@ -268,7 +269,8 @@ const Page: React.FC = () => {
           background-color: #ffffff;
         }
       `}</style>
-    </main>
+    
+    </main></Suspense>
   );
 };
 
