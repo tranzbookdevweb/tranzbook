@@ -11,14 +11,32 @@ export async function GET(request: Request) {
     const trips = await prisma.trip.findMany({
       where: {
         route: {
-          startLocation: { name: fromLocation },
-          endLocation: { name: toLocation }
+          startLocation: {
+            name: fromLocation // Filter by name
+          },
+          endLocation: {
+            name: toLocation // Filter by name
+          }
         },
-        date: new Date(date)
+        date: new Date(date) // Filter by date
       },
       include: {
+        branch: {
+          include: {
+            company: {
+              select: {
+                logoUrl: true 
+              }
+            }
+          }
+        },
         bus: true,
-        route: true,
+        route: {
+          include: {
+            startLocation: true, // Include startLocation
+            endLocation: true    // Include endLocation
+          }
+        },
         driver: true
       }
     });

@@ -7,6 +7,7 @@ import Ticket from "../(components)/ticket";
 import { BusDetailsSkeleton } from "../(components)/Skeletons/busDetailsSkeleton";
 import { SeatSelectionSkeleton } from "../(components)/Skeletons/seatSelectionSkeleton";
 import { CircularProgress } from "@mui/material";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Bus {
   id: string;
@@ -67,8 +68,9 @@ const Page: React.FC = () => {
   const [busImage, setBusImage] = useState<string>(
     "default-logo-url"
   ); // State for bus image
-  const tripId = "2b4a4bde-ce78-4714-a2c8-d3d7af0c41c4";
-  const apiUrl = `/api/GET/getTripById?id=${tripId}`;
+  const searchParams = useSearchParams();
+  const tripId = searchParams.get("tripId"); 
+    const apiUrl = `/api/GET/getTripById?id=${tripId}`;
 
   useEffect(() => {
     const fetchTripData = async () => {
@@ -124,9 +126,9 @@ const Page: React.FC = () => {
     route,
   } = tripData;
 
-  const busCompany = bus.company.name;
-  const busNumber = bus.plateNumber;
-  const busCapacity = bus.capacity;
+  const busCompany = bus?.company.name;
+  const busNumber = bus?.plateNumber;
+  const busCapacity = bus?.capacity;
   const tripArrivalTime = new Date(date).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",

@@ -45,7 +45,7 @@ export function PopularPlace() {
       </p>
 
       {/* Grid Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full ">
+      <div className="grid px-10  grid-cols-1 md:grid-cols-3 gap-6 w-full ">
         {locations.map((location, index) => (
           <div
             key={index}
