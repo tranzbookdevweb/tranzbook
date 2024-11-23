@@ -25,7 +25,7 @@ export default function UpperHome({}: Props) {
       setActiveButton(button);
     };
   return (
-    <main className='flex flex-col w-full h-full items-center '>
+    <main className='flex flex-col w-full h-full items-center overflow-x-hidden'>
     <div className={`bg-[#DEF5FB] ${theme === 'dark'? 'bg-gray-900':''} w-full rounded-b-[2pc] pb-20`} >
         <div className='flex p-2 flex-col items-center'>
           <div className='flex'>
