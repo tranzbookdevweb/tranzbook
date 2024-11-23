@@ -209,7 +209,7 @@ const PageContent: React.FC = () => {
             currentDate={new Date()}
           />
         </section>
-        <section className="flex flex-col items-center md:justify-start md:min-h-screen lg:px-20 md:px-0 w-full rounded-lg overflow-hidden max-sm:w-screen max-sm:p-0 md:mx-1">
+        <section className="flex flex-col items-center md:justify-start md:min-h-screen p-10 lg:px-20 md:p-5 w-full rounded-lg overflow-hidden max-sm:w-screen max-sm:p-2 md:mx-1">
           {isBooked ? (
             <Ticket
               ticketId={tripData.id}

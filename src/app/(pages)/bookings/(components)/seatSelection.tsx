@@ -95,7 +95,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   // not the bus Capacity... so incase it goes to live correct this semantic
 
   return (
-    <div className='bg-white flex flex-col items-center lg:justify-center p-5 md:p-2  max-sm:pb-0 border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px] '>
+    <div className='bg-white flex flex-col items-center lg:justify-center p-5  md:p-2  max-sm:pb- border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px] '>
       {selectedSeats.length > 0 ? (
         <div className='flex flex-col items-center justify-center lg:mt-10  '>
           <h3 className='text-center text-xl font-semibold mt-5'>{`${
