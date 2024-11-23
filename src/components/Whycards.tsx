@@ -55,11 +55,11 @@ function Whycards() {
       </div>
 
       {/* Tips Section */}
-      <div className="mt-16">
+      <div className="mt-16 max-w-6xl mx-auto">
         <h4 className="text-center text-2xl font-semibold mb-6">
           How to Get Cheap Tickets
         </h4>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
           {[
             {
               title: "Book in Advance",

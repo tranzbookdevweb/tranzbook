@@ -255,7 +255,7 @@ const SearchResults = () => {
                         className="w-full rounded-full h-8 object-fill"
                         src={ 
                           trip.bus.imageUrl
-                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.bus.imageUrl}`
+                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.branch.company.logoUrl}`
                           : defaultLogoUrl
                         }
                         alt="Bus Image"
