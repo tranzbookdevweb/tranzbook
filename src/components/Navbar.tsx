@@ -17,13 +17,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MenuSheet } from "./MenuToggle";
-import { v4 as uuidv4 } from "uuid";
 
 export async function Navbar() {
   // Fetch the current user session using Kinde server session
   const { getUser } = getKindeServerSession();
   const user = await getUser();
-  const randomUUID = uuidv4();
 
   return (
     <div className=' flex sticky bottom-0 top-0 left-0 right-0 z-[99] p-[1.6vh] w-full overflow-x-hidden bg-[#DEF5FB] items-center'>
