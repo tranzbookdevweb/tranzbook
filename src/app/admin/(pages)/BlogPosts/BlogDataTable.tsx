@@ -11,7 +11,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  CaretSortIcon,
   ChevronDownIcon,
 } from "@radix-ui/react-icons";
 import {
@@ -36,24 +35,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AdminSheet from '../../components/Sheetpop/Configuration/AddAdminSheet';
 
-interface BusCompany {
+// Blog type definition
+interface Blog {
   id: string;
-  firstName:  string
-  lastName: string 
-   email: string;
-   companyId: string
+  title: string;
+  content: string;
+  imageUrl: string | null;
+  admin: { name: string };
+  createdAt: string;
 }
 
 export function BlogDataTable() {
-  const [data, setData] = useState<BusCompany[]>([]);
+  const [data, setData] = useState<Blog[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const getBusCompanies = useCallback(async () => {
+  const getBlogs = useCallback(async () => {
     try {
-      const response = await fetch('/api/GET/getAdmin');
+      const response = await fetch('/api/GET/getBlogs');
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
@@ -65,39 +66,46 @@ export function BlogDataTable() {
   }, []);
 
   useEffect(() => {
-    getBusCompanies();
-  }, [getBusCompanies]);
+    getBlogs();
+  }, [getBlogs]);
 
   const handleAddSuccess = () => {
-    getBusCompanies();
+    getBlogs();
   };
 
-  const columns: ColumnDef<BusCompany>[] = [
+  const columns: ColumnDef<Blog>[] = [
     {
       accessorKey: "Sno",
       header: "Sr No",
       cell: ({ row }) => <div>{row.index + 1}</div>, // Use row index as Sno value
     },
     {
-      accessorKey: "firstName",
-      header: "firstName",
-      cell: ({ row }) => <div>{row.getValue("firstName")}</div>,
+      accessorKey: "title",
+      header: "Title",
+      cell: ({ row }) => <div>{row.getValue("title")}</div>,
     },
     {
-      accessorKey: "lastName",
-      header: "lastName",
-      cell: ({ row }) => <div>{row.getValue("lastName")}</div>,
+      accessorKey: "admin.name",
+      header: "Admin",
+      cell: ({ row }) => <div>{row.getValue("admin.name")}</div>,
     },
     {
-      accessorKey: "email",
-      header: "Email",
-      cell: ({ row }) => <div>{row.getValue("email")}</div>,
+      accessorKey: "createdAt",
+      header: "Created At",
+      cell: ({ row }) => <div>{new Date(row.getValue("createdAt")).toLocaleDateString()}</div>,
     },
     {
-      accessorKey: "companyId",
-      header: "Company",
-
-      cell: ({ row }) => <div>{row.getValue("companyId") || 'N/A'}</div>,
+      accessorKey: "imageUrl",
+      header: "Image",
+      cell: ({ row }) => (
+        <div>
+          {row.getValue("imageUrl") ? (
+            <img src={row.getValue("imageUrl")!} alt="Blog Image" className="h-16 w-16 object-cover" />
+          ) : (
+            'No image'
+          )}
+        </div>
+      ),
     },
   ];
 
@@ -126,10 +134,10 @@ export function BlogDataTable() {
       <div className="w-full">
         <div className="flex items-center py-4">
           <Input
-            placeholder="Filter Name..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            placeholder="Filter Title..."
+            value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
+              table.getColumn("title")?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
           />
@@ -162,7 +170,7 @@ export function BlogDataTable() {
         </div>
         <div className="rounded-md border">
           <Table>
-            <TableCaption>A list of bus companies.</TableCaption>
+            <TableCaption>A list of blogs.</TableCaption>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
