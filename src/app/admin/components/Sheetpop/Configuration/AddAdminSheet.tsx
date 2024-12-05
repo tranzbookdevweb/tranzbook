@@ -15,8 +15,14 @@ import {
 } from "@/components/ui/sheet";
 import { PlusCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Branch = {
+  id: string;
+  name: string;
+};
+
+type Role = {
   id: string;
   name: string;
 };
@@ -34,20 +40,36 @@ async function fetchBranches() {
   }
 }
 
+async function fetchRoles() {
+  try {
+    const response = await fetch('/api/GET/getRoles');
+    if (!response.ok) {
+      throw new Error('Failed to fetch roles');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching roles:', error);
+    return [];
+  }
+}
+
 function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
   const [email, setEmail] = useState('');
   const [branches, setBranches] = useState<Branch[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [branchId, setBranchId] = useState('');
+  const [roleId, setRoleId] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [branchesData] = await Promise.all([fetchBranches()]);
+      const [branchesData, rolesData] = await Promise.all([fetchBranches(), fetchRoles()]);
       setBranches(branchesData);
+      setRoles(rolesData);
     };
 
     fetchData();
@@ -56,8 +78,8 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!email || !password || !firstName || !lastName || !branchId) {
-      setError('First name, last name, email, password, and branch are required.');
+    if (!email || !password || !firstName || !lastName || !branchId || !roleId) {
+      setError('First name, last name, email, password, branch, and role are required.');
       return;
     }
 
@@ -70,7 +92,7 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, firstName, lastName, branchId }),
+        body: JSON.stringify({ email, password, firstName, lastName, branchId, roleId }),
       });
 
       if (!response.ok) {
@@ -97,6 +119,7 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
         </Button>
       </SheetTrigger>
       <SheetContent className='z-[999]'>
+      <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
         <SheetHeader>
           <SheetTitle>Add Admin</SheetTitle>
           <SheetDescription>Click save when you&apos;re done.</SheetDescription>
@@ -169,6 +192,23 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid grid-cols-1 items-center gap-4">
+              <Label htmlFor="roleId" className="text-left">
+                Role
+              </Label>
+              <Select value={roleId} onValueChange={setRoleId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent className="z-[99999]">
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      {role.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           {error && <p className="text-red-500">{error}</p>}
           <SheetFooter>
@@ -179,6 +219,7 @@ function AdminSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
             </SheetClose>
           </SheetFooter>
         </form>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );

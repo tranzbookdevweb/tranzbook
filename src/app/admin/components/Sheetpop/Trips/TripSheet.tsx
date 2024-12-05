@@ -7,7 +7,6 @@ import {
   SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -21,20 +20,21 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { CalendarDate } from './Calendar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Bus = {
   id: string;
   name: string;
   plateNumber: string;
-  busType: string;
+  busModel: string;
 };
 
 type Route = {
   id: string;
-  startLocationId: string;
-  endLocationId: string;
-  startLocationName: string;
-  endLocationName: string;
+  startCityId: string;
+  endCityId: string;
+  startCityName: string;
+  endCityName: string;
 };
 
 type Location = {
@@ -59,7 +59,7 @@ type Props = {
 
 async function fetchBuses() {
   try {
-    const response = await fetch('/api/GET/getBuses');
+    const response = await fetch('/api/GET/getBusesAvailable');
     if (!response.ok) {
       throw new Error('Failed to fetch buses');
     }
@@ -98,7 +98,7 @@ async function fetchLocations() {
 
 async function fetchDrivers() {
   try {
-    const response = await fetch('/api/GET/getDrivers');
+    const response = await fetch('/api/GET/getDriversAvailable');
     if (!response.ok) {
       throw new Error('Failed to fetch drivers');
     }
@@ -154,8 +154,8 @@ function TripSheet({ onAddSuccess }: Props) {
 
       const mappedRoutes = routesData.map((route: Route) => ({
         ...route,
-        startLocationName: locationsData.find((loc: Location) => loc.id === route.startLocationId)?.name || '',
-        endLocationName: locationsData.find((loc: Location) => loc.id === route.endLocationId)?.name || '',
+        startCityName: locationsData.find((loc: Location) => loc.id === route.startCityId)?.name || '',
+        endCityName: locationsData.find((loc: Location) => loc.id === route.endCityId)?.name || '',
       }));
       setRoutes(mappedRoutes);
     };
@@ -213,7 +213,8 @@ function TripSheet({ onAddSuccess }: Props) {
         </Button>
       </SheetTrigger>
       <SheetContent className="z-[999]">
-        <SheetHeader>
+               <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
+ <SheetHeader>
           <SheetTitle>Add Trip</SheetTitle>
           <SheetDescription>Click save when you&apos;re done.</SheetDescription>
         </SheetHeader>
@@ -252,14 +253,14 @@ function TripSheet({ onAddSuccess }: Props) {
               <Label htmlFor="busId" className="text-left">
                 Bus
               </Label>
-              <Select value={busId} onValueChange={setBusId}>
+              <Select value={busId} onValueChange={setBusId} disabled={buses.length === 0}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a bus" />
+                  <SelectValue placeholder={buses.length === 0 ? 'No buses available' : 'Select a bus'} />
                 </SelectTrigger>
                 <SelectContent className="z-[99999]">
                   {buses.map((bus) => (
                     <SelectItem key={bus.id} value={bus.id}>
-                      {bus.busType} ({bus.plateNumber})
+                      {bus.busModel} ({bus.plateNumber})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -276,7 +277,7 @@ function TripSheet({ onAddSuccess }: Props) {
                 <SelectContent className="z-[99999]">
                   {routes.map((route) => (
                     <SelectItem key={route.id} value={route.id}>
-                      {route.startLocationName} to {route.endLocationName}
+                      {route.startCityName} to {route.endCityName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -286,9 +287,9 @@ function TripSheet({ onAddSuccess }: Props) {
               <Label htmlFor="driverId" className="text-left">
                 Driver
               </Label>
-              <Select value={driverId} onValueChange={setDriverId}>
+              <Select value={driverId} onValueChange={setDriverId} disabled={drivers.length === 0}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a driver" />
+                  <SelectValue placeholder={drivers.length === 0 ? 'No drivers available' : 'Select a driver'} />
                 </SelectTrigger>
                 <SelectContent className="z-[99999]">
                   {drivers.map((driver) => (
@@ -316,15 +317,18 @@ function TripSheet({ onAddSuccess }: Props) {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          <SheetFooter className="mt-4">
-            <SheetClose asChild>
-              <Button type="submit" disabled={isSubmitting}>
+            {error && (
+              <div className="text-red-600 text-sm mt-2">
+                <p>{error}</p>
+              </div>
+            )}
+            <div className="mt-4">
+              <Button type="submit" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? 'Adding...' : 'Add Trip'}
               </Button>
-            </SheetClose>
-          </SheetFooter>
-        </form>
+            </div>
+          </div>
+        </form></ScrollArea>
       </SheetContent>
     </Sheet>
   );

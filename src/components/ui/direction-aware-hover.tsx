@@ -6,13 +6,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export const DirectionAwareHover = ({
-  imageUrl,
+  image,
   children,
   childrenClassName,
   imageClassName,
   className,
 }: {
-  imageUrl: string;
+  image: string;
   children: React.ReactNode | string;
   childrenClassName?: string;
   imageClassName?: string;
@@ -94,7 +94,7 @@ export const DirectionAwareHover = ({
               )}
               width="1000"
               height="1000"
-              src={imageUrl}
+              src={image}
             />
           </motion.div>
           <motion.div

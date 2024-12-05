@@ -9,115 +9,114 @@ datasource db {
 }
 
 model User {
-  id           String    @id @unique @default(uuid())
-  email        String    @unique
-  firstName    String
-  lastName     String
-  profileImage String?
-  bookings     Booking[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                 String            @id @default(uuid())
+  email              String            @unique
+  firstName          String
+  lastName           String
+  profileImage       String?
+  phoneNumber        String?
+  bookings           Booking[]
+  busCancellations   BusCancellation[] // Opposite relation field for BusCancellation
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 }
 
 model BusCompany {
-  id           String     @id @unique @default(uuid())
+  id           String     @id @default(uuid())
   name         String
   email        String     @unique
-  password     String
-  logoUrl      String?
+  logo      String?
   branches     Branch[]
-  buses        Bus[]      // Add this field
-  drivers      Driver[]   // Add this field
+  buses        Bus[]
+  drivers      Driver[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
 
 model Branch {
-  id           String     @id @unique @default(uuid())
+  id           String     @id @default(uuid())
   name         String
   address      String
-  location     String
+  phoneNumber  String?
+  city         String
   company      BusCompany @relation(fields: [companyId], references: [id])
   companyId    String
-  admins       Admin[]    
-  routes       Route[]    
-  trips        Trip[]     // Add this line to make the relationship bi-directional
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-}
-
-
-model Permission {
-  id           String  @id @unique @default(uuid())
-  entity       String  // e.g., 'admin', 'companies', 'branches', etc.
-  canCreate    Int     @default(0) // 0 for false, 1 for true
-  canRead      Int     @default(0) // 0 for false, 1 for true
-  canUpdate    Int     @default(0) // 0 for false, 1 for true
-  canDelete    Int     @default(0) // 0 for false, 1 for true
-  admin        Admin   @relation(fields: [adminId], references: [id])
-  adminId      String
-  createdAt    DateTime @default(now())
-}
-
-model Blog {
-  id           String    @id @unique @default(uuid())
-  title        String
-  content      String
-  imageUrl     String?
-  admin        Admin     @relation(fields: [adminId], references: [id]) // Written by Admin
-  adminId      String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-}
-
-model Gallery {
-  id           String    @id @unique @default(uuid())
-  title        String
-  imageUrl     String
-  description  String?
-  admin        Admin     @relation(fields: [adminId], references: [id]) // Managed by Admin
-  adminId      String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-}
-
-model Admin {
-  id           String     @id @unique @default(uuid())
-  email        String     @unique
-  password     String
-  firstName    String
-  lastName     String
-  branch       Branch     @relation(fields: [branchId], references: [id])
-  branchId     String
-  blogs        Blog[]     // Relationship to Blog
-  galleries    Gallery[]  // Relationship to Gallery
-  permissions  Permission[]
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-}
-
-
-model Bus {
-  id           String     @id @unique @default(uuid())
-  plateNumber  String
-  capacity     Int
-  busType      String
-  imageUrl     String?   
-  company      BusCompany @relation(fields: [companyId], references: [id]) // Relating to BusCompany
-  companyId    String
+  admins       Admin[]
+  routes       Route[]
   trips        Trip[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
 
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  permissions Permission[] // One-to-many relationship with Permission
+  admins      Admin[]      //roles are assigned to admins
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Permission {
+  id         String  @id @default(uuid())
+  name       String  @unique
+  canCreate  Boolean @default(false)
+  canRead    Boolean @default(false)
+  canUpdate  Boolean @default(false)
+  canDelete  Boolean @default(false)
+  roleId     String  // Foreign key for Role
+  role       Role    @relation(fields: [roleId], references: [id]) // Belongs to one Role
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+
+model Admin {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  password     String
+  firstName    String
+  lastName     String
+  role         Role       @relation(fields: [roleId], references: [id])
+  roleId       String
+  branch       Branch     @relation(fields: [branchId], references: [id])
+  branchId     String
+  blogs        Blog[]
+  galleries    Gallery[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Bus {
+  id            String     @id @default(uuid())
+  plateNumber   String
+  capacity      Int
+  busModel      String
+  status        String     @default("available") // Status field added
+  image         String?
+  company       BusCompany @relation(fields: [companyId], references: [id])
+  companyId     String
+  trips         Trip[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  airConditioning Boolean   @default(false)   // Boolean for air conditioning
+  chargingOutlets Boolean   @default(false)   // Boolean for charging outlets
+  wifi           Boolean   @default(false)   // Boolean for Wi-Fi
+  restRoom       Boolean   @default(false)   // Boolean for restroom availability
+  seatBelts      Boolean   @default(false)   // Boolean for seat belts availability
+  onboardFood    Boolean   @default(false)   // Boolean for onboard food
+}
+
+
 model Driver {
-  id           String     @id @unique @default(uuid())
+  id           String     @id @default(uuid())
   firstName    String
   lastName     String
   licenseNumber String    @unique
   email        String     @unique
   mobile       String
-  company      BusCompany @relation(fields: [companyId], references: [id]) // Relating to BusCompany
+  status       String     @default("Available") // Status field added
+  company      BusCompany @relation(fields: [companyId], references: [id])
   companyId    String
   trips        Trip[]
   createdAt    DateTime   @default(now())
@@ -125,47 +124,49 @@ model Driver {
 }
 
 model Trip {
-  id           String    @id @unique @default(uuid())
+  id           String    @id @default(uuid())
   date         DateTime
   price        Float
-  departureTime String 
+  departureTime String
   bus          Bus       @relation(fields: [busId], references: [id])
   busId        String
   route        Route     @relation(fields: [routeId], references: [id])
   routeId      String
   driver       Driver    @relation(fields: [driverId], references: [id])
   driverId     String
-  branch       Branch    @relation(fields: [branchId], references: [id])  // Assigning branch per trip
+  branch       Branch    @relation(fields: [branchId], references: [id])
   branchId     String
   bookings     Booking[]
+  busCancellations BusCancellation[] // Opposite relation field for BusCancellation
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
 
-model Location {
-  id           String       @id @unique @default(uuid())
+model City {
+  id           String       @id @default(uuid())
   name         String
+  country      String
   routesFrom   Route[]      @relation("routesFrom")
   routesTo     Route[]      @relation("routesTo")
 }
 
 model Route {
-  id           String     @id @unique @default(uuid())
-  startLocation Location  @relation("routesFrom", fields: [startLocationId], references: [id])
-  startLocationId String
-  endLocation   Location  @relation("routesTo", fields: [endLocationId], references: [id])
-  endLocationId String
-  duration      Int      
-  distance      Int        
-  branch        Branch     @relation(fields: [branchId], references: [id])
-  branchId      String
-  trips         Trip[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id           String     @id @default(uuid())
+  startCity    City       @relation("routesFrom", fields: [startCityId], references: [id])
+  startCityId  String
+  endCity      City       @relation("routesTo", fields: [endCityId], references: [id])
+  endCityId    String
+  duration     Int
+  distance     Int
+  branch       Branch     @relation(fields: [branchId], references: [id])
+  branchId     String
+  trips        Trip[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model Booking {
-  id           String    @id @unique @default(uuid())
+  id           String    @id @default(uuid())
   date         DateTime  @default(now())
   user         User      @relation(fields: [userId], references: [id])
   userId       String
@@ -176,3 +177,37 @@ model Booking {
   updatedAt    DateTime  @updatedAt
 }
 
+model BusCancellation {
+  id           String    @id @default(uuid())
+  bookingDate  DateTime
+  user         User      @relation(fields: [userId], references: [id])
+  userId       String
+  trip         Trip      @relation(fields: [tripId], references: [id])
+  tripId       String
+  seatNumber   Int
+  status       String    @default("pending") // refunded, retained, or pending
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Blog {
+  id           String    @id @default(uuid())
+  title        String
+  content      String
+  image     String?
+  admin        Admin     @relation(fields: [adminId], references: [id])
+  adminId      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Gallery {
+  id           String    @id @default(uuid())
+  title        String
+  image     String
+  description  String? 
+  admin        Admin     @relation(fields: [adminId], references: [id])
+  adminId      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}

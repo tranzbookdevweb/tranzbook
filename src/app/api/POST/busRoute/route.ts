@@ -7,16 +7,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { startLocationId, endLocationId, duration, distance, branchId } = await req.json();
+    const {startCityId, endCityId, duration, distance, branchId } = await req.json();
 
-    if (!startLocationId || !endLocationId || !duration || !distance || !branchId) {
+    if (!startCityId || !endCityId || !duration || !distance || !branchId) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
     const newRoute = await prisma.route.create({
       data: {
-        startLocationId,
-        endLocationId,
+        startCityId :startCityId,
+        endCityId: endCityId,
         duration,
         distance,
         branchId,  // Corrected from companyId to branchId

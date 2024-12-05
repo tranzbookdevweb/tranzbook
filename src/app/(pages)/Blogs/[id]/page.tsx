@@ -6,7 +6,7 @@ interface BlogPost {
   id: string;
   title: string;
   content: string;
-  imageUrl?: string;
+  image?: string;
   adminId: string;
   createdAt: string;
   updatedAt: string;
@@ -87,8 +87,8 @@ const BlogDetail: React.FC = () => {
       <div className="bg-white shadow-md rounded-lg p-6 mb-8">
         <h1 className="text-4xl font-bold mb-2">{blogPost.title}</h1>
         <p className="text-sm text-gray-600 mb-4">By {adminName} on {new Date(blogPost.createdAt).toLocaleDateString()}</p>
-        {blogPost.imageUrl && (
-          <img src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${blogPost.imageUrl}`} alt={blogPost.title} className="w-full h-auto rounded-md mb-4" />
+        {blogPost.image && (
+          <img src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${blogPost.image}`} alt={blogPost.title} className="w-full h-auto rounded-md mb-4" />
         )}
         <div className="text-gray-800" >{blogPost.content } </div>
       </div>
@@ -97,8 +97,8 @@ const BlogDetail: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {relatedPosts.map((post) => (
           <div key={post.id} className="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow">
-            {post.imageUrl && (
-              <img src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${post.imageUrl}`} alt={post.title} className="w-full h-40 object-cover rounded-md mb-2" />
+            {post.image && (
+              <img src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${post.image}`} alt={post.title} className="w-full h-40 object-cover rounded-md mb-2" />
             )}
             <h3 className="text-lg font-semibold mb-1">{post.title}</h3>
             <p className="text-sm text-gray-600">{new Date(post.createdAt).toLocaleDateString()}</p>

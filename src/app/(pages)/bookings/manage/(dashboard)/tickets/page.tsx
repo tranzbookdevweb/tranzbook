@@ -14,7 +14,7 @@ interface Ticket {
   totalCost: string;
   busNumber: string;
   busCompany: string;
-  busType: string;
+  busModel: string;
   busRoute: string;
   tripDuration: string;
   tripDepartureTime: string;
@@ -44,7 +44,7 @@ const Page: React.FC = () => {
         totalCost: "120 GHC",
         busNumber: "GR-1234-23",
         busCompany: "VIP Bus",
-        busType: "Luxury",
+        busModel: "Luxury",
         busRoute: "Accra to Kumasi",
         tripDuration: "5 hours",
         tripDepartureTime: "8:00 AM",
@@ -63,7 +63,7 @@ const Page: React.FC = () => {
         totalCost: "80 GHC",
         busNumber: "AS-6789-23",
         busCompany: "STC",
-        busType: "Standard",
+        busModel: "Standard",
         busRoute: "Accra to Takoradi",
         tripDuration: "4 hours",
         tripDepartureTime: "6:00 AM",
@@ -84,7 +84,7 @@ const Page: React.FC = () => {
         totalCost: "150 GHC",
         busNumber: "BA-4321-22",
         busCompany: "Metro Mass",
-        busType: "Economy",
+        busModel: "Economy",
         busRoute: "Kumasi to Tamale",
         tripDuration: "6 hours",
         tripDepartureTime: "9:00 AM",

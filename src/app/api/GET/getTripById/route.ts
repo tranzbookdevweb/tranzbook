@@ -24,8 +24,8 @@ export async function GET(request: Request) {
         branch: true, // Include related branch data
         route: {
           include: {
-            startLocation: true, // Include start location
-            endLocation: true,   // Include end location
+            startCity: true, // Include start location
+            endCity: true,   // Include end location
           },
         },
         bookings: {

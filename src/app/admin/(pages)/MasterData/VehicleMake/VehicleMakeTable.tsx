@@ -41,7 +41,7 @@ interface Data {
   plateNumber: string;
   capacity: number;
   busType: string;
-  imageUrl?: string;  // Adjusted to match model
+  image?: string;  // Adjusted to match model
   branchId: string;   // Adjusted to match model
 }
 
@@ -82,10 +82,10 @@ export function VehicleMakeDataTable() {
       cell: ({ row }) => <div>{row.getValue("capacity")}</div>,
     },
     {
-      accessorKey: "imageUrl",
+      accessorKey: "image",
       header: "Image",
       cell: ({ row }) =>
-         <img className='h-24 w-24' src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${row.getValue("imageUrl") || 'N/A'}`} alt=''/>
+         <img className='h-24 w-24' src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${row.getValue("image") || 'N/A'}`} alt=''/>
       ,
     },
     {
@@ -107,7 +107,7 @@ export function VehicleMakeDataTable() {
         plateNumber: item.plateNumber,
         capacity: item.capacity,
         busType: item.busType,
-        imageUrl: item.imageUrl,  // Adjusted to match model
+        image: item.image,  // Adjusted to match model
         branchId: item.branchId,   // Adjusted to match model
       })));
     } catch (error) {

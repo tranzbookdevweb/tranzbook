@@ -15,13 +15,14 @@ import {
 } from "@/components/ui/sheet";
 import { PlusCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Company = {
   id: string;
   name: string;
 };
 
-type Location = {
+type city = {
     id: string;
     name: string;
   };
@@ -39,7 +40,7 @@ async function fetchCompanies() {
   }
 }
 
-async function fetchLocations() {
+async function fetchcitys() {
     try {
       const response = await fetch('/api/GET/getLocation');
       if (!response.ok) {
@@ -54,10 +55,10 @@ async function fetchLocations() {
 function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [location, setLocation] = useState('');
+  const [city, setcity] = useState('');
   const [companyId, setCompanyId] = useState('');
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [locationData, setLocations] = useState<Location[]>([]);
+  const [cityData, setcitys] = useState<city[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,8 +73,8 @@ function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const locationsData = await fetchLocations();
-      setLocations(locationsData);
+      const citysData = await fetchcitys();
+      setcitys(citysData);
     };
 
     fetchData();
@@ -82,8 +83,8 @@ function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!name || !address || !location || !companyId) {
-      setError('Name, address, location, and company are required.');
+    if (!name || !address || !city || !companyId) {
+      setError('Name, address, city, and company are required.');
       return;
     }
 
@@ -99,7 +100,7 @@ function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
         body: JSON.stringify({
           name,
           address,
-          location,
+          city,
           companyId,
         }),
       });
@@ -128,6 +129,7 @@ function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
         </Button>
       </SheetTrigger>
       <SheetContent className='z-[999]'>
+      <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
         <SheetHeader>
           <SheetTitle>Add Branch</SheetTitle>
           <SheetDescription>Click save when you&apos;re done.</SheetDescription>
@@ -155,14 +157,14 @@ function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
               />
             </div>
             <div className="grid grid-cols-1 items-center gap-4">
-            <Select value={location} onValueChange={setLocation}>
+            <Select value={city} onValueChange={setcity}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a Location" />
+                  <SelectValue placeholder="Select a city" />
                 </SelectTrigger>
                 <SelectContent className="z-[999]">
-                  {locationData.map((location) => (
-                    <SelectItem key={location.id} value={location.id}>
-                      {location.name}
+                  {cityData.map((city) => (
+                    <SelectItem key={city.id} value={city.id}>
+                      {city.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -193,6 +195,7 @@ function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
             </SheetClose>
           </SheetFooter>
         </form>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );

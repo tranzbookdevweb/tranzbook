@@ -40,7 +40,7 @@ interface BusCompany {
   id: string;
   name: string;
   email: string;
-  logoUrl?: string;
+  logo?: string;
 }
 
 export function Priveleges() {
@@ -88,9 +88,9 @@ export function Priveleges() {
       cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
     {
-      accessorKey: "logoUrl",
+      accessorKey: "logo",
       header: "Logo",
-      cell: ({ row }) => <img className='h-24 w-24' src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${row.getValue("logoUrl") || 'N/A'}`} alt=''/>,
+      cell: ({ row }) => <img className='h-24 w-24' src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${row.getValue("logo") || 'N/A'}`} alt=''/>,
     },
   ];
 

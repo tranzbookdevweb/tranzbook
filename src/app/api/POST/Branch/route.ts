@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, address, location, companyId } = await req.json();
+    const { name, address, city, companyId } = await req.json();
 
     // Validate required fields
-    if (!name || !address || !location || !companyId) {
-      return NextResponse.json({ error: "Name, address, location, and company ID are required" }, { status: 400 });
+    if (!name || !address || !city || !companyId) {
+      return NextResponse.json({ error: "Name, address, city, and company ID are required" }, { status: 400 });
     }
 
     // Create new branch
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         address,
-        location,
+        city,
         company: {
           connect: { id: companyId }  // Link the branch to an existing company
         },

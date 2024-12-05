@@ -8,20 +8,18 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const logoUrl = formData.get('logoUrl') as File;
+    const logo = formData.get('logo') as File;
 
-    if (!name || !email || !password || !logoUrl) {
+    if (!name || !email  || !logo) {
       return NextResponse.json({ error: "Name, email, password, and logo are required" }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     const { data: imageData, error: uploadError } = await supabase.storage
       .from('images')
-      .upload(`/logos/${logoUrl.name}-${Date.now()}`, logoUrl, {
+      .upload(`/logos/${logo.name}-${Date.now()}`, logo, {
         cacheControl: '2592000',
-        contentType: logoUrl.type,
+        contentType: logo.type,
       });
 
     if (uploadError) {
@@ -32,8 +30,7 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         email,
-        password: hashedPassword,
-        logoUrl: imageData?.fullPath,
+        logo: imageData?.fullPath,
       },
     });
 

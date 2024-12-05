@@ -5,32 +5,32 @@ import { AnimatePresence, motion } from "framer-motion";
 export function PopularPlace() {
   const locations = [
     {
-      imageUrl: '/Regions/EasternRegion.png',
+      image: '/Regions/EasternRegion.png',
       title: "Nairobi",
       subtitle: "Kenya",
     },
     {
-      imageUrl: '/Regions/CapeCoast.png',
+      image: '/Regions/CapeCoast.png',
       title: "Kisumu",
       subtitle: "Kenya",
     },
     {
-      imageUrl: '/Regions/Kumasi.png',
+      image: '/Regions/Kumasi.png',
       title: "Kitale",
       subtitle: "Kenya",
     },
     {
-      imageUrl: '/Regions/NorthernRegion.png',
+      image: '/Regions/NorthernRegion.png',
       title: "Bungoma",
       subtitle: "Kenya",
     },
     {
-      imageUrl: '/Regions/VoltaRegion.png',
+      image: '/Regions/VoltaRegion.png',
       title: "Kampala",
       subtitle: "Uganda",
     },
     {
-      imageUrl: '/Regions/AccraRegion.png',
+      image: '/Regions/AccraRegion.png',
       title: "Mombasa",
       subtitle: "Kenya",
     },
@@ -53,7 +53,7 @@ export function PopularPlace() {
           >
             {/* Background Image */}
             <Image
-              src={location.imageUrl}
+              src={location.image}
               alt={location.title}
               layout="fill"
               objectFit="cover"

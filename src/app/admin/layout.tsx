@@ -6,6 +6,7 @@ import { Metadata } from 'next';
 import { SideBar } from './components/sidebar';
 import Header from './components/header';
 import PageWrapper from './components/pagewrapper';
+import { Toaster } from '@/components/ui/toaster';
 
 const karla = Karla({
   weight: ["200", "300", "400", "500", "600", "700", "800"],
@@ -39,6 +40,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <>
+          <Toaster/>
             <SideBar />
             <div className="flex flex-col h-full w-full">
               <Header />

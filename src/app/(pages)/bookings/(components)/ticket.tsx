@@ -12,7 +12,7 @@ interface TicketProps {
   ticketId: string | string[];
   busNumber: string | number;
   busCompany: string;
-  busType: string;
+  busModel: string;
   busRoute: { origin: string; destination: string };
   tripDuration: string | number;
   tripDepartureTime: number | string;
@@ -30,7 +30,7 @@ const Ticket: React.FC<TicketProps> = ({
   totalCost,
   busNumber,
   busCompany,
-  busType,
+  busModel,
   busRoute,
   tripDuration,
   tripDepartureTime,
@@ -109,7 +109,7 @@ const Ticket: React.FC<TicketProps> = ({
             {`Bus Number: ${busNumber}`}
           </text>
           <text x='230' y='500' fontSize='35' fill='#333'>
-            {`Bus Type: ${busType}`}
+            {`Bus Type: ${busModel}`}
           </text>
           <text x='230' y='550' fontSize='35' fill='#333'>
             {`Route: ${busRoute.origin} → ${busRoute.destination}`}

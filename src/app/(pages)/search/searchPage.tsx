@@ -29,7 +29,7 @@ type Trip = {
     createdAt: string;
     updatedAt: string;
     company: {
-      logoUrl: string;
+      logo: string;
     };
   };
   bus: {
@@ -37,25 +37,25 @@ type Trip = {
     plateNumber: string;
     capacity: number;
     busType: string;
-    imageUrl: string;
+    image: string;
     companyId: string;
     createdAt: string;
     updatedAt: string;
   };
   route: {
     id: string;
-    startLocationId: string;
-    endLocationId: string;
+    startCityId: string;
+    endCityId: string;
     duration: number;
     distance: number;
     branchId: string;
     createdAt: string;
     updatedAt: string;
-    startLocation: {
+    startCity: {
       id: string;
       name: string;
     };
-    endLocation: {
+    endCity: {
       id: string;
       name: string;
     };
@@ -73,7 +73,7 @@ type Trip = {
   };
 };
 
-const defaultLogoUrl = 'path/to/default/logo'; // Replace with your actual default logo URL
+const defaultlogo = 'path/to/default/logo'; // Replace with your actual default logo URL
 
 const SearchResults = () => {
   const [results, setResults] = useState<Trip[]>([]);
@@ -221,16 +221,16 @@ const SearchResults = () => {
                       <img
                         className='w-48 rounded-full h-24 object-fill'
                         src={ 
-                          trip.branch.company.logoUrl
-                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${trip.bus.imageUrl}`
-                          : defaultLogoUrl
+                          trip.branch.company.logo
+                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${trip.bus.image}`
+                          : defaultlogo
                         }
                         alt="Company Logo"
                       />
                     </div>
                     <h2>
                       <PanoramaFishEyeSharp className="ic" />
-                      {trip.route.startLocation.name}
+                      {trip.route.startCity.name}
                     </h2>
                     <h3>
                       <AccessTimeSharp className="ic" /> {trip.departureTime} | Date:{" "}
@@ -240,7 +240,7 @@ const SearchResults = () => {
                   <div className="sectionbottom">
                     <h2>
                       <LocationOnSharp className="ic" />
-                      {trip.route.endLocation.name}
+                      {trip.route.endCity.name}
                     </h2>
                     <h3>
                       <AccessTimeSharp className="ic" /> Duration: {trip.route.duration} mins | Distance:{" "}
@@ -254,9 +254,9 @@ const SearchResults = () => {
                       <img
                         className="w-full rounded-full h-8 object-fill"
                         src={ 
-                          trip.bus.imageUrl
-                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.branch.company.logoUrl}`
-                          : defaultLogoUrl
+                          trip.bus.image
+                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.branch.company.logo}`
+                          : defaultlogo
                         }
                         alt="Bus Image"
                       />

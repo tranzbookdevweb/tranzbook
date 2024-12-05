@@ -8,7 +8,7 @@ interface BlogPost {
   id: string;
   title: string;
   content: string;
-  imageUrl?: string;
+  image?: string;
   adminId: string;
   createdAt: string;
   updatedAt: string;
@@ -92,9 +92,9 @@ const Blog: React.FC = () => {
                 transition={{ duration: 0.3 }}
                 onClick={() => handlePostClick(post.id)} // Add click handler
               >
-                {post.imageUrl && (
+                {post.image && (
                   <motion.img
-                    src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${post.imageUrl}`}
+                    src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${post.image}`}
                   
                     alt={post.title}
                     className="w-full h-full object-cover max-h-64 object-center"

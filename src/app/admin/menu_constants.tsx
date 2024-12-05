@@ -1,7 +1,7 @@
 import { Bus, Car, GitBranch, LocateFixed, LucideSidebarClose, Speaker, Ticket } from "lucide-react";
 import { BsCash, BsChat, BsDoorClosed, BsEnvelope, BsFile, BsGear, BsHouseDoor, BsKanban, BsListUl, BsPeople, BsPersonFillCheck, BsPersonFillGear, BsPersonGear, BsQuestionCircle, BsX } from "react-icons/bs";
 import { SideNavItemGroup } from "./components/type/sidebar-nav-item";
-import { PostAdd } from "@mui/icons-material";
+import { People, PeopleOutline, PostAdd } from "@mui/icons-material";
 
 
 
@@ -40,7 +40,7 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                 icon: <GitBranch size={20} />,
                 submenu: true,
                 subMenuItems: [
-                    { title: 'Vehicle Make', path: '/admin/MasterData/VehicleMake' },
+                    { title: 'Buses', path: '/admin/MasterData/VehicleMake' },
                     // { title: 'Vehicle Model', path: 'admin/MasterData/VehicleModel' },
                     { title: 'Country', path: '/admin/MasterData/Country' },
                     // { title: 'Driver Needed Documentation', path: '/admin/MasterData/DriverNeededDocumentation' },
@@ -59,15 +59,17 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                 submenu: true,
                 subMenuItems: [
                     {title: ' Drivers', path: '/admin/manageDrivers/ApprovedDrivers' },
-            //         {title: 'Approve Pending Drivers', path: '/admin/manageDrivers/ApprovePendingDrivers' },
-            //         {title: 'Driver Ratings', path: '/admin/manageDrivers/DriverRatings' },
-            //         {title: 'Negative Balance Drivers', path: '/admin/manageDrivers/NegativeBalanceDrivers' },
-          ],
+                    ],
             },
             {
                 title: 'Trips',
                 path: '/admin/Trips',
                 icon: <Bus size={20} />,
+            },
+            {
+                title: 'Roles',
+                path: '/admin/Roles',
+                icon: <BsPersonGear size={20} />,
             },
             {
                 title: 'Admins',
@@ -85,11 +87,7 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                     { title: 'Cancelled Trips', path: '/admin/TripRequests/CancelledTrips'},
                 ],
             },
-            // {
-            //     title: 'Vehicle Types',
-            //     path: '/VehicleTypes',
-            //     icon: <Car size={20} />,
-            // },
+
             {
                 title: 'Manage Drivers',
                 path: '/admin/manageDrivers',
@@ -97,15 +95,13 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                 submenu: true,
                 subMenuItems: [
                     {title: ' Drivers', path: '/admin/manageDrivers/ApprovedDrivers' },
-            //         {title: 'Approve Pending Drivers', path: '/admin/manageDrivers/ApprovePendingDrivers' },
-            //         {title: 'Driver Ratings', path: '/admin/manageDrivers/DriverRatings' },
-            //         {title: 'Negative Balance Drivers', path: '/admin/manageDrivers/NegativeBalanceDrivers' },
-          ],
+          //         {title: 'Driver Ratings', path: '/admin/manageDrivers/DriverRatings' },
+        ],
             },
             {
                 title: 'Manage Users',
                 path: '/admin/manageUsers',
-                icon: <BsPersonGear size={20} />,
+                icon: <PeopleOutline />,
                 submenu: true,
                 subMenuItems: [
                     {title: 'Approved Users', path: '/admin/manageUsers/ApprovedUsers' },
@@ -115,15 +111,6 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                     {title: 'Deleted Users', path: '/admin/manageUsers/DeletedUsers' },
                     ],
             },
-            //    {
-            //             title: 'Set Price',
-            //             path: '/setPrice',
-            //             icon: <BsCash size={20} />,
-            //             submenu: true,
-            //             subMenuItems: [
-            //                 {title: 'World', path: '/Trip Requests' },
-            //            ],
-            //         },
         ]
     },
     {

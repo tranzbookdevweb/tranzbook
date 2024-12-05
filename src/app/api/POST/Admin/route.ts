@@ -5,21 +5,25 @@ import bcrypt from "bcrypt";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password, firstName, lastName,  branchId } = await req.json();
+    const { email, password, firstName, lastName, roleId, branchId } = await req.json();
 
-    if (!email || !password || !firstName || !lastName  || !branchId) {
-      return NextResponse.json({ error: "Email, password, firstName, lastName, companyId, and branchId are required" }, { status: 400 });
+    // Ensure all required fields are provided
+    if (!email || !password || !firstName || !lastName || !roleId || !branchId) {
+      return NextResponse.json({ error: "Email, password, firstName, lastName, roleId, and branchId are required" }, { status: 400 });
     }
 
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create the new admin
     const newAdmin = await prisma.admin.create({
       data: {
         firstName,
         lastName,
-        branchId,
         email,
         password: hashedPassword,
+        roleId,  // Role reference
+        branchId,  // Branch reference
       },
     });
 

@@ -14,27 +14,27 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { PlusCircle } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 function BusCompanySheet({ onAddSuccess }: { onAddSuccess: () => void }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [logoUrl, setLogoUrl] = useState<File | null>(null);
+  const [logo, setlogo] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setLogoUrl(file);
+      setlogo(file);
     }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!name || !email || !password || !logoUrl) {
-      setError('Name, email, password, and logo are required.');
+    if (!name || !email || !logo) {
+      setError('Name, email, and logo are required.');
       return;
     }
 
@@ -45,8 +45,7 @@ function BusCompanySheet({ onAddSuccess }: { onAddSuccess: () => void }) {
       const formData = new FormData();
       formData.append('name', name);
       formData.append('email', email);
-      formData.append('password', password);
-      formData.append('logoUrl', logoUrl);
+      formData.append('logo', logo);
 
       const response = await fetch('/api/POST/busCompany', {
         method: 'POST',
@@ -77,6 +76,8 @@ function BusCompanySheet({ onAddSuccess }: { onAddSuccess: () => void }) {
         </Button>
       </SheetTrigger>
       <SheetContent className='z-[999]'>
+      <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
+
         <SheetHeader>
           <SheetTitle>Add Bus Company</SheetTitle>
           <SheetDescription>Click save when you&apos;re done.</SheetDescription>
@@ -107,25 +108,13 @@ function BusCompanySheet({ onAddSuccess }: { onAddSuccess: () => void }) {
                 className="col-span-3"
               />
             </div>
+
             <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="Password" className="text-left">
-                Password
-              </Label>
-              <Input
-                id="Password"
-                placeholder="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="LogoUrl" className="text-left">
+              <Label htmlFor="logo" className="text-left">
                 Logo
               </Label>
               <Input
-                id="LogoUrl"
+                id="logo"
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
@@ -142,6 +131,7 @@ function BusCompanySheet({ onAddSuccess }: { onAddSuccess: () => void }) {
             </SheetClose>
           </SheetFooter>
         </form>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );

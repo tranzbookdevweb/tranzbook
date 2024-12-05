@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type BusCompany = {
   id: string;
@@ -37,7 +38,8 @@ function ApprovedDriversSheet({ onAddSuccess }: Props) {
   const [licenseNumber, setLicenseNumber] = useState('');
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
-  const [companyId, setcompanyId] = useState('');
+  const [companyId, setCompanyId] = useState('');
+  const [status, setStatus] = useState('available'); // Default status is 'available'
   const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,7 +71,7 @@ function ApprovedDriversSheet({ onAddSuccess }: Props) {
 
     setError(null);
 
-    const driverData = { firstName, lastName, licenseNumber, email, mobile, companyId };
+    const driverData = { firstName, lastName, licenseNumber, email, mobile, companyId, status };
 
     try {
       const response = await fetch('/api/POST/Driver', {
@@ -101,6 +103,7 @@ function ApprovedDriversSheet({ onAddSuccess }: Props) {
         </Button>
       </SheetTrigger>
       <SheetContent className='z-[99998] overflow-y-scroll h-full'>
+      <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
         <SheetHeader>
           <SheetTitle>Add Driver</SheetTitle>
           <SheetDescription>
@@ -177,7 +180,7 @@ function ApprovedDriversSheet({ onAddSuccess }: Props) {
             <Label htmlFor="companyId" className="text-left">
               Branch
             </Label>
-            <Select value={companyId} onValueChange={setcompanyId}>
+            <Select value={companyId} onValueChange={setCompanyId}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a branch" />
               </SelectTrigger>
@@ -191,6 +194,23 @@ function ApprovedDriversSheet({ onAddSuccess }: Props) {
             </Select>
           </div>
 
+          {/* Add the Select for Status */}
+          <div className="grid grid-cols-1 items-center gap-4">
+            <Label htmlFor="status" className="text-left">
+              Status
+            </Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a status" />
+              </SelectTrigger>
+              <SelectContent className="z-[99999]">
+                <SelectItem value="available">Available</SelectItem>
+                <SelectItem value="busy">Busy</SelectItem>
+                <SelectItem value="leave">Leave</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {error && <p className="text-red-500">{error}</p>}
 
           <SheetFooter>
@@ -199,6 +219,7 @@ function ApprovedDriversSheet({ onAddSuccess }: Props) {
             </SheetClose>
           </SheetFooter>
         </form>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   )

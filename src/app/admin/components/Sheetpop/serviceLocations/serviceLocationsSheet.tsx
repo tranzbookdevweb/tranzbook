@@ -20,6 +20,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Location = {
   id: string;
@@ -81,8 +82,8 @@ async function fetchBusCompanies() {
 }
 
 function ServiceLocation({ onAddSuccess }: Props) {
-  const [startLocationId, setStartLocationId] = useState('');
-  const [endLocationId, setEndLocationId] = useState('');
+  const [startCityId, setstartCityId] = useState('');
+  const [endCityId, setendCityId] = useState('');
   const [duration, setDuration] = useState(0);
   const [distance, setDistance] = useState(0);
   const [branchId, setBranchId] = useState('');
@@ -123,7 +124,7 @@ function ServiceLocation({ onAddSuccess }: Props) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!startLocationId || !endLocationId || !duration || !distance || !branchId) {
+    if (!startCityId || !endCityId || !duration || !distance || !branchId) {
       setError('All fields are required.');
       return;
     }
@@ -137,7 +138,7 @@ function ServiceLocation({ onAddSuccess }: Props) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ startLocationId, endLocationId, duration, distance, branchId }),
+        body: JSON.stringify({ startCityId, endCityId, duration, distance, branchId }),
       });
 
       if (!response.ok) {
@@ -164,6 +165,7 @@ function ServiceLocation({ onAddSuccess }: Props) {
         </Button>
       </SheetTrigger>
       <SheetContent className="z-[999]">
+      <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
         <SheetHeader>
           <SheetTitle>Add Route</SheetTitle>
           <SheetDescription>Click save when you&apos;re done.</SheetDescription>
@@ -171,10 +173,10 @@ function ServiceLocation({ onAddSuccess }: Props) {
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="startLocationId" className="text-left">
+              <Label htmlFor="startCityId" className="text-left">
                 Start Location
               </Label>
-              <Select value={startLocationId} onValueChange={setStartLocationId}>
+              <Select value={startCityId} onValueChange={setstartCityId}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a start location" />
                 </SelectTrigger>
@@ -188,10 +190,10 @@ function ServiceLocation({ onAddSuccess }: Props) {
               </Select>
             </div>
             <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="endLocationId" className="text-left">
+              <Label htmlFor="endCityId" className="text-left">
                 End Location
               </Label>
-              <Select value={endLocationId} onValueChange={setEndLocationId}>
+              <Select value={endCityId} onValueChange={setendCityId}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select an end location" />
                 </SelectTrigger>
@@ -274,6 +276,8 @@ function ServiceLocation({ onAddSuccess }: Props) {
             </SheetClose>
           </SheetFooter>
         </form>
+        </ScrollArea>
+    
       </SheetContent>
     </Sheet>
   );

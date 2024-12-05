@@ -35,8 +35,8 @@ import ServiceLocation from '../../components/Sheetpop/serviceLocations/serviceL
 
 interface Data {
   id: string;
-  startLocationId: string;
-  endLocationId: string;
+  startCityId: string;
+  endCityId: string;
   duration: number;
   distance: number;
   companyId: string;
@@ -52,7 +52,7 @@ interface BusCompany {
   name: string;
 }
 
-const columns: ColumnDef<Data & { startLocationName: string; endLocationName: string; companyName: string; }>[] = [
+const columns: ColumnDef<Data & { startCityName: string; endCityName: string; companyName: string; }>[] = [
   {
     accessorKey: "Sno",
     header: "Sr No",
@@ -60,14 +60,14 @@ const columns: ColumnDef<Data & { startLocationName: string; endLocationName: st
   },
   
   {
-    accessorKey: "startLocationName",
+    accessorKey: "startCityName",
     header: "Start Location",
-    cell: ({ row }) => <div>{row.getValue("startLocationName")}</div>,
+    cell: ({ row }) => <div>{row.getValue("startCityName")}</div>,
   },
   {
-    accessorKey: "endLocationName",
+    accessorKey: "endCityName",
     header: "End Location",
-    cell: ({ row }) => <div>{row.getValue("endLocationName")}</div>,
+    cell: ({ row }) => <div>{row.getValue("endCityName")}</div>,
   },
   {
     accessorKey: "duration",
@@ -90,7 +90,7 @@ export function Location() {
   const [data, setData] = useState<Data[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
-  const [sortedData, setSortedData] = useState<(Data & { startLocationName: string; endLocationName: string; companyName: string; })[]>([]);
+  const [sortedData, setSortedData] = useState<(Data & { startCityName: string; endCityName: string; companyName: string; })[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -130,8 +130,8 @@ export function Location() {
 
     const newSortedData = data.map(route => ({
       ...route,
-      startLocationName: locationMap.get(route.startLocationId) || route.startLocationId,
-      endLocationName: locationMap.get(route.endLocationId) || route.endLocationId,
+      startCityName: locationMap.get(route.startCityId) || route.startCityId,
+      endCityName: locationMap.get(route.endCityId) || route.endCityId,
       companyName: companyMap.get(route.companyId) || route.companyId,
     }));
 

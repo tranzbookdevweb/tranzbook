@@ -18,7 +18,7 @@ type CompanyData = {
   id: string;
   name: string;
   email: string;
-  logoUrl?: string;
+  logo?: string;
 };
 export function BookingFilterAccordion() {
   const [filters, setFilters] = useState<Filters>({

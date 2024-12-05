@@ -34,25 +34,27 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import BranchSheet from '@/app/admin/components/Sheetpop/Priveleges/BranchSheet';
+import BlogSheet from '../../components/Sheetpop/Blog/Blog';
 
-interface Branch {
+interface Blog {
   id: string;
-  name: string;
-  address: string;
-  location: string;
+  title: string;
+  content: string;
+  imageUrl: string | null;
+  admin: { name: string };
+  createdAt: string;
 }
 
 export function BlogDataTable() {
-  const [data, setData] = useState<Branch[]>([]);
+  const [data, setData] = useState<Blog[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const getBranches = useCallback(async () => {
+  const getBlogs = useCallback(async () => {
     try {
-      const response = await fetch('/api/GET/getBranches');
+      const response = await fetch('/api/GET/getBlogs');
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
@@ -64,33 +66,53 @@ export function BlogDataTable() {
   }, []);
 
   useEffect(() => {
-    getBranches();
-  }, [getBranches]);
+    getBlogs();
+  }, [getBlogs]);
 
   const handleAddSuccess = () => {
-    getBranches();
+    getBlogs();
   };
 
-  const columns: ColumnDef<Branch>[] = [
+  const columns: ColumnDef<Blog>[] = [
     {
       accessorKey: "Sno",
       header: "Sr No",
       cell: ({ row }) => <div>{row.index + 1}</div>,
     },
     {
-      accessorKey: "name",
-      header: "Name",
-      cell: ({ row }) => <div>{row.getValue("name")}</div>,
+      accessorKey: "title",
+      header: "Title",
+      cell: ({ row }) => <div>{row.getValue("title")}</div>,
     },
     {
-      accessorKey: "address",
-      header: "Address",
-      cell: ({ row }) => <div>{row.getValue("address")}</div>,
+      accessorKey: "content",
+      header: "Content",
+      cell: ({ row }) => <div className="truncate w-40">{row.getValue("content")}</div>,
     },
     {
-      accessorKey: "location",
-      header: "Location",
-      cell: ({ row }) => <div>{row.getValue("location")}</div>,
+      accessorKey: "imageUrl",
+      header: "Image",
+      cell: ({ row }) => (
+        row.getValue("imageUrl") ? (
+          <img
+            src={row.getValue("imageUrl")}
+            alt="Blog Image"
+            className="w-10 h-10 object-cover"
+          />
+        ) : (
+          "No image"
+        )
+      ),
+    },
+    {
+      accessorKey: "admin",
+      header: "Admin",
+      cell: ({ row }) => <div>{row.original.admin?.name || "Unknown"}</div>,
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created At",
+      cell: ({ row }) => new Date(row.getValue("createdAt")).toLocaleDateString(),
     },
   ];
 
@@ -115,14 +137,14 @@ export function BlogDataTable() {
 
   return (
     <div>
-      <BranchSheet onAddSuccess={handleAddSuccess} />
+      <BlogSheet onAddSuccess={handleAddSuccess} />
       <div className="w-full">
         <div className="flex items-center py-4">
           <Input
-            placeholder="Filter Name..."
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            placeholder="Filter Title..."
+            value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
+              table.getColumn("title")?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
           />
@@ -155,7 +177,7 @@ export function BlogDataTable() {
         </div>
         <div className="rounded-md border">
           <Table>
-            <TableCaption>A list of branches.</TableCaption>
+            <TableCaption>A list of blog posts.</TableCaption>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>

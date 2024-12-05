@@ -6,33 +6,33 @@ import { motion } from 'framer-motion';
 
 interface PopularPost {
   title: string;
-  imageUrl: string;
+  image: string;
 }
 
 const PopularPosts: PopularPost[] = [
   {
     title: 'East Region',
-    imageUrl: '/Regions/EasternRegion.png',
+    image: '/Regions/EasternRegion.png',
   },
   {
     title: 'Cape Coast',
-    imageUrl: '/Regions/CapeCoast.png',
+    image: '/Regions/CapeCoast.png',
   },
   {
     title: 'Kumasi',
-    imageUrl: '/Regions/Kumasi.png',
+    image: '/Regions/Kumasi.png',
   },
   {
     title: 'Northern Region',
-    imageUrl: '/Regions/NorthernRegion.png',
+    image: '/Regions/NorthernRegion.png',
   },
   {
     title: 'Volta Region',
-    imageUrl: '/Regions/VoltaRegion.png',
+    image: '/Regions/VoltaRegion.png',
   },
   {
     title: 'Greater Accra Region',
-    imageUrl: '/Regions/AccraRegion.png',
+    image: '/Regions/AccraRegion.png',
   },
 ];
 
@@ -49,7 +49,7 @@ const PopularLocation: React.FC = () => {
               transition={{ duration: 0.3 }}
             >
               <motion.img
-                src={post.imageUrl}
+                src={post.image}
                 alt={post.title}
                 className="w-full h-full object-cover object-center"
                 whileHover={{ scale: 1.02 }}

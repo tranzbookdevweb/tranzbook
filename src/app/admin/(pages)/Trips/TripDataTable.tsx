@@ -46,8 +46,8 @@ type TripData = {
   price: number;
   busId: string;
   routeId: string;
-  startLocationId: string;
-  endLocationId: string;
+  startCityId: string;
+  endCityId: string;
   duration: number;
   distance: number;
   companyId: string;
@@ -55,8 +55,8 @@ type TripData = {
 
 type Route = {
   id: string;
-  startLocationId: string;
-  endLocationId: string;
+  startCityId: string;
+  endCityId: string;
 };
 
 type Location = {
@@ -64,7 +64,7 @@ type Location = {
   name: string;
 };
 
-const columns: ColumnDef<TripData & { startLocationName: string; endLocationName: string; busType: string; }>[] = [
+const columns: ColumnDef<TripData & { startCityName: string; endCityName: string; busType: string; }>[] = [
   {
     accessorKey: "Sno",
     header: "Sr No",
@@ -87,14 +87,14 @@ const columns: ColumnDef<TripData & { startLocationName: string; endLocationName
     cell: ({ row }) => <div>{row.getValue("busType")}</div>,
   },
   {
-    accessorKey: "startLocationName",
+    accessorKey: "startCityName",
     header: "Start Location",
-    cell: ({ row }) => <div>{row.getValue("startLocationName")}</div>,
+    cell: ({ row }) => <div>{row.getValue("startCityName")}</div>,
   },
   {
-    accessorKey: "endLocationName",
+    accessorKey: "endCityName",
     header: "End Location",
-    cell: ({ row }) => <div>{row.getValue("endLocationName")}</div>,
+    cell: ({ row }) => <div>{row.getValue("endCityName")}</div>,
   },
 ];
 
@@ -103,7 +103,7 @@ export function Trip() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
-  const [sortedData, setSortedData] = useState<(TripData & { startLocationName: string; endLocationName: string; busType: string; })[]>([]);
+  const [sortedData, setSortedData] = useState<(TripData & { startCityName: string; endCityName: string; busType: string; })[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -149,8 +149,8 @@ export function Trip() {
       const route = routeMap.get(trip.routeId);
       return {
         ...trip,
-        startLocationName: route ? locationMap.get(route.startLocationId) || route.startLocationId : trip.startLocationId,
-        endLocationName: route ? locationMap.get(route.endLocationId) || route.endLocationId : trip.endLocationId,
+        startCityName: route ? locationMap.get(route.startCityId) || route.startCityId : trip.startCityId,
+        endCityName: route ? locationMap.get(route.endCityId) || route.endCityId : trip.endCityId,
         busType: busMap.get(trip.busId) || trip.busId,
       };
     });

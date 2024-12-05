@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const location = await prisma.location.findMany();
-    return NextResponse.json(location, { status: 200 });
+    const city = await prisma.city.findMany();
+    return NextResponse.json(city, { status: 200 });
   } catch (error) {
     console.error('Server error:', error);
-    return NextResponse.json({ error: 'An error occurred while fetching location companies' }, { status: 500 });
+    return NextResponse.json({ error: 'An error occurred while fetching city companies' }, { status: 500 });
   }
 }
