@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -34,27 +34,26 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import BlogSheet from '../../components/Sheetpop/Blog/Blog';
+import AdminSheet from '../../components/Sheetpop/Configuration/AddAdminSheet';
 
-interface Blog {
+interface BusCompany {
   id: string;
-  title: string;
-  content: string;
-  imageUrl: string | null;
-  admin: { name: string };
-  createdAt: string;
+  firstName:  string
+  lastName: string 
+   email: string;
+   companyId: string
 }
 
 export function BlogDataTable() {
-  const [data, setData] = useState<Blog[]>([]);
+  const [data, setData] = useState<BusCompany[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const getBlogs = useCallback(async () => {
+  const getBusCompanies = useCallback(async () => {
     try {
-      const response = await fetch('/api/GET/getBlogs');
+      const response = await fetch('/api/GET/getAdmin');
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
@@ -66,53 +65,39 @@ export function BlogDataTable() {
   }, []);
 
   useEffect(() => {
-    getBlogs();
-  }, [getBlogs]);
+    getBusCompanies();
+  }, [getBusCompanies]);
 
   const handleAddSuccess = () => {
-    getBlogs();
+    getBusCompanies();
   };
 
-  const columns: ColumnDef<Blog>[] = [
+  const columns: ColumnDef<BusCompany>[] = [
     {
       accessorKey: "Sno",
       header: "Sr No",
-      cell: ({ row }) => <div>{row.index + 1}</div>,
+      cell: ({ row }) => <div>{row.index + 1}</div>, // Use row index as Sno value
     },
     {
-      accessorKey: "title",
-      header: "Title",
-      cell: ({ row }) => <div>{row.getValue("title")}</div>,
+      accessorKey: "firstName",
+      header: "firstName",
+      cell: ({ row }) => <div>{row.getValue("firstName")}</div>,
     },
     {
-      accessorKey: "content",
-      header: "Content",
-      cell: ({ row }) => <div className="truncate w-40">{row.getValue("content")}</div>,
+      accessorKey: "lastName",
+      header: "lastName",
+      cell: ({ row }) => <div>{row.getValue("lastName")}</div>,
     },
     {
-      accessorKey: "imageUrl",
-      header: "Image",
-      cell: ({ row }) => (
-        row.getValue("imageUrl") ? (
-          <img
-            src={row.getValue("imageUrl")}
-            alt="Blog Image"
-            className="w-10 h-10 object-cover"
-          />
-        ) : (
-          "No image"
-        )
-      ),
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
     {
-      accessorKey: "admin",
-      header: "Admin",
-      cell: ({ row }) => <div>{row.original.admin?.name || "Unknown"}</div>,
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Created At",
-      cell: ({ row }) => new Date(row.getValue("createdAt")).toLocaleDateString(),
+      accessorKey: "companyId",
+      header: "Company",
+
+      cell: ({ row }) => <div>{row.getValue("companyId") || 'N/A'}</div>,
     },
   ];
 
@@ -137,14 +122,14 @@ export function BlogDataTable() {
 
   return (
     <div>
-      <BlogSheet onAddSuccess={handleAddSuccess} />
+      <AdminSheet onAddSuccess={handleAddSuccess} />
       <div className="w-full">
         <div className="flex items-center py-4">
           <Input
-            placeholder="Filter Title..."
-            value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+            placeholder="Filter Name..."
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("title")?.setFilterValue(event.target.value)
+              table.getColumn("name")?.setFilterValue(event.target.value)
             }
             className="max-w-sm"
           />
@@ -177,7 +162,7 @@ export function BlogDataTable() {
         </div>
         <div className="rounded-md border">
           <Table>
-            <TableCaption>A list of blog posts.</TableCaption>
+            <TableCaption>A list of bus companies.</TableCaption>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>

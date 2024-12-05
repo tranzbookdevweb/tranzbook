@@ -8,9 +8,8 @@ import { BusDetailsSkeleton } from "../(components)/Skeletons/busDetailsSkeleton
 import { SeatSelectionSkeleton } from "../(components)/Skeletons/seatSelectionSkeleton";
 import { CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 import { BellElectric, PowerIcon, Wifi } from "lucide-react";
-import { AcUnitOutlined, FamilyRestroom, FoodBank } from "@mui/icons-material";
+import {  AcUnitOutlined, FamilyRestroom, FoodBank } from "@mui/icons-material";
 
 // Interfaces
 interface Bus {
@@ -52,7 +51,7 @@ interface Trip {
   route: Route;
 }
 
-const PageContent: React.FC = () => {
+const PageContainer: React.FC = () => {
   const searchParams = useSearchParams();
   const tripId = searchParams.get("tripId");
   const apiUrl = `/api/GET/getTripById?id=${tripId}`;
@@ -62,9 +61,6 @@ const PageContent: React.FC = () => {
   const [isBooked, setBooked] = useState<boolean>(false);
   const [tripData, setTripData] = useState<Trip | null>(null);
   const [busImage, setBusImage] = useState<string>("default-logo-url");
-
-  const { user, getUser } = useKindeBrowserClient();
-  const alsoUser = getUser();
 
   useEffect(() => {
     if (!tripId) return;
@@ -150,8 +146,7 @@ const PageContent: React.FC = () => {
   };
 
   return (
-    <main className="flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden">
-      <Suspense fallback={<div>Loading...</div>}>
+    <main className="flex-1 border-t border-b bg-white dark:bg- min-h-screen flex flex-col items-center w-full relative overflow-hidden">
         <div className="flex flex-row w-full min-h-screen max-sm:flex-col-reverse">
           <section className="min-h-screen border-r border-gray-200 custom-scrollbar overflow-y-auto">
             <BusDetails
@@ -218,9 +213,13 @@ const PageContent: React.FC = () => {
             )}
           </section>
         </div>
-      </Suspense>
     </main>
   );
 };
 
-export default PageContent;
+const PageContent = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <PageContainer />
+  </Suspense>
+);
+export default PageContent
