@@ -1,5 +1,5 @@
-'use client'
-import React, { useState, useEffect } from "react";
+'use client';
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,15 +27,13 @@ interface Role {
   permissions: Permission[];
 }
 
-const EditRolePage = () => {
-  const searchParams = useSearchParams(); 
+const EditRolePageContent = () => {
+  const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const [role, setRole] = useState<Role | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [name, setName] = useState<string>(""); 
   const [saving, setSaving] = useState<boolean>(false);
   const { toast } = useToast(); 
-
   const [selectAll, setSelectAll] = useState<boolean>(false); // State to track select all checkbox
 
   useEffect(() => {
@@ -51,8 +49,6 @@ const EditRolePage = () => {
           setName(data.name); 
         } catch (error) {
           console.error("Error fetching role:", error);
-        } finally {
-          setLoading(false);
         }
       }
     };
@@ -132,10 +128,6 @@ const EditRolePage = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   if (!role) {
     return <div>Role not found</div>;
   }
@@ -158,16 +150,16 @@ const EditRolePage = () => {
 
         <div className="mt-4">
           <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Permissions</h3>
-          <div className="flex items-center mb-4">
-            <input
-              type="checkbox"
-              checked={selectAll}
-              onChange={handleSelectAllChange}
-              className="mr-2"
-            />
-            <span>Select All</span>
-          </div>
+            <h3 className="text-lg font-medium">Permissions</h3>
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                checked={selectAll}
+                onChange={handleSelectAllChange}
+                className="mr-2"
+              />
+              <span>Select All</span>
+            </div>
           </div>
           <Accordion type="single" collapsible className="w-full mt-2">
             {role.permissions.map((permission) => (
@@ -223,5 +215,11 @@ const EditRolePage = () => {
     </div>
   );
 };
+
+const EditRolePage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <EditRolePageContent />
+  </Suspense>
+);
 
 export default EditRolePage;
