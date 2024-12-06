@@ -129,7 +129,7 @@ const PageContainer: React.FC = () => {
 
   const handleBooking = async () => {
     try {
-      const bookingData = { userId: "", tripId, seatNumber: 1 };
+      const bookingData = {  tripId, seatNumber: 1 };
       const response = await fetch("/api/POST/Booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

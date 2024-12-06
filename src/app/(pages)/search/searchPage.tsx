@@ -36,7 +36,7 @@ type Trip = {
     id: string;
     plateNumber: string;
     capacity: number;
-    busType: string;
+    busModel: string;
     image: string;
     companyId: string;
     createdAt: string;
@@ -78,32 +78,39 @@ const defaultlogo = 'path/to/default/logo'; // Replace with your actual default 
 const SearchResults = () => {
   const [results, setResults] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState('cheapest'); // Default sort filter
+  const [company, setCompany] = useState<string[]>([]);
+  const [time, setTime] = useState<string[]>([]);
   const [error, setError] = useState('');
   const searchParams = useSearchParams();
   const fromLocation = searchParams.get("fromLocation") || "";
   const toLocation = searchParams.get("toLocation") || "";
   const date = searchParams.get("date") || "";
 
+
+  const fetchResults = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `/api/GET/getSearchByQuery?fromLocation=${fromLocation}&toLocation=${toLocation}&date=${date}&sort=${sort}&company=${company}&time=${time}`
+      );
+      if (!response.ok) throw new Error('Error fetching trips');
+      const data: Trip[] = await response.json();
+      setResults(data);
+    } catch (err) {
+      setError('Error fetching trips');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchResults = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `/api/GET/getSearchByQuery?fromLocation=${fromLocation}&toLocation=${toLocation}&date=${date}`
-        );
-        if (!response.ok) throw new Error('Error fetching trips');
-        const data: Trip[] = await response.json();
-        setResults(data);
-      } catch (err) {
-        setError('Error fetching trips');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchResults();
-  }, [fromLocation, toLocation, date]);
+  }, [fromLocation, toLocation, date, sort, company, time]);
 
+  const handleSaveFilter = () => {
+    fetchResults(); // Re-fetch results with the selected filters
+  };
   if (loading) {
     return (
       <div className="grid grid-cols-3">
@@ -160,51 +167,35 @@ const SearchResults = () => {
   }
 
   return results.length > 0 ? (
-    <div className="grid grid-cols-3">
-    <div className="grid grid-cols-1">
-      <div className="flex-col flex ml-5">
-        <h2 className="font-bold text-gray-400 text-[11px]">SELECT YOUR TRIP</h2>
-        <h1 className="font-bold text-[#48A0FF] text-[15px]">
+    <div className="p-4">
+      <div className='flex items-center justify-between w-full'>
+      <div className="mb-4">
+        <h2 className="text-sm text-gray-400">SELECT YOUR TRIP</h2>
+        <h1 className="text-lg text-blue-500 font-bold">
           Available Trips: {results.length} results
         </h1>
       </div>
-    </div>
-    <div className="grid grid-cols-1 col-span-2">
-      <div className="value flex bg-white items-center p-[2vh] rounded-md mr-[2vw]">
-        <h2 className="mr-3 font-semibold">Sort By</h2>
-        <div className="flex items-center space-x-4 max-md:flex-row">
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        <h2 className="text-sm font-semibold">Sort By:</h2>
+        {["cheapest", "fastest", "earliest"].map((filter) => (
           <button
-            className="px-2 font-semibold rounded-[0.4pc]"
-            style={{
-              backgroundColor: "#48A0FF",
-              color: "#F2F4F7",
-            }}
+            key={filter}
+            className={`px-3 py-1 rounded-md text-sm ${
+              sort === filter ? "bg-blue-500 text-white" : "bg-gray-200 text-blue-500"
+            }`}
+            onClick={() => setSort(filter)}
           >
-            Cheapest
+            {filter.charAt(0).toUpperCase() + filter.slice(1)}
           </button>
-          <button
-            className="px-2 font-semibold rounded-[0.4pc]"
-            style={{
-              backgroundColor: "#F2F4F7",
-              color: "#48A0FF",
-            }}
-          >
-            Fastest
-          </button>
-          <button
-            className="px-2 font-semibold rounded-[0.4pc]"
-            style={{
-              backgroundColor: "#F2F4F7",
-              color: "#48A0FF",
-            }}
-          >
-            Earliest
-          </button>
-        </div>
-      </div>
-    </div>
+        ))}
+      </div></div>
+    <div className="grid grid-cols-3 gap-4">
     <div className="grid max-lg:hidden grid-cols-1 items-start justify-center">
-      <BookingFilterAccordion />
+      <BookingFilterAccordion 
+      // onSaveFilter={handleSaveFilter}
+      onCompanyFilterChange={(value:any) => setCompany([value])}  
+            onTimeFilterChange={(value:any) => setTime([value])}  
+         />
     </div>
     <div className="grid grid-cols-1 col-span-2 max-lg:col-span-3 items-start justify-center">
       <div>
@@ -261,8 +252,8 @@ const SearchResults = () => {
                         alt="Bus Image"
                       />
                     </div>
-                    <h2 className="font-semibold flex items-center text-[#48A0FF]">
-                      <Bus /> {trip.bus.busType} | {trip.bus.plateNumber}
+                    <h2 className="font-semibold max-md:text-[11px] max-md:flex-col flex items-center text-[#48A0FF]">
+                      <Bus className='max-md:hidden' /> {trip.bus.busModel} | {trip.bus.plateNumber}
                     </h2>
                   </div>
                   <h6 className="font-semibold">GH₵{trip.price}</h6>
@@ -283,7 +274,7 @@ const SearchResults = () => {
           </div>
         ))}
       </div>
-    </div>
+    </div></div>
   </div>
   ) : (
     <NoBusFound />
