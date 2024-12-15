@@ -12,7 +12,7 @@ interface WhyProps {
 
 const Why: React.FC<WhyProps> = ({ activeButton }) => {
   return (
-    <div className="px-4 py-8 w-full max-w-7xl mx-auto">
+    <div className="px-4 py-8 w-full items-center max-w-7xl mx-auto">
       {/* Intro Section */}
       <p className="text-center text-lg md:text-xl text-gray-700 mb-10 px-4">
         Your Comfort, Our Priority. Imagine planning your trip without ever
@@ -50,36 +50,36 @@ const Why: React.FC<WhyProps> = ({ activeButton }) => {
               <h4 className="text-2xl font-semibold mb-4">Why Choose TranzBook for Cargo?</h4>
               <div className="space-y-6">
                 <FactListItem
-                  title="Increased Efficiency"
-                  description="TranzBook streamlines the booking process, enabling goods owners to manage their bookings more efficiently. This can reduce the amount of time and resources required to manage bookings, allowing goods owners to focus on other aspects of their business."
+                  title="Comprehensive Cargo Services"
+                  description="TranzBook facilitates cargo truck bookings for intercountry transportation, connecting shippers and cargo truck operators. It provides a reliable platform for businesses to find trusted trucking services for their freight needs."
                 />
                 <FactListItem
-                  title="Cost Savings"
-                  description="By providing access to a large network of carriers and trucks, TranzBook helps goods owners to find the most cost-effective shipping options. Additionally, the platform offers pricing optimization tools to ensure that goods owners are paying competitive prices for their goods delivery."
+                  title="Transparent & Efficient Operations"
+                  description="With TranzBook, businesses can request quotes, select appropriate trucks, and track the progress of shipments in a transparent and efficient manner. This ensures smooth and reliable cargo transportation."
                 />
                 <FactListItem
-                  title="Access to a Large Network of Carriers"
-                  description="TranzBook provides goods owners with access to a large network of carriers and trucks. This enables goods owners to find the right carrier for their cargo and ensure timely delivery."
+                  title="Global Reach & Local Partnerships"
+                  description="TranzBook collaborates with local cargo trucking companies to expand its network globally, ensuring compliance with regional regulations while delivering seamless intercountry logistics."
                 />
                 <FactListItem
-                  title="Real-Time Visibility"
-                  description="Our platform provides real-time visibility into movements and tracking, enabling goods owners to monitor their cargo and track its location and delivery status."
+                  title="Future Growth & Vision"
+                  description="In three years, TranzBook plans to onboard more partners, expand across 20 African countries, and handle 100,000 daily bookings. By ten years, TranzBook envisions becoming a global leader in transport and logistics with 1,000,000 daily transactions and a presence across Africa, Europe, and America."
                 />
               </div>
             </>
           )}
         </div>
 
-        <motion.div className="flex  relative w-full h-full">
-  <Image
-    quality={100}
-    src={activeButton === 'Bus' ? man : truck}
-    alt={activeButton === 'Bus' ? "Man with laptop" : "Cargo truck"}
-    className="rounded-xl object-fill w-full max-h-[600px] max-lg:max-h-[500px] max-md:max-h-[350px] "
-  />
-</motion.div>
+        <motion.div className="flex relative w-full h-full">
+          <Image
+            quality={100}
+            src={activeButton === 'Bus' ? man : truck}
+            alt={activeButton === 'Bus' ? "Man with laptop" : "Cargo truck"}
+            className="rounded-xl object-fill w-full max-h-[600px] max-lg:max-h-[500px] max-md:max-h-[350px]"
+          />
+        </motion.div>
       </div>
-      <Whycards/>
+      <Whycards />
     </div>
   );
 };
