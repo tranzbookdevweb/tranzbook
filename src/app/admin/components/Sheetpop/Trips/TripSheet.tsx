@@ -202,7 +202,7 @@ function TripSheet({ onAddSuccess }: Props) {
         <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
           <SheetHeader>
             <SheetTitle>Add Trip</SheetTitle>
-            <SheetDescription>Click save when you're done.</SheetDescription>
+            <SheetDescription>Click save when you&apos;re done.</SheetDescription>
           </SheetHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
