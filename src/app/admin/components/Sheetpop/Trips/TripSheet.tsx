@@ -281,7 +281,7 @@ function TripSheet({ onAddSuccess }: Props) {
                   </SelectContent>
                 </Select>
               </div>
-              {recurring && (
+              {!recurring && (
                 <div className="grid grid-cols-1 items-center gap-4">
                   <Label htmlFor="driverId" className="text-left">
                     Driver

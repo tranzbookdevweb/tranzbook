@@ -14,8 +14,11 @@ export async function GET(request: Request) {
     let orderBy: any[] = [];
     let timeFilter: any = {};
 
-    // Get the current time
-    const now = new Date();
+    // Get the current date and time
+    const currentDateTime = new Date();
+    const currentDateTimeISOString = currentDateTime.toISOString();
+    const currentDate = currentDateTimeISOString.split("T")[0]; // Date part (YYYY-MM-DD)
+    const currentTime = currentDateTimeISOString.split("T")[1].split(".")[0]; // Time part (HH:mm:ss)
 
     // Set sorting logic
     if (sort === "cheapest") {
@@ -57,7 +60,26 @@ export async function GET(request: Request) {
       };
     }
 
-    // Construct the query filters
+    // Compare the trip date with the current date and time
+    const tripDateTime = new Date(date); // Trip date (without time)
+    const tripDate = tripDateTime.toISOString().split("T")[0]; // Extract trip date (YYYY-MM-DD)
+
+    // Create a filter for trips happening now or in the future
+    let departureTimeFilter: any = {
+      gte: currentDate + "T" + currentTime, // Filter for trips from the current time onward
+    };
+
+    // If the trip's date is in the future, it's valid no matter the time
+    if (tripDate > currentDate) {
+      departureTimeFilter = {}; // No filter needed for future dates
+    } else if (tripDate === currentDate) {
+      // For trips on the current date, we need to ensure the time is later than now
+      departureTimeFilter = {
+        gte: currentDate + "T" + currentTime, // Ensure future trips for today are included
+      };
+    }
+
+    // Construct the query filters for both specific-date and recurring trips
     const specificDateFilter: any = {
       route: {
         startCity: {
@@ -68,9 +90,7 @@ export async function GET(request: Request) {
         },
       },
       date: new Date(date), // Specific date filter
-      departureTime: {
-        gte: now.toISOString().split("T")[1], // Filter out past departure times
-      },
+      departureTime: departureTimeFilter, // Apply the departure time filter
       ...timeFilter,
     };
 
@@ -84,9 +104,7 @@ export async function GET(request: Request) {
         },
       },
       recurring: true, // Include recurring trips
-      departureTime: {
-        gte: now.toISOString().split("T")[1], // Filter out past departure times
-      },
+      departureTime: departureTimeFilter, // Apply the departure time filter
       ...timeFilter,
     };
 

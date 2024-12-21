@@ -92,6 +92,7 @@ model Bus {
   plateNumber   String?
   capacity      Int
   busModel      String?
+   onArrival       Boolean    @default(false)
   status        String     @default("available") // Status field added
   image         String?
   company       BusCompany @relation(fields: [companyId], references: [id])
@@ -133,8 +134,8 @@ model Trip {
   busId          String
   route          Route     @relation(fields: [routeId], references: [id])
   routeId        String
-  driver         Driver    @relation(fields: [driverId], references: [id])
-  driverId       String
+  driver         Driver?    @relation(fields: [driverId], references: [id])
+  driverId       String?
   branch         Branch    @relation(fields: [branchId], references: [id])
   branchId       String
   bookings       Booking[]

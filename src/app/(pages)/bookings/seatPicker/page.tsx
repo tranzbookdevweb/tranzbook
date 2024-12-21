@@ -155,12 +155,12 @@ const PageContainer: React.FC = () => {
         <section className="min-h-screen border-r border-gray-200 custom-scrollbar overflow-y-auto">
           <BusDetails
             busImage={busImage}
-            busNumber={bus.plateNumber}
+            busNumber={bus?.plateNumber}
             busCompany={bus.company.name}
             tripDepartureTime={departureTime}
             tripArrivalTime={tripArrivalTime}
             busExtras={busExtras}
-            busDriverID={`${driver.firstName} ${driver.lastName}`}
+            busDriverID={`${driver?.firstName} ${driver?.lastName}`}
             busCapacity={bus.capacity}
             busModel={bus.busModel}
             busRoute={{

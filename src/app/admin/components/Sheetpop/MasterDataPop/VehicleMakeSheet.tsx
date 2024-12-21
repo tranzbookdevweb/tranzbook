@@ -1,43 +1,3 @@
-// Type definitions for the models
-type Bus = {
-  id: string;  // Matches the id type from Prisma model (String, UUID)
-  plateNumber: string;
-  capacity: number;
-  busModel: string;
-  status: string; // Default value is "available"
-  image?: string; // Optional image URL
-  companyId: string; // Foreign key reference to BusCompany
-  trips: Trip[]; // Array of trips associated with this bus
-  airConditioning: boolean;  // Boolean for air conditioning
-  chargingOutlets: boolean;  // Boolean for charging outlets
-  wifi: boolean;  // Boolean for Wi-Fi
-  restRoom: boolean;  // Boolean for restroom availability
-  seatBelts: boolean;  // Boolean for seat belts availability
-  onboardFood: boolean;  // Boolean for onboard food
-};
-
-type BusCompany = {
-  id: string;
-  name: string;
-};
-
-type Branch = {
-  id: string;
-  name: string;
-  companyId: string;  // Foreign key reference to BusCompany
-};
-
-type Trip = {
-  id: string;
-  // Add any necessary fields for the Trip model
-};
-
-// Props for BusSheet component
-type Props = {
-  onAddSuccess: () => void;
-};
-
-// BusSheet component implementation
 import React, { useState, useEffect } from 'react'; 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,6 +21,21 @@ import {
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+type BusCompany = {
+  id: string;
+  name: string;
+};
+
+type Branch = {
+  id: string;
+  name: string;
+  companyId: string;  // Foreign key reference to BusCompany
+};
+
+type Props = {
+  onAddSuccess: () => void;
+};
+
 function BusSheet({ onAddSuccess }: Props) {
   const [plateNumber, setPlateNumber] = useState('');
   const [capacity, setCapacity] = useState(0);
@@ -81,9 +56,9 @@ function BusSheet({ onAddSuccess }: Props) {
   const [restRoom, setRestRoom] = useState(false);
   const [seatBelts, setSeatBelts] = useState(false);
   const [onboardFood, setOnboardFood] = useState(false);
+  const [onArrival, setOnArrival] = useState(false); // New state for onArrival
 
   useEffect(() => {
-    // Fetch the list of bus companies
     const fetchBusCompanies = async () => {
       try {
         const response = await fetch('/api/GET/getbusCompany');
@@ -97,7 +72,6 @@ function BusSheet({ onAddSuccess }: Props) {
       }
     };
 
-    // Fetch the list of branches
     const fetchBranches = async () => {
       try {
         const response = await fetch('/api/GET/getBranches');
@@ -117,7 +91,6 @@ function BusSheet({ onAddSuccess }: Props) {
 
   useEffect(() => {
     if (companyId) {
-      // Filter branches based on the selected company
       const filtered = branches.filter(branch => branch.companyId === companyId);
       setFilteredBranches(filtered);
     } else {
@@ -128,8 +101,8 @@ function BusSheet({ onAddSuccess }: Props) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if ( !capacity || !companyId || !image) {
-      setError('All fields are required.');
+    if (!capacity || !companyId || !image || (onArrival && plateNumber)) {
+      setError('All fields are required, and plate number should not be entered if the bus is on arrival.');
       return;
     }
 
@@ -138,19 +111,19 @@ function BusSheet({ onAddSuccess }: Props) {
 
     try {
       const formData = new FormData();
-      formData.append('plateNumber', plateNumber);
+      formData.append('plateNumber', onArrival ? '' : plateNumber); // Skip plate number if onArrival is true
       formData.append('capacity', capacity.toString());
       formData.append('busModel', busModel);
       formData.append('companyId', companyId);
       formData.append('image', image);
 
-      // Append all the boolean extras
       formData.append('airConditioning', airCondition.toString());
       formData.append('chargingOutlets', chargingOutlets.toString());
       formData.append('wifi', wifi.toString());
       formData.append('restRoom', restRoom.toString());
       formData.append('seatBelts', seatBelts.toString());
       formData.append('onboardFood', onboardFood.toString());
+      formData.append('onArrival', onArrival.toString());
 
       const response = await fetch('/api/POST/vehicleMake', {
         method: 'POST',
@@ -188,18 +161,22 @@ function BusSheet({ onAddSuccess }: Props) {
           </SheetHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-1 items-center gap-4">
-                <Label htmlFor="plateNumber" className="text-left">
-                  Plate Number
-                </Label>
-                <Input
-                  id="plateNumber"
-                  placeholder="Plate Number"
-                  value={plateNumber}
-                  onChange={(e) => setPlateNumber(e.target.value)}
-                  className="col-span-3"
-                />
-              </div>
+            {!onArrival && (
+                <>
+                  <div className="grid grid-cols-1 items-center gap-4">
+                    <Label htmlFor="plateNumber" className="text-left">
+                      Plate Number
+                    </Label>
+                    <Input id="plateNumber" type="text" />
+                  </div>
+                  <div className="grid grid-cols-1 items-center gap-4">
+                    <Label htmlFor="busModel" className="text-left">
+                      Bus Model
+                    </Label>
+                    <Input id="busModel" type="text" />
+                  </div>
+                </>
+              )}
               <div className="grid grid-cols-1 items-center gap-4">
                 <Label htmlFor="capacity" className="text-left">
                   Capacity
@@ -213,18 +190,7 @@ function BusSheet({ onAddSuccess }: Props) {
                   className="col-span-3"
                 />
               </div>
-              <div className="grid grid-cols-1 items-center gap-4">
-                <Label htmlFor="busModel" className="text-left">
-                  Bus Model
-                </Label>
-                <Input
-                  id="busModel"
-                  placeholder="Bus Type"
-                  value={busModel}
-                  onChange={(e) => setBusModel(e.target.value)}
-                  className="col-span-3"
-                />
-              </div>
+          
               <div className="grid grid-cols-1 items-center gap-4">
                 <Label htmlFor="image" className="text-left">
                   Image
@@ -279,66 +245,90 @@ function BusSheet({ onAddSuccess }: Props) {
                 <div className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={airCondition}
-                    onChange={() => setAirCondition(!airCondition)}
+                    checked={onArrival}
+                    onChange={() => setOnArrival((prev) => !prev)}
+                    className="mr-2"
                   />
-                  <span className="ml-2">Air Conditioning</span>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={chargingOutlets}
-                    onChange={() => setChargingOutlets(!chargingOutlets)}
-                  />
-                  <span className="ml-2">Charging Outlets</span>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={wifi}
-                    onChange={() => setWifi(!wifi)}
-                  />
-                  <span className="ml-2">Wi-Fi</span>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={restRoom}
-                    onChange={() => setRestRoom(!restRoom)}
-                  />
-                  <span className="ml-2">Restroom</span>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={seatBelts}
-                    onChange={() => setSeatBelts(!seatBelts)}
-                  />
-                  <span className="ml-2">Seat Belts</span>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={onboardFood}
-                    onChange={() => setOnboardFood(!onboardFood)}
-                  />
-                  <span className="ml-2">Onboard Food</span>
+                  <Label htmlFor="onArrival" className="text-left">
+                    On Arrival (Set as available)
+                  </Label>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label className="text-left">Bus Features</Label>
+                <div className="space-x-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={airCondition}
+                      onChange={() => setAirCondition((prev) => !prev)}
+                      className="mr-2"
+                    />
+                    <Label>Air Conditioning</Label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={chargingOutlets}
+                      onChange={() => setChargingOutlets((prev) => !prev)}
+                      className="mr-2"
+                    />
+                    <Label>Charging Outlets</Label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={wifi}
+                      onChange={() => setWifi((prev) => !prev)}
+                      className="mr-2"
+                    />
+                    <Label>Wi-Fi</Label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={restRoom}
+                      onChange={() => setRestRoom((prev) => !prev)}
+                      className="mr-2"
+                    />
+                    <Label>Rest Room</Label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={seatBelts}
+                      onChange={() => setSeatBelts((prev) => !prev)}
+                      className="mr-2"
+                    />
+                    <Label>Seat Belts</Label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={onboardFood}
+                      onChange={() => setOnboardFood((prev) => !prev)}
+                      className="mr-2"
+                    />
+                    <Label>Onboard Food</Label>
+                  </div>
+                </div>
+              </div>
+
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+
+              <div className="space-x-4 mt-4">
                 <Button
                   type="submit"
-                  className="py-2"
                   disabled={isSubmitting}
+                  className="bg-green-600 text-white"
                 >
                   {isSubmitting ? 'Submitting...' : 'Save Bus'}
                 </Button>
-                <SheetClose>
-                  Cancel
+                <SheetClose asChild>
+                  <Button variant="outline">Cancel</Button>
                 </SheetClose>
               </div>
-              {error && <div className="text-red-500 mt-2">{error}</div>}
             </div>
           </form>
         </ScrollArea>

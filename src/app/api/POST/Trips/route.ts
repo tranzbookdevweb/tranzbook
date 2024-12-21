@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
         price,
         busId,
         routeId,
-        driverId,
+        driverId: recurring ? null : driverId,
         departureTime,
         branchId,
         recurring,

@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       "restRoom",
       "seatBelts",
       "onboardFood",
+      "onArrival", // New boolean field for arrival status
     ];
 
     const busExtras = extras.reduce((acc, extra) => {
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     }, {} as Record<string, boolean>);
 
     // Validate required fields
-    if (!plateNumber || !capacity || !busModel || !companyId || !image) {
+    if (!capacity || !companyId || !image) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
         busModel,
         companyId,
         image: imageData?.path,  // Store the image path in Prisma
-        status: "available",     // Set the default status to "available"
+        status: "available",     // Default status is set to available
         ...busExtras,            // Dynamically include the boolean extras
       },
     });

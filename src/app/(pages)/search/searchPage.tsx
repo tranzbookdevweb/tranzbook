@@ -240,7 +240,7 @@ const SearchResults = () => {
                   </div>
                 </div>
                 <div className="rightloca flex flex-col items-center justify-between">
-                  <div className="flex items-center h-full py-5 justify-between flex-col text-[2vh]">
+                  <div className="flex items-center text-center h-full py-5 justify-between flex-col text-[2vh]">
                     <div>
                       <img
                         className="w-full rounded-full h-12 object-fill"
@@ -251,6 +251,8 @@ const SearchResults = () => {
                         }
                         alt="Bus Image"
                       />
+                                        <h6 className="font-semibold text-center">GH₵{trip.price}</h6>
+
                     </div>
                     <div>
                     <Link
