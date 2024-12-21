@@ -18,6 +18,11 @@ export async function GET() {
     for (const trip of trips) {
       const { departureTime, route, driver, bus, date } = trip;
 
+      if (!date || !departureTime || !route?.duration || !driver || !bus) {
+        console.warn(`Skipping trip due to missing data: ${JSON.stringify(trip)}`);
+        continue; // Skip trips with incomplete data
+      }
+
       // Combine the trip's date and departure time to get the full trip start time
       const tripStartTime = new Date(date);
       const [hours, minutes] = departureTime.split(":").map(Number);
@@ -57,13 +62,16 @@ export async function GET() {
     // Fetch available drivers (those who are not assigned to ongoing trips)
     const drivers = await prisma.driver.findMany({
       where: {
-        status: 'available',
+        status: "available",
       },
     });
 
     return NextResponse.json(drivers, { status: 200 });
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ error: 'An error occurred while fetching drivers' }, { status: 500 });
+    console.error("Server error:", error);
+    return NextResponse.json(
+      { error: "An error occurred while fetching drivers" },
+      { status: 500 }
+    );
   }
 }
