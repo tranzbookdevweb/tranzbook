@@ -9,7 +9,7 @@ import { SeatSelectionSkeleton } from "../(components)/Skeletons/seatSelectionSk
 import { CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { BellElectric, PowerIcon, Wifi } from "lucide-react";
-import {  AcUnitOutlined, FamilyRestroom, FoodBank } from "@mui/icons-material";
+import { AcUnitOutlined, FamilyRestroom, FoodBank } from "@mui/icons-material";
 
 // Interfaces
 interface Bus {
@@ -57,7 +57,7 @@ const PageContainer: React.FC = () => {
   const apiUrl = `/api/GET/getTripById?id=${tripId}`;
 
   const [currency] = useState<string>("GHS");
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);  
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isBooked, setBooked] = useState<boolean>(false);
   const [tripData, setTripData] = useState<Trip | null>(null);
   const [busImage, setBusImage] = useState<string>("default-logo-url");
@@ -91,7 +91,11 @@ const PageContainer: React.FC = () => {
           <section className="min-h-screen lg:w-72 border-r max-sm:border-t border-gray-200 custom-scrollbar overflow-y-auto">
             <BusDetailsSkeleton />
           </section>
-          <section className={`flex flex-col items-center p-5 w-full rounded-lg overflow-hidden ${isBooked ? "justify-center" : ""}`}>
+          <section
+            className={`flex flex-col items-center p-5 w-full rounded-lg overflow-hidden ${
+              isBooked ? "justify-center" : ""
+            }`}
+          >
             {isBooked ? <CircularProgress /> : <SeatSelectionSkeleton />}
           </section>
         </div>
@@ -100,7 +104,7 @@ const PageContainer: React.FC = () => {
   }
 
   const { date, price: busFare, departureTime, bus, driver, route } = tripData;
-  
+
   function calculateArrivalTime(departureTime: string, duration: number): string {
     const [hours, minutes] = departureTime.split(":").map(Number);
     const departureDate = new Date();
@@ -113,12 +117,12 @@ const PageContainer: React.FC = () => {
 
   const tripArrivalTime = calculateArrivalTime(departureTime, route.duration);
   const busExtras = [
-    bus.wifi && { name: "Wi-Fi", icon: <Wifi size={12}/> },
-    bus.airConditioning && { name: "AC", icon: <AcUnitOutlined className="text-[17px]"/> },
-    bus.chargingOutlets && { name: "Charging Outlets", icon: <PowerIcon size={12}/> },
-    bus.restRoom && { name: "Rest Room", icon: <FamilyRestroom className='text-[17px]'/> },
+    bus.wifi && { name: "Wi-Fi", icon: <Wifi size={12} /> },
+    bus.airConditioning && { name: "AC", icon: <AcUnitOutlined className="text-[17px]" /> },
+    bus.chargingOutlets && { name: "Charging Outlets", icon: <PowerIcon size={12} /> },
+    bus.restRoom && { name: "Rest Room", icon: <FamilyRestroom className="text-[17px]" /> },
     bus.seatBelts && { name: "Seat Belts", icon: <BellElectric size={12} /> },
-    bus.onboardFood && { name: "Onboard Food", icon: <FoodBank className='text-[17px]'/> },
+    bus.onboardFood && { name: "Onboard Food", icon: <FoodBank className="text-[17px]" /> },
   ].filter((extra) => extra !== false);
 
   const handleSeatSelection = (seatId: string) => {
@@ -129,7 +133,7 @@ const PageContainer: React.FC = () => {
 
   const handleBooking = async () => {
     try {
-      const bookingData = {  tripId, seatNumber: 1 };
+      const bookingData = { tripId, seatNumber: 1 };
       const response = await fetch("/api/POST/Booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -146,73 +150,75 @@ const PageContainer: React.FC = () => {
   };
 
   return (
-    <main className="flex-1 border-t border-b bg-white dark:bg- min-h-screen flex flex-col items-center w-full relative overflow-hidden">
-        <div className="flex flex-row w-full min-h-screen max-sm:flex-col-reverse">
-          <section className="min-h-screen border-r border-gray-200 custom-scrollbar overflow-y-auto">
-            <BusDetails
-              busImage={busImage}
+    <main className="flex-1 border-t border-b h-full bg-white dark:bg- min-h-screen flex flex-col items-center w-full relative overflow-hidden">
+      <div className="flex flex-row w-full min-h-screen max-sm:flex-col-reverse">
+        <section className="min-h-screen border-r border-gray-200 custom-scrollbar overflow-y-auto">
+          <BusDetails
+            busImage={busImage}
+            busNumber={bus.plateNumber}
+            busCompany={bus.company.name}
+            tripDepartureTime={departureTime}
+            tripArrivalTime={tripArrivalTime}
+            busExtras={busExtras}
+            busDriverID={`${driver.firstName} ${driver.lastName}`}
+            busCapacity={bus.capacity}
+            busModel={bus.busModel}
+            busRoute={{
+              origin: route.startCity.name,
+              destination: route.endCity.name,
+            }}
+            tripDuration={route.duration}
+            distance={route.distance}
+            busFare={busFare}
+            selectedSeats={selectedSeats}
+            currency={currency}
+            handleBooking={handleBooking}
+            isBooked={isBooked}
+            id={tripData.id}
+            currentDate={new Date()}
+          />
+    
+        </section>
+        <section className="flex flex-col items-center p-5 w-full rounded-lg overflow-hidden">
+          {isBooked ? (
+            <Ticket
+              ticketId={tripData.id}
               busNumber={bus.plateNumber}
               busCompany={bus.company.name}
               tripDepartureTime={departureTime}
               tripArrivalTime={tripArrivalTime}
-              busExtras={busExtras}
-              busDriverID={`${driver.firstName} ${driver.lastName}`}
-              busCapacity={bus.capacity}
-              busModel={bus.busModel}
               busRoute={{
                 origin: route.startCity.name,
                 destination: route.endCity.name,
               }}
-              tripDuration={route.duration}
-              distance={route.distance}
               busFare={busFare}
-              selectedSeats={selectedSeats}
+              busModel={bus.busModel}
               currency={currency}
-              handleBooking={handleBooking}
-              isBooked={isBooked}
-              id={tripData.id}
+              tripDuration={route.duration}
+              totalCost={busFare * selectedSeats.length}
               currentDate={new Date()}
+              selectedSeats={selectedSeats}
+              isBooked={isBooked}
             />
-          </section>
-          <section className="flex flex-col items-center p-5 w-full rounded-lg overflow-hidden">
-            {isBooked ? (
-              <Ticket
-                ticketId={tripData.id}
-                busNumber={bus.plateNumber}
-                busCompany={bus.company.name}
-                tripDepartureTime={departureTime}
-                tripArrivalTime={tripArrivalTime}
-                busRoute={{
-                  origin: route.startCity.name,
-                  destination: route.endCity.name,
-                }}
-                busFare={busFare}
-                busModel={bus.busModel}
-                currency={currency}
-                tripDuration={route.duration}
-                totalCost={busFare * selectedSeats.length}
-                currentDate={new Date()}
-                selectedSeats={selectedSeats}
-                isBooked={isBooked}
-              />
-            ) : (
-              <SeatSelection
-                busCapacity={bus.capacity}
-                selectedSeats={selectedSeats}
-                handleSeatSelection={handleSeatSelection}
-                handleClearSeats={() => setSelectedSeats([])}
-                handleSelectAllSeats={() =>
-                  setSelectedSeats(
-                    Array.from(
-                      { length: bus.capacity - 1 },
-                      (_, i) => `${i + 1}`.padStart((bus.capacity - 1).toString().length, "0")
-                    )
+          ) : (
+            <SeatSelection
+              busCapacity={bus.capacity}
+              selectedSeats={selectedSeats}
+              handleSeatSelection={handleSeatSelection}
+              handleClearSeats={() => setSelectedSeats([])}
+              handleSelectAllSeats={() =>
+                setSelectedSeats(
+                  Array.from(
+                    { length: bus.capacity - 1 },
+                    (_, i) => `${i + 1}`.padStart((bus.capacity - 1).toString().length, "0")
                   )
-                }
-              />
-            )}
-          </section>
-        </div>
+                )
+              }
+            />
+          )}
+
+        </section>
+      </div>
     </main>
   );
 };
@@ -222,4 +228,4 @@ const PageContent = () => (
     <PageContainer />
   </Suspense>
 );
-export default PageContent
+export default PageContent;

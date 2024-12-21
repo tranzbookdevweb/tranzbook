@@ -41,7 +41,6 @@ export async function Navbar() {
           {/* Middle menu links for larger screens */}
           <div className='menuMiddle max-lg:hidden flex text-blue-500 items-center text-[14px] font-medium space-x-3'>
             <Link href='/About'>About Us</Link>
-            <ProductToggle />
             <ResourcesToggle />
           </div>
           {user && (

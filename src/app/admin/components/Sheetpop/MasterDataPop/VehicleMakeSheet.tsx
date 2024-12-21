@@ -128,7 +128,7 @@ function BusSheet({ onAddSuccess }: Props) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!plateNumber || !capacity || !busModel || !companyId || !image) {
+    if ( !capacity || !companyId || !image) {
       setError('All fields are required.');
       return;
     }
@@ -265,7 +265,7 @@ function BusSheet({ onAddSuccess }: Props) {
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a branch" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[99999]">
                     {filteredBranches.map((branch) => (
                       <SelectItem key={branch.id} value={branch.id}>
                         {branch.name}

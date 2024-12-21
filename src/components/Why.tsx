@@ -15,11 +15,9 @@ const Why: React.FC<WhyProps> = ({ activeButton }) => {
     <div className="px-4 py-8 w-full items-center max-w-7xl mx-auto">
       {/* Intro Section */}
       <p className="text-center text-lg md:text-xl text-gray-700 mb-10 px-4">
-        Your Comfort, Our Priority. Imagine planning your trip without ever
-        leaving your home. With TranzBook, you can find and book the best buses
-        right from your couch, saving yourself the hassle of crowded bus
-        stations. Wherever you&apos;re headed, just pull out your phone or
-        laptop, and let TranzBook bring the journey to you.
+        {activeButton === 'Bus'
+          ? "Your Comfort, Our Priority. Imagine planning your trip without ever leaving your home. With TranzBook, you can find and book the best buses right from your couch, saving yourself the hassle of crowded bus stations. Wherever you’re headed, just pull out your phone or laptop, and let TranzBook bring the journey to you."
+          : "Move Your World with TranzBook Cargo! Simplify your logistics with TranzBook Cargo, the ultimate solution for seamless cargo transportation within Ghana and across borders. Whether you're a business owner shipping goods or an individual sending packages, we make it effortless, affordable, and reliable."}
       </p>
 
       {/* Conditional Rendering based on activeButton */}
@@ -50,20 +48,24 @@ const Why: React.FC<WhyProps> = ({ activeButton }) => {
               <h4 className="text-2xl font-semibold mb-4">Why Choose TranzBook for Cargo?</h4>
               <div className="space-y-6">
                 <FactListItem
-                  title="Comprehensive Cargo Services"
-                  description="TranzBook facilitates cargo truck bookings for intercountry transportation, connecting shippers and cargo truck operators. It provides a reliable platform for businesses to find trusted trucking services for their freight needs."
+                  title="Nationwide Coverage"
+                  description="Send your cargo to any corner of Ghana with confidence."
                 />
                 <FactListItem
-                  title="Transparent & Efficient Operations"
-                  description="With TranzBook, businesses can request quotes, select appropriate trucks, and track the progress of shipments in a transparent and efficient manner. This ensures smooth and reliable cargo transportation."
+                  title="Cross-Border Shipping"
+                  description="Expand your reach with reliable cargo services to Nigeria, Togo, Benin, Burkina Faso, Côte d'Ivoire, Mali, and beyond."
                 />
                 <FactListItem
-                  title="Global Reach & Local Partnerships"
-                  description="TranzBook collaborates with local cargo trucking companies to expand its network globally, ensuring compliance with regional regulations while delivering seamless intercountry logistics."
+                  title="Real-Time Tracking"
+                  description="Stay connected with your shipment every step of the way."
                 />
                 <FactListItem
-                  title="Future Growth & Vision"
-                  description="In three years, TranzBook plans to onboard more partners, expand across 20 African countries, and handle 100,000 daily bookings. By ten years, TranzBook envisions becoming a global leader in transport and logistics with 1,000,000 daily transactions and a presence across Africa, Europe, and America."
+                  title="Speed and Security"
+                  description="We prioritize swift delivery and utmost care for your goods."
+                />
+                <FactListItem
+                  title="24/7 Support"
+                  description="Our team is ready to assist anytime, ensuring a stress-free experience."
                 />
               </div>
             </>
@@ -79,8 +81,8 @@ const Why: React.FC<WhyProps> = ({ activeButton }) => {
           />
         </motion.div>
       </div>
-      <Whycards />
-    </div>
+      <Whycards activeButton={activeButton} />
+      </div>
   );
 };
 

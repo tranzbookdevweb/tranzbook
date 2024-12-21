@@ -1,4 +1,4 @@
-import prisma from "@/app/lib/db"; 
+import prisma from "@/app/lib/db";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -13,6 +13,9 @@ export async function GET(request: Request) {
   try {
     let orderBy: any[] = [];
     let timeFilter: any = {};
+
+    // Get the current time
+    const now = new Date();
 
     // Set sorting logic
     if (sort === "cheapest") {
@@ -55,7 +58,7 @@ export async function GET(request: Request) {
     }
 
     // Construct the query filters
-    const filters: any = {
+    const specificDateFilter: any = {
       route: {
         startCity: {
           name: fromLocation,
@@ -64,21 +67,48 @@ export async function GET(request: Request) {
           name: toLocation,
         },
       },
-      date: new Date(date),
+      date: new Date(date), // Specific date filter
+      departureTime: {
+        gte: now.toISOString().split("T")[1], // Filter out past departure times
+      },
+      ...timeFilter,
+    };
+
+    const recurringFilter: any = {
+      route: {
+        startCity: {
+          name: fromLocation,
+        },
+        endCity: {
+          name: toLocation,
+        },
+      },
+      recurring: true, // Include recurring trips
+      departureTime: {
+        gte: now.toISOString().split("T")[1], // Filter out past departure times
+      },
       ...timeFilter,
     };
 
     // Add company filter if provided
     if (company) {
-      filters.branch = {
+      specificDateFilter.branch = {
+        company: {
+          id: company,
+        },
+      };
+      recurringFilter.branch = {
         company: {
           id: company,
         },
       };
     }
 
+    // Fetch both specific-date and recurring trips
     const trips = await prisma.trip.findMany({
-      where: filters,
+      where: {
+        OR: [specificDateFilter, recurringFilter],
+      },
       orderBy,
       include: {
         branch: {

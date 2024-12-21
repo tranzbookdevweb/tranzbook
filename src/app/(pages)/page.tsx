@@ -56,7 +56,7 @@ export default function UpperHome({}: Props) {
   </div>
   
   </div>
-  <div><Widgets/>
+  <div><Widgets activeButton={activeButton}/>
     <Why activeButton={activeButton}/>
      <PopularPlace />
       <Partner/>

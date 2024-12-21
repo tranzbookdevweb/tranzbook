@@ -123,6 +123,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
           </div>
         </div>
       ) : (
+        
         <h2 className='text-xl pb-2 font-semibold text-center mt-5'>
           Select Your Seats
         </h2>

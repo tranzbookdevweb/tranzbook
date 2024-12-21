@@ -240,10 +240,10 @@ const SearchResults = () => {
                   </div>
                 </div>
                 <div className="rightloca flex flex-col items-center justify-between">
-                  <div className="flex items-center flex-col text-[2vh]">
+                  <div className="flex items-center h-full py-5 justify-between flex-col text-[2vh]">
                     <div>
                       <img
-                        className="w-full rounded-full h-8 object-fill"
+                        className="w-full rounded-full h-12 object-fill"
                         src={ 
                           trip.bus.image
                           ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.branch.company.logo}`
@@ -252,12 +252,7 @@ const SearchResults = () => {
                         alt="Bus Image"
                       />
                     </div>
-                    <h2 className="font-semibold max-md:text-[11px] max-md:flex-col flex items-center text-[#48A0FF]">
-                      <Bus className='max-md:hidden' /> {trip.bus.busModel} | {trip.bus.plateNumber}
-                    </h2>
-                  </div>
-                  <h6 className="font-semibold">GH₵{trip.price}</h6>
-                  <div>
+                    <div>
                     <Link
                       href={{
                         pathname: "/bookings/seatPicker",
@@ -267,7 +262,7 @@ const SearchResults = () => {
                     >
                       Book
                     </Link>
-                  </div>
+                  </div></div>
                 </div>
               </div>
             </div>

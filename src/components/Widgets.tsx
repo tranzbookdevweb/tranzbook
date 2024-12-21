@@ -3,6 +3,8 @@ import DirectionsBusFilledOutlinedIcon from '@mui/icons-material/DirectionsBusFi
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import RingVolumeOutlinedIcon from '@mui/icons-material/RingVolumeOutlined';
+import TrackChangesOutlinedIcon from '@mui/icons-material/TrackChangesOutlined';
+import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 
@@ -12,7 +14,12 @@ interface Widget {
   subtitle: string;
 }
 
-const widgets: Widget[] = [
+interface Props {
+  activeButton: 'Bus' | 'Cargo'; // Accept activeButton as a prop
+}
+
+// Widgets data for "Bus"
+const busWidgets: Widget[] = [
   {
     icon: DirectionsBusFilledOutlinedIcon,
     title: 'Traveling to any region in Ghana?',
@@ -35,8 +42,40 @@ const widgets: Widget[] = [
   },
 ];
 
-function Widgets() {
+// Widgets data for "Cargo"
+const cargoWidgets: Widget[] = [
+  {
+    icon: LocalShippingOutlinedIcon,
+    title: 'Sending Cargo Across Ghana?',
+    subtitle: 'Find secure, reliable, and fast cargo services to any region in Ghana. TranzBook it and relax.',
+  },
+  {
+    icon: CompareArrowsIcon,
+    title: 'Shipping Beyond Ghana?',
+    subtitle: "Easily send cargo to destinations like Nigeria, Togo, Benin, Burkina Faso, Côte d'Ivoire, Mali, and more.",
+  },
+  {
+    icon: RingVolumeOutlinedIcon,
+    title: '24/7 Support for Your Logistics Needs',
+    subtitle: 'Our dedicated team is always ready to assist you with your cargo queries.',
+  },
+  {
+    icon: TrackChangesOutlinedIcon,
+    title: 'Real-Time Tracking',
+    subtitle: 'Stay informed! Track your cargo every step of the way for peace of mind.',
+  },
+  {
+    icon: MonetizationOnOutlinedIcon,
+    title: 'Affordable and Transparent Pricing',
+    subtitle: 'Enjoy competitive rates with no hidden fees, ensuring value for your money.',
+  },
+];
+
+function Widgets({ activeButton }: Props) {
   const { theme } = useTheme();
+
+  // Select the appropriate widgets based on the active button
+  const widgets = activeButton === 'Bus' ? busWidgets : cargoWidgets;
 
   return (
     <motion.div

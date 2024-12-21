@@ -34,15 +34,7 @@ export function ResourcesToggle() {
           Careers
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem >
-        <Link href='/Gallery' className="rounded-[8px] hover:bg-orange-200 p-2 hover:text-white w-full hover:cursor-pointer  items-center flex font-semibold">
-
-        <GalleryThumbnails className="mr-2"/>
-          Gallery
-
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem  >
+                <DropdownMenuItem  >
         <Link href='' className="rounded-[8px] hover:bg-orange-200 p-2 hover:text-white w-full hover:cursor-pointer  items-center flex font-semibold">
         <HelpCircleIcon className="mr-2"/>
           FAQ

@@ -22,7 +22,7 @@ module.exports = {
       },
     ],
     domains: ["lh3.googleusercontent.com",
-      "i.pinimg.com"
+      "i.pinimg.com",'gravatar.com'
     ],
   },
 };

@@ -73,10 +73,12 @@ const BusDetails: React.FC<BusDetailsProps> = ({
       </div>
 
       <div className="w-full flex flex-col md:space-y-5 min-[1366px]:space-y-[0.8em] space-y-[0.65em] md:pb-4">
-        <div className="flex items-center justify-between">
+      <p className="text-sm font-semibold text-red-500 p-2">
+          *Disclaimer: Selected seats may not be guaranteed.
+          </p>{/* <div className="flex items-center justify-between">
           <span className="text-xs text-gray-500">Bus Number</span>
           <span className="text-sm font-semibold text-gray-700">{busNumber}</span>
-        </div>
+        </div> */}
 
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-500">Capacity</span>
@@ -138,10 +140,10 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   </div>
   </div>
 
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <FiUser className="text-blue-600 mr-2" />
           <span className="text-sm font-semibold text-gray-700">Driver ID: {busDriverID}</span>
-        </div>
+        </div> */}
 
         <div>
           <div className="flex flex-col justify-between border-t border-b py-4 border-gray-300">
