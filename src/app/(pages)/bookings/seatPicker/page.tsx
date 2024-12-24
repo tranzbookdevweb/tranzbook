@@ -133,21 +133,46 @@ const PageContainer: React.FC = () => {
 
   const handleBooking = async () => {
     try {
-      const bookingData = { tripId, seatNumber: 1 };
+      // Function to generate a 6-digit random reference string
+      const generateReference = (): string => {
+        return Math.random().toString(36).substr(2, 6).toUpperCase(); // Generate 6 characters and make them uppercase
+      };
+  
+      const reference = generateReference();  // Generate the reference
+      
+      // Function to parse selected seats to numbers
+      const parseSeatsToNumbers = (seats: string[]): number[] => {
+        return seats.map((seat: string) => parseInt(seat, 10));  // Convert each seat to a number
+      };
+  
+      const seatNumbers = parseSeatsToNumbers(selectedSeats);  // Parse the selected seats into numbers
+  
+      const bookingData = { 
+        reference,  // Add the generated reference here
+        tripId, 
+        seatNumber: seatNumbers  // Store the parsed seat numbers
+      };
+  
+      // Send the booking request to the server
       const response = await fetch("/api/POST/Booking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
       });
-
-      if (response.ok) alert("Booking successful");
-      else alert("Booking failed");
+  
+      if (response.ok) {
+        alert("Booking successful");
+      } else {
+        alert("Booking failed");
+      }
     } catch (error) {
       console.error("Error during booking:", error);
     }
-
+  
     setBooked(!isBooked);
   };
+  
+  
 
   return (
     <main className="flex-1 border-t border-b h-full bg-white dark:bg- min-h-screen flex flex-col items-center w-full relative overflow-hidden">

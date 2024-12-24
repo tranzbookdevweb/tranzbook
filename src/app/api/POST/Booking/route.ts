@@ -1,99 +1,51 @@
-import prisma from "@/app/lib/db"; // Prisma instance
+import prisma from "@/app/lib/db"; // Ensure Prisma client is set up correctly
 import { NextRequest, NextResponse } from "next/server";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
-// Helper function to generate a 6-character alphanumeric reference
-function generateReference() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let reference = "";
-  for (let i = 0; i < 6; i++) {
-    reference += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return reference;
-}
-
-export async function POST(req:NextRequest) {
+// POST function to handle booking creation
+export async function POST(req: NextRequest) {
   try {
-    // Get the user session
+    // Get the current user using Kinde authentication
     const { getUser } = getKindeServerSession();
     const user = await getUser();
 
-    if (!user || !user.id) {
+    // If no user is found, return an error
+    if (!user) {
       return NextResponse.json(
-        { error: "Unauthorized: User not logged in" },
+        { message: "User not authenticated" },
         { status: 401 }
       );
     }
 
-    // Parse the request body
+    // Parse the request body to get the booking data
     const body = await req.json();
-    const { tripId, seatNumber } = body;
+    const { reference, tripId, seatNumber } = body;
 
-    // Validate the input
-    if (!tripId || !seatNumber) {
+    // Ensure that all required fields are provided in the request
+    if (!reference || !tripId || !seatNumber) {
       return NextResponse.json(
-        { error: "Missing required fields: tripId or seatNumber" },
+        { message: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Check if the trip exists
-    const trip = await prisma.trip.findUnique({
-      where: { id: tripId },
-    });
-
-    if (!trip) {
-      return NextResponse.json({ error: "Trip not found" }, { status: 404 });
-    }
-
-    // Ensure the seat is available
-    const existingBooking = await prisma.booking.findFirst({
-      where: {
-        tripId,
-        seatNumber,
-      },
-    });
-
-    if (existingBooking) {
-      return NextResponse.json(
-        { error: "Seat is already booked" },
-        { status: 409 }
-      );
-    }
-
-    // Generate a unique 6-character reference
-    let reference;
-    let isUnique = false;
-    do {
-      reference = generateReference();
-      const existingReference = await prisma.booking.findUnique({
-        where: { reference },
-      });
-      if (!existingReference) {
-        isUnique = true;
-      }
-    } while (!isUnique);
-
-    // Create the booking with the generated reference
+    // Create a new booking in the database using Prisma
     const booking = await prisma.booking.create({
       data: {
+        reference, // Assuming reference is generated on the client-side
+        userId: user.id, // Using the authenticated user's ID
         tripId,
         seatNumber,
-        userId: user.id,
-        reference, // Assign the generated reference
+        status: "Pending", // Explicitly set status to "Pending"
       },
     });
 
-    // Respond with the booking details
+    // Return the created booking as a response
+    return NextResponse.json(booking, { status: 201 });
+  } catch (error: any) {
+    console.error("Error during booking creation:", error);
     return NextResponse.json(
-      { message: "Booking successful", booking },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("Error during booking:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
+      { message: "Failed to create booking", error: error.message },
       { status: 500 }
     );
   }

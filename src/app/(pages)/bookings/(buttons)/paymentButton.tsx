@@ -18,24 +18,37 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   handleBooking,
   disabled,
 }) => {
-  const [isClient, setIsClient] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
   const { toast } = useToast();
 
+  useEffect(() => {
+    // Fetch user email from the API
+    const fetchEmail = async () => {
+      try {
+        const response = await fetch("/api/getEmail");
+        if (!response.ok) {
+          throw new Error("Failed to fetch email");
+        }
+        const data = await response.json();
+        setEmail(data.email);
+      } catch (error) {
+        console.error("Error fetching email:", error);
+      }
+    };
+
+    fetchEmail();
+  }, []);
 
   const handlePayments = usePaystackPayment({
-    channels: ["mobile_money","card","bank","bank_transfer"],
-    // in .env: NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY="pk_live_9559bad7cb4e0cdbb1570bcfd85c46d9fe8296ee"
+    channels: ["mobile_money", "card", "bank", "bank_transfer"],
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY! as string,
-    // phone: "0546871870", //not needed
-    email: "sknukpezah@gmail.com", //use the user's email from the tranzbook users table from the db
+    email: email || "default@example.com", // Use fetched email or fallback
     currency: "GHS",
-    // amount: 1 * 100 , //for testing = 1ghc
     amount: busFare * selectedSeats.length * 100,
   });
 
   const onSuccess = (reference: any) => {
     handleBooking();
-    
     toast({
       title: "Booking successful!",
       description: `Payment successful! Reference: ${reference.reference}`,
@@ -46,20 +59,12 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     alert("Payment Not Successful");
   };
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (!isClient) {
-    return null;
-  }
-
   return (
     <button
       className={className}
       onClick={() => handlePayments({ onSuccess, onClose })}
-      disabled={disabled}>
-      Book Now
+      disabled={disabled || !email}>
+      {email ? "Book Now" : "Loading..."}
     </button>
   );
 };
