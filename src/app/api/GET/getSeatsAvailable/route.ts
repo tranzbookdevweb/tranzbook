@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // ignore the date for now
     const selectedDate = new Date(date);
 
     const trip = await prisma.trip.findUnique({
