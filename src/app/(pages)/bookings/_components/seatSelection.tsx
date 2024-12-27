@@ -3,6 +3,7 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 
 
 interface SeatSelectionProps {
@@ -13,6 +14,12 @@ interface SeatSelectionProps {
   handleSeatSelection: (seatId: string) => void;
   handleClearSeats: () => void;
   handleSelectAllSeats: () => void;
+}
+
+interface SeatsAvailable {
+  availableSeats: number[];
+  bookedSeats?: number[];
+  totalSeats: number[];
 }
 
 
@@ -32,6 +39,28 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   const formatSeatNumber = (seatNumber: number) => {
     return (seatNumber + 1).toString().padStart(numberOfDigits, "0");
   };
+
+    // const searchParams = useSearchParams();
+    // const tripId = searchParams.get("tripId");
+    //   const [bookedSeats, setBookedSeats] = useState<number[]>([]);
+
+    // useEffect(() => {
+    //   if (!tripId) return;
+
+    //   const fetchBookedSeats = async () => {
+    //     try {
+    //       const response = await fetch(
+    //         `/api/GET/getSeatsAvailable?tripId=${tripId}`
+    //       );
+    //       const data: SeatsAvailable = await response.json();
+    //       setBookedSeats(data.bookedSeats || []);
+    //     } catch (error) {
+    //       console.error(error);
+    //     }
+    //   };
+
+    //   fetchBookedSeats();
+    // }, [tripId]);
 
   const renderSeats = () => {
     let allSeats: JSX.Element[] = [];

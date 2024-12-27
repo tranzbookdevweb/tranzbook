@@ -97,7 +97,7 @@ const PageContainer: React.FC = () => {
     const fetchBookedSeats = async () => {
       try {
         const response = await fetch(
-          `/api/GET/getSeatsAvailable?id=${tripId}`
+          `/api/GET/getSeatsAvailable?tripId=${tripId}`
         );
         const data: SeatsAvailable = await response.json();
         setBookedSeats(data.bookedSeats || []);

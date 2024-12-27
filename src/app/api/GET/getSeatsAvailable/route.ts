@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // http://localhost:3000/bookings/seatPicker?tripId=a6623405-3742-45e0-86e4-45eb5b567e60&date=2024-12-30T00%3A00%3A00.000Z
 
-// `/api/GET/getSeatsAvailable?id=a6623405-3742-45e0-86e4-45eb5b567e60&date=2024-12-30T00%3A00%3A00.000Z`
+// `/api/GET/getSeatsAvailable?tripId=a6623405-3742-45e0-86e4-45eb5b567e60&date=2024-12-30T00%3A00%3A00.000Z`
 // no seats booked at tripId=15de2f28-cb53-4164-afcb-0c0b7e237d27
 
 export async function GET(req: NextRequest) {
@@ -15,9 +15,9 @@ export async function GET(req: NextRequest) {
       searchParams.get("date") ||
        `2024-12-30T00%3A00%3A00.000Z`; 
 
-    if (!tripId || !date) {
+    if (!tripId) {
       return NextResponse.json(
-        { error: "Missing tripId or date" },
+        { error: "Missing tripId" },
         { status: 400 }
       );
     }
