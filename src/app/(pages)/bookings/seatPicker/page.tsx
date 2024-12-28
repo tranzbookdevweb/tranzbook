@@ -55,11 +55,11 @@ interface Trip {
   route: Route;
 }
 
-interface SeatsAvailable {
-  availableSeats: number[];
-  bookedSeats?: number[];
-  totalSeats: number[];
-}
+type SeatsAvailable = Record<
+  "availableSeats" | "totalSeats",
+  number[]
+> &
+  Partial<Record<"bookedSeats", number[]>>;
 
 const PageContainer: React.FC = () => {
   const searchParams = useSearchParams();
@@ -73,7 +73,7 @@ const PageContainer: React.FC = () => {
   const [busImage, setBusImage] = useState<string>(
     "default-logo-url"
   );
-  const [bookedSeats, setBookedSeats] = useState<number[]>([]);
+  const [bookedSeats, setBookedSeats] = useState<SeatsAvailable["bookedSeats"]>([]);
 
   useEffect(() => {
     if (!tripId) return;
@@ -100,7 +100,7 @@ const PageContainer: React.FC = () => {
           `/api/GET/getSeatsAvailable?tripId=${tripId}`
         );
         const data: SeatsAvailable = await response.json();
-        setBookedSeats(data.bookedSeats || []);
+        setBookedSeats(data.bookedSeats ?? []);
       } catch (error) {
         console.error(error);
       }
@@ -299,7 +299,7 @@ const PageContainer: React.FC = () => {
               handleSelectAllSeats={() =>
                 setSelectedSeats(
                   Array.from({ length: bus.capacity - 1 }, (_, i) =>
-                    !bookedSeats.includes(i+2) 
+                    !bookedSeats?.includes(i + 2)
                       ? `${i + 1}`.padStart(
                           (bus.capacity - 1).toString().length,
                           "0"
