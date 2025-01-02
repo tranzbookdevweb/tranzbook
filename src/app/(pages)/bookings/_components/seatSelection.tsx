@@ -1,19 +1,32 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
+
 
 interface SeatSelectionProps {
+  tripId: string;
   busCapacity: number;
+  bookedSeats?: number[];
   selectedSeats: string[];
   handleSeatSelection: (seatId: string) => void;
   handleClearSeats: () => void;
   handleSelectAllSeats: () => void;
 }
 
+interface SeatsAvailable {
+  availableSeats: number[];
+  bookedSeats?: number[];
+  totalSeats: number[];
+}
+
+
 const SeatSelection: React.FC<SeatSelectionProps> = ({
+  tripId,
   busCapacity,
+  bookedSeats,
   selectedSeats,
   handleSeatSelection,
   handleClearSeats,
@@ -26,6 +39,28 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   const formatSeatNumber = (seatNumber: number) => {
     return (seatNumber + 1).toString().padStart(numberOfDigits, "0");
   };
+
+    // const searchParams = useSearchParams();
+    // const tripId = searchParams.get("tripId");
+    //   const [bookedSeats, setBookedSeats] = useState<number[]>([]);
+
+    // useEffect(() => {
+    //   if (!tripId) return;
+
+    //   const fetchBookedSeats = async () => {
+    //     try {
+    //       const response = await fetch(
+    //         `/api/GET/getSeatsAvailable?tripId=${tripId}`
+    //       );
+    //       const data: SeatsAvailable = await response.json();
+    //       setBookedSeats(data.bookedSeats || []);
+    //     } catch (error) {
+    //       console.error(error);
+    //     }
+    //   };
+
+    //   fetchBookedSeats();
+    // }, [tripId]);
 
   const renderSeats = () => {
     let allSeats: JSX.Element[] = [];
@@ -63,7 +98,12 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
                 isSelected
                   ? "bg-[#FFCC59] text-white"
                   : "bg-white text-gray-500 "
-              }`}>
+              } ${bookedSeats?.includes(seatNumber + 2) ? "opacity-30":""}
+                `}
+                // +2 because seat 1 = Driver; lemme know if the bookedSeats dont corresponds with it
+              disabled={
+                bookedSeats?.includes(seatNumber + 2) ? true : false
+              }>
               <Image
                 src='/seat.png'
                 alt='seat'
@@ -83,16 +123,18 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
         <div
           key={`row-${row}`}
           className='flex flex-row max-[310px]:flex-wrap  max-[310px]:justify-center justify-between w-full gap-10 max-sm:gap-0 '>
-          <div className='flex max-[140px]:flex-wrap max-[140px]:justify-center'>{rowSeats.slice(0, 2)}</div>
-          <div className='flex max-[140px]:flex-wrap max-[140px]:justify-center'>{rowSeats.slice(2, 4)}</div>
+          <div className='flex max-[140px]:flex-wrap max-[140px]:justify-center'>
+            {rowSeats.slice(0, 2)}
+          </div>
+          <div className='flex max-[140px]:flex-wrap max-[140px]:justify-center'>
+            {rowSeats.slice(2, 4)}
+          </div>
         </div>
       );
     }
 
     return allSeats;
   };
-  // NB: the seat selection should be based on the number of seats available from the db
-  // not the bus Capacity... so incase it goes to live correct this semantic
 
   return (
     <div className='bg-white flex flex-col items-center lg:justify-center p-5  md:p-2  max-sm:pb- border border-slate-200 rounded-xl dark:text-black h-full overflow-hidden  max-sm:w-full max-sm:px-2 md:min-h-full lg:min-w-[500px] min-[1200px]:min-w-[700px] min-[1200px]:h-[650px] lg:h-[500px] '>
@@ -123,7 +165,6 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
           </div>
         </div>
       ) : (
-        
         <h2 className='text-xl pb-2 font-semibold text-center mt-5'>
           Select Your Seats
         </h2>
