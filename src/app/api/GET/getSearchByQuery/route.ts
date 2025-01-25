@@ -129,7 +129,7 @@ export async function GET(request: Request) {
       },
       orderBy,
       include: {
-        branch: {
+        bus: {
           include: {
             company: {
               select: {
@@ -138,7 +138,6 @@ export async function GET(request: Request) {
             },
           },
         },
-        bus: true,
         route: {
           include: {
             startCity: true,

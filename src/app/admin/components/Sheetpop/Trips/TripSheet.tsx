@@ -22,7 +22,15 @@ import {
 import { CalendarDate } from "./Calendar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-type Bus = { id: string; name: string; plateNumber: string; busModel: string };
+// Type Definitions
+type Bus = {
+  id: string;
+  name?: string;
+  plateNumber?: string;
+  busModel: string;
+  capacity: number;
+};
+
 type Route = {
   id: string;
   startCityId: string;
@@ -30,123 +38,96 @@ type Route = {
   startCityName: string;
   endCityName: string;
 };
-type Location = { id: string; name: string };
+
 type Driver = { id: string; firstName: string; lastName: string };
-type Branch = { id: string; name: string };
+
+type Company = { id: string; name: string };
+
+type TripForm = {
+  id: string;
+  date?: string | null;
+  recurring: boolean;
+  price: number;
+  departureTime: string;
+  busId: string;
+  routeId: string;
+  driverId?: string | null;
+  bus: Bus;
+  route: Route;
+  driver?: Driver | null;
+};
+
 type Props = { onAddSuccess: () => void };
 
-async function fetchBuses() {
-  try {
-    const response = await fetch("/api/GET/getBusesAvailable");
-    if (!response.ok) throw new Error("Failed to fetch buses");
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching buses:", error);
-    return [];
-  }
-}
-
-async function fetchRoutes() {
-  try {
-    const response = await fetch("/api/GET/getRoute");
-    if (!response.ok) throw new Error("Failed to fetch routes");
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching routes:", error);
-    return [];
-  }
-}
-
-async function fetchLocations() {
-  try {
-    const response = await fetch("/api/GET/getLocation");
-    if (!response.ok) throw new Error("Failed to fetch locations");
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching locations:", error);
-    return [];
-  }
-}
-
-async function fetchDrivers() {
-  try {
-    const response = await fetch("/api/GET/getDriversAvailable");
-    if (!response.ok) throw new Error("Failed to fetch drivers");
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching drivers:", error);
-    return [];
-  }
-}
-
-async function fetchBranches() {
-  try {
-    const response = await fetch("/api/GET/getBranches");
-    if (!response.ok) throw new Error("Failed to fetch branches");
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching branches:", error);
-    return [];
-  }
-}
-
 function TripSheet({ onAddSuccess }: Props) {
-  const [date, setDate] = useState("");
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [tripData, setTripData] = useState<TripForm[]>([]);
   const [departureTime, setDepartureTime] = useState("");
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState<number>(0);
   const [busId, setBusId] = useState("");
   const [routeId, setRouteId] = useState("");
-  const [driverId, setDriverId] = useState("");
-  const [branchId, setBranchId] = useState("");
+  const [driverId, setDriverId] = useState<string | null>(null);
   const [recurring, setRecurring] = useState(false);
-  const [buses, setBuses] = useState<Bus[]>([]);
-  const [routes, setRoutes] = useState<Route[]>([]);
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
+  const [date, setDate] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch companies from the API
   useEffect(() => {
-    const fetchData = async () => {
-      const [busesData, routesData, locationsData, driversData, branchesData] =
-        await Promise.all([
-          fetchBuses(),
-          fetchRoutes(),
-          fetchLocations(),
-          fetchDrivers(),
-          fetchBranches(),
-        ]);
-      setBuses(busesData);
-      setLocations(locationsData);
-      setDrivers(driversData);
-      setBranches(branchesData);
+    async function fetchCompanies() {
+      try {
+        const response = await fetch("/api/GET/getbusCompany");
+        if (!response.ok) throw new Error("Failed to fetch companies");
+        const data: Company[] = await response.json();
+        setCompanies(data);
+      } catch (err) {
+        console.error(err);
+        setError("Error loading companies");
+      }
+    }
 
-      const mappedRoutes = routesData.map((route: Route) => ({
-        ...route,
-        startCityName:
-          locationsData.find((loc: Location) => loc.id === route.startCityId)
-            ?.name || "",
-        endCityName:
-          locationsData.find((loc: Location) => loc.id === route.endCityId)
-            ?.name || "",
-      }));
-      setRoutes(mappedRoutes);
-    };
-
-    fetchData();
+    fetchCompanies();
   }, []);
 
-  const handleDateChange = (selectedDate: Date | null) => {
-    if (selectedDate) {
-      setDate(selectedDate.toISOString());
+  // Fetch trip data based on the selected companyId
+  useEffect(() => {
+    if (!companyId) return;
+
+    async function fetchTripData() {
+      try {
+        const response = await fetch(`/api/GET/getTripForm?companyId=${companyId}`);
+        if (!response.ok) throw new Error("Failed to fetch trip data");
+        const data: TripForm[] = await response.json();
+        setTripData(data);
+      } catch (err) {
+        console.error(err);
+        setError("Error loading trip data");
+      }
     }
+
+    fetchTripData();
+  }, [companyId]);
+
+  // Extract unique buses, routes, and drivers from tripData
+  const buses = Array.from(new Map(tripData.map((trip) => [trip.bus.id, trip.bus])).values());
+  const routes = Array.from(new Map(tripData.map((trip) => [trip.route.id, trip.route])).values());
+  const drivers = Array.from(
+    new Map(
+      tripData
+        .filter((trip) => trip.driver)
+        .map((trip) => [trip.driver!.id, trip.driver!])
+    ).values()
+  );
+
+  const handleDateChange = (selectedDate: Date | null) => {
+    setDate(selectedDate ? selectedDate.toISOString() : null);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!departureTime || !price || !busId || !routeId || !branchId) {
+    if (!departureTime || !price || !busId || !routeId) {
       setError("All fields are required.");
       return;
     }
@@ -162,9 +143,7 @@ function TripSheet({ onAddSuccess }: Props) {
     try {
       const response = await fetch("/api/POST/Trips", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           date,
           departureTime,
@@ -172,19 +151,15 @@ function TripSheet({ onAddSuccess }: Props) {
           busId,
           routeId,
           driverId,
-          branchId,
           recurring,
         }),
       });
 
-      if (!response.ok) throw new Error("Network response was not ok");
-
-      const data = await response.json();
-      console.log("Data received:", data);
+      if (!response.ok) throw new Error("Failed to add trip");
       onAddSuccess();
       alert("Trip added successfully!");
-    } catch (error) {
-      console.error("Error:", error);
+    } catch (err) {
+      console.error(err);
       setError("Failed to add trip.");
     } finally {
       setIsSubmitting(false);
@@ -202,77 +177,78 @@ function TripSheet({ onAddSuccess }: Props) {
         <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
           <SheetHeader>
             <SheetTitle>Add Trip</SheetTitle>
-            <SheetDescription>Click save when you&apos;re done.</SheetDescription>
+            <SheetDescription>Fill out the details below and save.</SheetDescription>
           </SheetHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
+              {/* Company Selector */}
               <div className="grid grid-cols-1 items-center gap-4">
-                <Label htmlFor="recurring" className="text-left">
-                  Recurring Trip
-                </Label>
-                <Input
-                  type="checkbox"
-                  id="recurring"
-                  checked={recurring}
-                  onChange={() => setRecurring(!recurring)}
-                />
-              </div>
-              {!recurring && (
-                <div className="grid grid-cols-1 items-center gap-4">
-                  <Label htmlFor="date" className="text-left">
-                    Date
-                  </Label>
-                  <CalendarDate onDateChange={handleDateChange} />
-                </div>
-              )}
-              <div className="grid grid-cols-1 items-center gap-4">
-                <Label htmlFor="departureTime" className="text-left">
-                  Departure Time
-                </Label>
-                <Input
-                  id="departureTime"
-                  type="time"
-                  value={departureTime}
-                  onChange={(e) => setDepartureTime(e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-1 items-center gap-4">
-                <Label htmlFor="price" className="text-left">
-                  Price
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
-                />
-              </div>
-              <div className="grid grid-cols-1 items-center gap-4">
-                <Label htmlFor="busId" className="text-left">
-                  Bus
-                </Label>
-                <Select value={busId} onValueChange={setBusId}>
+                <Label>Company</Label>
+                <Select value={companyId ?? ""} onValueChange={setCompanyId}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a bus" />
+                    <SelectValue placeholder="Select a company" />
                   </SelectTrigger>
-                  <SelectContent className="z-[99999]">
-                    {buses.map((bus) => (
-                      <SelectItem key={bus.id} value={bus.id}>
-                        {bus.busModel} ({bus.plateNumber})
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-1 items-center gap-4">
-                <Label htmlFor="routeId" className="text-left">
-                  Route
-                </Label>
+                <Label>Recurring Trip</Label>
+                <Input
+                  type="checkbox"
+                  checked={recurring}
+                  onChange={() => setRecurring(!recurring)}
+                />
+              </div>
+              {!recurring && (
+                <div className="grid grid-cols-1 items-center gap-4">
+                  <Label>Date</Label>
+                  <CalendarDate onDateChange={handleDateChange} />
+                </div>
+              )}
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label>Departure Time</Label>
+                <Input
+                  type="time"
+                  value={departureTime}
+                  onChange={(e) => setDepartureTime(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label>Price</Label>
+                <Input
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(Number(e.target.value))}
+                />
+              </div>
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label>Bus</Label>
+                <Select value={busId} onValueChange={setBusId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a bus" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {buses.map((bus) => (
+                      <SelectItem key={bus.id} value={bus.id}>
+                        {bus.busModel} ({bus.capacity})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label>Route</Label>
                 <Select value={routeId} onValueChange={setRouteId}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a route" />
                   </SelectTrigger>
-                  <SelectContent className="z-[99999]">
+                  <SelectContent>
                     {routes.map((route) => (
                       <SelectItem key={route.id} value={route.id}>
                         {route.startCityName} - {route.endCityName}
@@ -283,14 +259,12 @@ function TripSheet({ onAddSuccess }: Props) {
               </div>
               {!recurring && (
                 <div className="grid grid-cols-1 items-center gap-4">
-                  <Label htmlFor="driverId" className="text-left">
-                    Driver
-                  </Label>
-                  <Select value={driverId} onValueChange={setDriverId}>
+                  <Label>Driver</Label>
+                  <Select value={driverId ?? ""} onValueChange={setDriverId}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a driver" />
                     </SelectTrigger>
-                    <SelectContent className="z-[99999]">
+                    <SelectContent>
                       {drivers.map((driver) => (
                         <SelectItem key={driver.id} value={driver.id}>
                           {driver.firstName} {driver.lastName}
@@ -300,23 +274,6 @@ function TripSheet({ onAddSuccess }: Props) {
                   </Select>
                 </div>
               )}
-              <div className="grid grid-cols-1 items-center gap-4">
-                <Label htmlFor="branchId" className="text-left">
-                  Branch
-                </Label>
-                <Select value={branchId} onValueChange={setBranchId}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a branch" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[99999]">
-                    {branches.map((branch) => (
-                      <SelectItem key={branch.id} value={branch.id}>
-                        {branch.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
             {error && <p className="text-red-500">{error}</p>}
             <Button type="submit" disabled={isSubmitting}>

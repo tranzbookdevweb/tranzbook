@@ -43,7 +43,6 @@ model Branch {
   companyId    String
   admins       Admin[]
   routes       Route[]
-  trips        Trip[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
@@ -92,7 +91,7 @@ model Bus {
   plateNumber   String?
   capacity      Int
   busModel      String?
-   onArrival       Boolean    @default(false)
+  onArrival       Boolean    @default(false)
   status        String     @default("available") // Status field added
   image         String?
   company       BusCompany @relation(fields: [companyId], references: [id])
@@ -130,14 +129,12 @@ model Trip {
   recurring      Boolean   @default(false) // True if the trip is constant
   price          Float
   departureTime  String
-  bus            Bus       @relation(fields: [busId], references: [id])
-  busId          String
+  bus            Bus?       @relation(fields: [busId], references: [id])
+  busId          String?
   route          Route     @relation(fields: [routeId], references: [id])
   routeId        String
   driver         Driver?    @relation(fields: [driverId], references: [id])
   driverId       String?
-  branch         Branch    @relation(fields: [branchId], references: [id])
-  branchId       String
   bookings       Booking[]
   busCancellations BusCancellation[] // Opposite relation field for BusCancellation
   createdAt      DateTime  @default(now())
@@ -178,9 +175,17 @@ model Booking {
   trip         Trip      @relation(fields: [tripId], references: [id])
   tripId       String
   seatNumber   Int[]
-  status       String    @default("Pending") // New field for status with a default value
+  status       BookingStatus    @default(pending) // New field for status with a default value
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+enum BookingStatus{
+  pending
+  confirmed
+  cancelled
+  refunded
+  retained
 }
 
 
@@ -193,7 +198,7 @@ model BusCancellation {
   trip         Trip      @relation(fields: [tripId], references: [id])
   tripId       String
   seatNumber   Int
-  status       String    @default("pending") // refunded, retained, or pending
+  status       String    @default("cancelled") // refunded, retained, or pending
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -202,7 +207,7 @@ model Blog {
   id           String    @id @default(uuid())
   title        String
   content      String
-  image     String?
+  image        String?
   admin        Admin     @relation(fields: [adminId], references: [id])
   adminId      String
   createdAt    DateTime  @default(now())

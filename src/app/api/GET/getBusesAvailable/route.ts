@@ -1,16 +1,31 @@
 import prisma from "@/app/lib/db";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const companyId = searchParams.get("companyId");
+
+    if (!companyId) {
+      return NextResponse.json(
+        { error: "Missing companyId query parameter" },
+        { status: 400 }
+      );
+    }
+
     const currentTime = new Date();
 
-    // Fetch all trips along with their associated route, bus, and driver details
+    // Fetch all trips with associated route, bus, and driver details for the company
     const trips = await prisma.trip.findMany({
+      where: {
+        bus: {
+          companyId,
+        },
+      },
       include: {
         route: true,
-        bus: true,   // This includes the bus object, where 'onArrival' is located
-        driver: true, // This includes the driver object
+        bus: true,
+        driver: true,
       },
     });
 
@@ -22,7 +37,7 @@ export async function GET() {
         data: { status: "available" },
       });
 
-      // If driver is not null, update the driver status to "available"
+      // If driverId is provided, update the driver status
       if (driverId) {
         await prisma.driver.update({
           where: { id: driverId },
@@ -31,32 +46,35 @@ export async function GET() {
       }
     };
 
-    // Iterate over trips and process those that are finished
+    // Iterate over trips to process those that are finished
     for (const trip of trips) {
       const { departureTime, route, bus, driver } = trip;
 
-      // Access 'onArrival' from the bus object
-      if (bus.onArrival) {
-        await updateStatus(bus.id, driver?.id); // Pass driver?.id to handle potential null value
-        continue; // Skip further checks for this bus and trip
+      // Skip processing if `onArrival` is true
+      if (bus?.onArrival) {
+        await updateStatus(bus.id, driver?.id);
+        continue;
       }
 
-      // Calculate trip end time based on departure time and route duration
+      // Parse departure time
       const departureDate = new Date();
       const [hours, minutes] = departureTime.split(":").map(Number);
       departureDate.setHours(hours, minutes, 0, 0);
 
       const tripEndTime = new Date(departureDate.getTime() + route.duration * 60000);
 
-      // If the current time is past the trip's end time, update bus and driver status
+      // If the current time is past the trip's end time, update the bus and driver status
       if (currentTime >= tripEndTime) {
-        await updateStatus(bus.id, driver?.id); // Pass driver?.id to handle potential null value
+        await updateStatus(bus.id, driver?.id);
       }
     }
 
-    // Fetch and return all buses that are available
+    // Fetch and return all available buses for the company
     const buses = await prisma.bus.findMany({
-      where: { status: "available" },
+      where: {
+        companyId,
+        status: "available",
+      },
     });
 
     return NextResponse.json(buses, { status: 200 });

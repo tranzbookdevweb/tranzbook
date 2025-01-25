@@ -14,7 +14,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Place, locations } from './locationConstants/Locations';
+
+interface Location {
+  id: string;
+  name: string;
+}
 
 interface ComboboxFormProps {
   onLocationSelect: (location: string) => void;
@@ -24,18 +28,37 @@ interface ComboboxFormProps {
 
 export function ComboboxForm({ onLocationSelect, disabledOptions = [], locationType }: ComboboxFormProps) {
   const [open, setOpen] = React.useState(false);
-  const [selectedLocation, setSelectedLocation] = React.useState<Place | null>(null);
+  const [locations, setLocations] = React.useState<Location[]>([]); // Ensure initial value is an empty array
+  const [selectedLocation, setSelectedLocation] = React.useState<Location | null>(null);
+  const [loading, setLoading] = React.useState(false);
+
+  // Fetch locations from API
+  React.useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/GET/getLocation');
+        if (!response.ok) {
+          throw new Error('Failed to fetch locations');
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setLocations(data);
+        } else {
+          console.error('Unexpected API response structure:', data);
+          setLocations([]); // Fallback to an empty array if data is not as expected
+        }      } catch (error) {
+        console.error('Error fetching locations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
 
   const handleLocationSelect = (location: string) => {
-    let foundLocation: Place | null = null;
-
-    locations.forEach((country) => {
-      const loc = country.locations.find((loc) => loc.capital === location);
-      if (loc) {
-        foundLocation = loc;
-      }
-    });
-
+    const foundLocation = locations.find((loc) => loc.name === location) || null;
     setSelectedLocation(foundLocation);
     setOpen(false);
     onLocationSelect(location); // Call the callback function with the name of the selected location
@@ -44,8 +67,8 @@ export function ComboboxForm({ onLocationSelect, disabledOptions = [], locationT
   // Set custom placeholders based on the location type
   const placeholder =
     locationType === 'FROM'
-      ? selectedLocation?.capital || 'Markola Accra'
-      : selectedLocation?.capital || 'Kejetia Market';
+      ? selectedLocation?.name || 'Markola Accra'
+      : selectedLocation?.name || 'Kejetia Market';
 
   return (
     <div className="flex items-center w-full space-x-4">
@@ -53,7 +76,7 @@ export function ComboboxForm({ onLocationSelect, disabledOptions = [], locationT
         <PopoverTrigger asChild>
           <div className="w-full cursor-pointer">
             {selectedLocation ? (
-              <>{selectedLocation.capital}</>
+              <>{selectedLocation.name}</>
             ) : (
               <span className="text-gray-500">{placeholder}</span>
             )}
@@ -63,22 +86,29 @@ export function ComboboxForm({ onLocationSelect, disabledOptions = [], locationT
           <Command>
             <CommandInput placeholder="Choose Location" />
             <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup>
-                {locations.flatMap((country) =>
-                  country.locations
-                    .filter((location) => !disabledOptions.includes(location.capital))
-                    .map((location) => (
-                      <CommandItem
-                        key={location.capital}
-                        value={location.capital}
-                        onSelect={() => handleLocationSelect(location.capital)}
-                      >
-                        {location.capital}
-                      </CommandItem>
-                    ))
-                )}
-              </CommandGroup>
+              {loading ? (
+                <CommandEmpty>Loading...</CommandEmpty>
+              ) : (
+                <>
+                  {locations.length === 0 ? (
+                    <CommandEmpty>No locations found.</CommandEmpty>
+                  ) : (
+                    <CommandGroup>
+                      {locations
+                        .filter((location) => !disabledOptions.includes(location.name))
+                        .map((location) => (
+                          <CommandItem
+                            key={location.id}
+                            value={location.name}
+                            onSelect={() => handleLocationSelect(location.name)}
+                          >
+                            {location.name}
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  )}
+                </>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>

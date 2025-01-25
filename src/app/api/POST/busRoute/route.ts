@@ -7,25 +7,38 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const {startCityId, endCityId, duration, distance, branchId } = await req.json();
+    const { startCityId, endCityId, duration, distance, branchId } = await req.json();
 
     if (!startCityId || !endCityId || !duration || !distance || !branchId) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
+    // Create the first route
     const newRoute = await prisma.route.create({
       data: {
-        startCityId :startCityId,
+        startCityId: startCityId,
         endCityId: endCityId,
         duration,
         distance,
-        branchId,  // Corrected from companyId to branchId
+        branchId,
       },
     });
 
-    return NextResponse.json(newRoute, { status: 201 });
+    // Create the reverse route
+    const reverseRoute = await prisma.route.create({
+      data: {
+        startCityId: endCityId, // Swapped start and end cities
+        endCityId: startCityId,
+        duration,
+        distance,
+        branchId,
+      },
+    });
+
+    // Return both routes
+    return NextResponse.json({ newRoute, reverseRoute }, { status: 201 });
   } catch (error) {
-    console.error('Error creating route:', error);
+    console.error('Error creating routes:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

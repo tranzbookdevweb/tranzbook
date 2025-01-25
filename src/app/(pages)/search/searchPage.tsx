@@ -20,18 +20,6 @@ type Trip = {
   branchId: string;
   createdAt: string;
   updatedAt: string;
-  branch: {
-    id: string;
-    name: string;
-    address: string;
-    location: string;
-    companyId: string;
-    createdAt: string;
-    updatedAt: string;
-    company: {
-      logo: string;
-    };
-  };
   bus: {
     id: string;
     plateNumber: string;
@@ -41,6 +29,9 @@ type Trip = {
     companyId: string;
     createdAt: string;
     updatedAt: string;
+    company: {
+      logo: string
+  }
   };
   route: {
     id: string;
@@ -210,9 +201,9 @@ const SearchResults = () => {
                   <div className="sectiontop">
                     <div className="buspic">
                       <img
-                        className='w-48 rounded-full h-24 object-fill'
+                        className='w-48 rounded-full h-24 object-cover'
                         src={ 
-                          trip.branch.company.logo
+                          trip.bus.company.logo
                           ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${trip.bus.image}`
                           : defaultlogo
                         }
@@ -225,7 +216,7 @@ const SearchResults = () => {
                     </h2>
                     <h3>
                       <AccessTimeSharp className="ic" /> {trip.departureTime} | Date:{" "}
-                      {trip.date || "No date selected"}
+                      {trip.date || date}
                     </h3>
                   </div>
                   <div className="sectionbottom">
@@ -246,7 +237,7 @@ const SearchResults = () => {
                         className="w-full rounded-full h-12 object-fill"
                         src={ 
                           trip.bus.image
-                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.branch.company.logo}`
+                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.bus.company.logo}`
                           : defaultlogo
                         }
                         alt="Bus Image"

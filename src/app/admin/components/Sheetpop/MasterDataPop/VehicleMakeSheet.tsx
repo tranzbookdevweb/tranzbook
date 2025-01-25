@@ -169,15 +169,16 @@ function BusSheet({ onAddSuccess }: Props) {
                     </Label>
                     <Input id="plateNumber" type="text" />
                   </div>
-                  <div className="grid grid-cols-1 items-center gap-4">
-                    <Label htmlFor="busModel" className="text-left">
-                      Bus Model
-                    </Label>
-                    <Input id="busModel" type="text" />
-                  </div>
+                  
                 </>
               )}
               <div className="grid grid-cols-1 items-center gap-4">
+                    <Label htmlFor="busModel" className="text-left">
+                      Bus Model
+                    </Label>
+                    <Input name="busModel" id="busModel" type="text" />
+                  </div>
+                  <div className="grid grid-cols-1 items-center gap-4">
                 <Label htmlFor="capacity" className="text-left">
                   Capacity
                 </Label>

@@ -1,13 +1,16 @@
-import prisma from "@/app/lib/db"; // Ensure Prisma client is set up correctly
-import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/app/lib/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
 
-// POST function to handle booking creation
 export async function POST(req: NextRequest) {
   try {
+    console.log("Incoming Request:", req.method, req.url);
+
     // Get the current user using Kinde authentication
     const { getUser } = getKindeServerSession();
     const user = await getUser();
+
+    console.log("Authenticated User:", user);
 
     // If no user is found, return an error
     if (!user) {
@@ -19,6 +22,8 @@ export async function POST(req: NextRequest) {
 
     // Parse the request body to get the booking data
     const body = await req.json();
+    console.log("Request Body:", body);
+
     const { reference, tripId, seatNumber } = body;
 
     // Ensure that all required fields are provided in the request
@@ -32,15 +37,16 @@ export async function POST(req: NextRequest) {
     // Create a new booking in the database using Prisma
     const booking = await prisma.booking.create({
       data: {
-        reference, // Assuming reference is generated on the client-side
-        userId: user.id, // Using the authenticated user's ID
+        reference,
+        userId: user.id,
         tripId,
         seatNumber,
-        status: "Pending", // Explicitly set status to "Pending"
+        status: "Pending",
       },
     });
 
-    // Return the created booking as a response
+    console.log("Booking Created:", booking);
+
     return NextResponse.json(booking, { status: 201 });
   } catch (error: any) {
     console.error("Error during booking creation:", error);
