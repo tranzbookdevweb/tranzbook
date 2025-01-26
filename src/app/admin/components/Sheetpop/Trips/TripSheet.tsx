@@ -35,16 +35,21 @@ type Route = {
   id: string;
   startCityId: string;
   endCityId: string;
-  startCityName: string;
-  endCityName: string;
+  startCity: string;
+  endCity: string;
 };
 
 type Driver = { id: string; firstName: string; lastName: string };
 
 type Company = { id: string; name: string };
 
+type TripResponse = {
+  buses: Bus[];
+  routes: Route[];
+  drivers: Driver[];
+};
+
 type TripForm = {
-  id: string;
   date?: string | null;
   recurring: boolean;
   price: number;
@@ -52,9 +57,6 @@ type TripForm = {
   busId: string;
   routeId: string;
   driverId?: string | null;
-  bus: Bus;
-  route: Route;
-  driver?: Driver | null;
 };
 
 type Props = { onAddSuccess: () => void };
@@ -62,7 +64,12 @@ type Props = { onAddSuccess: () => void };
 function TripSheet({ onAddSuccess }: Props) {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [companyId, setCompanyId] = useState<string | null>(null);
-  const [tripData, setTripData] = useState<TripForm[]>([]);
+  const [tripData, setTripData] = useState<TripResponse>({
+    buses: [],
+    routes: [],
+    drivers: [],
+  });
+
   const [departureTime, setDepartureTime] = useState("");
   const [price, setPrice] = useState<number>(0);
   const [busId, setBusId] = useState("");
@@ -73,7 +80,7 @@ function TripSheet({ onAddSuccess }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch companies from the API
+  // Fetch companies
   useEffect(() => {
     async function fetchCompanies() {
       try {
@@ -86,11 +93,10 @@ function TripSheet({ onAddSuccess }: Props) {
         setError("Error loading companies");
       }
     }
-
     fetchCompanies();
   }, []);
 
-  // Fetch trip data based on the selected companyId
+  // Fetch trip data
   useEffect(() => {
     if (!companyId) return;
 
@@ -98,27 +104,15 @@ function TripSheet({ onAddSuccess }: Props) {
       try {
         const response = await fetch(`/api/GET/getTripForm?companyId=${companyId}`);
         if (!response.ok) throw new Error("Failed to fetch trip data");
-        const data: TripForm[] = await response.json();
+        const data: TripResponse = await response.json();
         setTripData(data);
       } catch (err) {
         console.error(err);
         setError("Error loading trip data");
       }
     }
-
     fetchTripData();
   }, [companyId]);
-
-  // Extract unique buses, routes, and drivers from tripData
-  const buses = Array.from(new Map(tripData.map((trip) => [trip.bus.id, trip.bus])).values());
-  const routes = Array.from(new Map(tripData.map((trip) => [trip.route.id, trip.route])).values());
-  const drivers = Array.from(
-    new Map(
-      tripData
-        .filter((trip) => trip.driver)
-        .map((trip) => [trip.driver!.id, trip.driver!])
-    ).values()
-  );
 
   const handleDateChange = (selectedDate: Date | null) => {
     setDate(selectedDate ? selectedDate.toISOString() : null);
@@ -166,6 +160,7 @@ function TripSheet({ onAddSuccess }: Props) {
     }
   };
 
+  const { buses, routes, drivers } = tripData;
   return (
     <Sheet>
       <SheetTrigger className="flex items-center">
@@ -188,7 +183,7 @@ function TripSheet({ onAddSuccess }: Props) {
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a company" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[999]">
                     {companies.map((company) => (
                       <SelectItem key={company.id} value={company.id}>
                         {company.name}
@@ -228,52 +223,67 @@ function TripSheet({ onAddSuccess }: Props) {
                 />
               </div>
               <div className="grid grid-cols-1 items-center gap-4">
-                <Label>Bus</Label>
-                <Select value={busId} onValueChange={setBusId}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a bus" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {buses.map((bus) => (
-                      <SelectItem key={bus.id} value={bus.id}>
-                        {bus.busModel} ({bus.capacity})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-1 items-center gap-4">
-                <Label>Route</Label>
-                <Select value={routeId} onValueChange={setRouteId}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a route" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {routes.map((route) => (
-                      <SelectItem key={route.id} value={route.id}>
-                        {route.startCityName} - {route.endCityName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {!recurring && (
-                <div className="grid grid-cols-1 items-center gap-4">
-                  <Label>Driver</Label>
-                  <Select value={driverId ?? ""} onValueChange={setDriverId}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a driver" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {drivers.map((driver) => (
-                        <SelectItem key={driver.id} value={driver.id}>
-                          {driver.firstName} {driver.lastName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+  <Label>Bus</Label>
+  {buses.length === 0 ? (
+    <p>No available buses</p>
+  ) : (
+    <Select value={busId} onValueChange={setBusId}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Select a bus" />
+      </SelectTrigger>
+      <SelectContent className="z-[999]">
+        {buses.map((bus) => (
+          <SelectItem key={bus.id} value={bus.id}>
+            {bus.busModel} ({bus.capacity})
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )}
+</div>
+
+<div className="grid grid-cols-1 items-center gap-4">
+  <Label>Route</Label>
+  {routes.length === 0 ? (
+    <p>No available routes</p>
+  ) : (
+    <Select value={routeId} onValueChange={setRouteId}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Select a route" />
+      </SelectTrigger>
+      <SelectContent  className="z-[999]">
+        {routes.map((route) => (
+          <SelectItem key={route.id} value={route.id}>
+            {route.startCity} - {route.endCity}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )}
+</div>
+
+{!recurring && (
+  <div className="grid grid-cols-1 items-center gap-4">
+    <Label>Driver</Label>
+    {drivers.length === 0 ? (
+      <p>No available drivers</p>
+    ) : (
+      <Select value={driverId ?? ""} onValueChange={setDriverId}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select a driver" />
+        </SelectTrigger>
+        <SelectContent className="z-[999]">
+          {drivers.map((driver) => (
+            <SelectItem key={driver.id} value={driver.id}>
+              {driver.firstName} {driver.lastName}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )}
+  </div>
+)}
+
             </div>
             {error && <p className="text-red-500">{error}</p>}
             <Button type="submit" disabled={isSubmitting}>

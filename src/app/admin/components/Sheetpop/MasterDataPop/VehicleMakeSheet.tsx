@@ -176,7 +176,12 @@ function BusSheet({ onAddSuccess }: Props) {
                     <Label htmlFor="busModel" className="text-left">
                       Bus Model
                     </Label>
-                    <Input name="busModel" id="busModel" type="text" />
+                    <Input
+                     name="busModel"
+                      id="busModel"
+                       type="text"
+                       value={busModel}
+                       onChange={(e) => setBusModel(e.target.value)} />
                   </div>
                   <div className="grid grid-cols-1 items-center gap-4">
                 <Label htmlFor="capacity" className="text-left">
