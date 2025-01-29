@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     if (status === "Upcoming") {
       // Upcoming trips: trips with a date greater than or equal to today
       filter.trip = { date: { gte: now } };
-      filter.status = "Pending"; // Optional: Ensure only pending trips are shown
+      filter.status = "pending"; // Optional: Ensure only pending trips are shown
     } else if (status === "Past") {
       // Past trips: trips with a date less than today (already taken)
       filter.trip = { date: { lt: now } };

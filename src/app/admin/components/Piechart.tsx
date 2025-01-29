@@ -11,7 +11,7 @@ interface DataItem {
 const data: DataItem[] = [
   { name: "Completed", value: 400, color: "#0088FE" },
   { name: "Cancelled ", value: 300, color: "#00C49F" },
-  { name: "Pending", value: 300, color: "#FFBB28" },
+  { name: "pending", value: 300, color: "#FFBB28" },
 ];
 
 const PieChartBox: React.FC = () => {

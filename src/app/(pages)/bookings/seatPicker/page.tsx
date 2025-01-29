@@ -216,7 +216,7 @@ const PageContainer: React.FC = () => {
         reference, // Add the generated reference here
         tripId,
         seatNumber: seatNumbers, // Store the parsed seat numbers
-        status: "Pending", //not necessary since it's a default value
+        status: "pending", //not necessary since it's a default value
       };
 
       // Send the booking request to the server
