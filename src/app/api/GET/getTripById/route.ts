@@ -21,7 +21,6 @@ export async function GET(request: Request) {
           },
         },
         driver: true, // Include related driver data
-        branch: true, // Include related branch data
         route: {
           include: {
             startCity: true, // Include start location
