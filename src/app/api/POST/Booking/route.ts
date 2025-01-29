@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         tripId,
         seatNumber,
-        status: "Pending",
+        status: "pending",
       },
     });
 
