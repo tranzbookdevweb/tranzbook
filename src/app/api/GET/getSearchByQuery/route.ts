@@ -83,11 +83,19 @@ export async function GET(request: Request) {
     const specificDateFilter: any = {
       route: {
         startCity: {
-          name: fromLocation,
-        },
+          name: {
+            // Use `ilike` for case-insensitive comparison in PostgreSQL
+            // or `lower()` for other databases (like MySQL)
+            contains: fromLocation,
+            mode: "insensitive",
+          },        },
         endCity: {
-          name: toLocation,
-        },
+          name: {
+            // Use `ilike` for case-insensitive comparison in PostgreSQL
+            // or `lower()` for other databases (like MySQL)
+            contains: toLocation,
+            mode: "insensitive",
+          },        },
       },
       date: new Date(date), // Specific date filter
       departureTime: departureTimeFilter, // Apply the departure time filter
@@ -97,10 +105,19 @@ export async function GET(request: Request) {
     const recurringFilter: any = {
       route: {
         startCity: {
-          name: fromLocation,
-        },
+          name: {
+            // Use `ilike` for case-insensitive comparison in PostgreSQL
+            // or `lower()` for other databases (like MySQL)
+            contains: fromLocation,
+            mode: "insensitive",
+          },        },
         endCity: {
-          name: toLocation,
+          name: {
+            // Use `ilike` for case-insensitive comparison in PostgreSQL
+            // or `lower()` for other databases (like MySQL)
+            contains: toLocation,
+            mode: "insensitive",
+          },
         },
       },
       recurring: true, // Include recurring trips
