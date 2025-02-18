@@ -62,7 +62,7 @@ export default function UpperHome({}: Props) {
       <Partner/>
   
     <section id='Faq'>
-      <Faq/>
+      <Faq activeButton={activeButton}/>
     </section>
     
 
