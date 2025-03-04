@@ -39,10 +39,9 @@ type Props = {
 function BusSheet({ onAddSuccess }: Props) {
   const [plateNumber, setPlateNumber] = useState('');
   const [capacity, setCapacity] = useState(0);
-  const [busModel, setBusModel] = useState('');
+  const [busDescription, setBusDescription] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
-  const [branchId, setBranchId] = useState('');
   const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
@@ -113,7 +112,7 @@ function BusSheet({ onAddSuccess }: Props) {
       const formData = new FormData();
       formData.append('plateNumber', onArrival ? '' : plateNumber); // Skip plate number if onArrival is true
       formData.append('capacity', capacity.toString());
-      formData.append('busModel', busModel);
+      formData.append('busDescription', busDescription);
       formData.append('companyId', companyId);
       formData.append('image', image);
 
@@ -173,15 +172,15 @@ function BusSheet({ onAddSuccess }: Props) {
                 </>
               )}
               <div className="grid grid-cols-1 items-center gap-4">
-                    <Label htmlFor="busModel" className="text-left">
+                    <Label htmlFor="busDescription" className="text-left">
                       Bus Model
                     </Label>
                     <Input
-                     name="busModel"
-                      id="busModel"
+                     name="busDescription"
+                      id="busDescription"
                        type="text"
-                       value={busModel}
-                       onChange={(e) => setBusModel(e.target.value)} />
+                       value={busDescription}
+                       onChange={(e) => setBusDescription(e.target.value)} />
                   </div>
                   <div className="grid grid-cols-1 items-center gap-4">
                 <Label htmlFor="capacity" className="text-left">
@@ -225,27 +224,7 @@ function BusSheet({ onAddSuccess }: Props) {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-1 items-center gap-4">
-                <Label htmlFor="branchId" className="text-left">
-                  Branch
-                </Label>
-                <Select
-                  value={branchId}
-                  onValueChange={(value) => setBranchId(value)}
-                  disabled={!companyId}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a branch" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[99999]">
-                    {filteredBranches.map((branch) => (
-                      <SelectItem key={branch.id} value={branch.id}>
-                        {branch.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+
 
               <div className="space-x-4">
                 <div className="flex items-center">

@@ -81,19 +81,34 @@ async function fetchBusCompanies() {
   }
 }
 
+async function fetchExistingRoute(startCityId: string, endCityId: string) {
+  try {
+    const response = await fetch(
+      `/api/GET/checkroutes?start=${startCityId}&end=${endCityId}`
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching existing route:", error);
+    return null;
+  }
+}
+
 function ServiceLocation({ onAddSuccess }: Props) {
   const [startCityId, setstartCityId] = useState('');
   const [endCityId, setendCityId] = useState('');
   const [duration, setDuration] = useState(0);
   const [distance, setDistance] = useState(0);
   const [branchId, setBranchId] = useState('');
-  const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
+  const [companyId, setcompanyId] = useState<string | null>(null);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDisabled, setIsDisabled] = useState(false);
+
 
   useEffect(() => {
     // Fetch branches, locations, and bus companies
@@ -110,16 +125,30 @@ function ServiceLocation({ onAddSuccess }: Props) {
 
     fetchData();
   }, []);
-
   useEffect(() => {
-    if (selectedCompany) {
+    if (startCityId && endCityId) {
+      fetchExistingRoute(startCityId, endCityId).then((route) => {
+        if (route) {
+          setDistance(route.distance);
+          setDuration(route.duration);
+          setIsDisabled(true);
+        } else {
+          setDistance(0);
+          setDuration(0);
+          setIsDisabled(false);
+        }
+      });
+    }
+  }, [startCityId, endCityId]);
+  useEffect(() => {
+    if (companyId) {
       // Filter branches based on the selected company
-      const filtered = branches.filter(branch => branch.companyId === selectedCompany);
+      const filtered = branches.filter(branch => branch.companyId === companyId);
       setFilteredBranches(filtered);
     } else {
       setFilteredBranches([]);
     }
-  }, [selectedCompany, branches]);
+  }, [companyId, branches]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -138,7 +167,7 @@ function ServiceLocation({ onAddSuccess }: Props) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ startCityId, endCityId, duration, distance, branchId }),
+        body: JSON.stringify({ startCityId, endCityId, duration, distance, branchId,companyId  }),
       });
 
       if (!response.ok) {
@@ -217,6 +246,8 @@ function ServiceLocation({ onAddSuccess }: Props) {
                 value={duration}
                 onChange={(e) => setDuration(Number(e.target.value))}
                 className="col-span-3"
+                disabled={isDisabled}
+
               />
             </div>
             <div className="grid grid-cols-1 items-center gap-4">
@@ -230,13 +261,15 @@ function ServiceLocation({ onAddSuccess }: Props) {
                 value={distance}
                 onChange={(e) => setDistance(Number(e.target.value))}
                 className="col-span-3"
+                disabled={isDisabled}
+
               />
             </div>
             <div className="grid grid-cols-1 items-center gap-4">
               <Label htmlFor="company" className="text-left">
                 Company
               </Label>
-              <Select value={selectedCompany ?? ''} onValueChange={(value) => setSelectedCompany(value)}>
+              <Select value={companyId ?? ''} onValueChange={(value) => setcompanyId(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a company" />
                 </SelectTrigger>
@@ -253,7 +286,7 @@ function ServiceLocation({ onAddSuccess }: Props) {
               <Label htmlFor="branchId" className="text-left">
                 Branch
               </Label>
-              <Select value={branchId} onValueChange={setBranchId} disabled={!selectedCompany}>
+              <Select value={branchId} onValueChange={setBranchId} disabled={!companyId}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a branch" />
                 </SelectTrigger>

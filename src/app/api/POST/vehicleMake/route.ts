@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const plateNumber = formData.get("plateNumber") as string;
     const capacity = parseInt(formData.get("capacity") as string, 10);
-    const busModel = formData.get("busModel") as string;
+    const busDescription = formData.get("busDescription") as string;
     const companyId = formData.get("companyId") as string;
     const image = formData.get("image") as File;
 
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       data: {
         plateNumber,
         capacity,
-        busModel,
+        busDescription,
         companyId,
         image: imageData?.path,  // Store the image path in Prisma
         status: "available",     // Default status is set to available

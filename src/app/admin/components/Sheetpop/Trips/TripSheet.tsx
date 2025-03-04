@@ -21,13 +21,14 @@ import {
 } from "@/components/ui/select";
 import { CalendarDate } from "./Calendar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Type Definitions
 type Bus = {
   id: string;
   name?: string;
   plateNumber?: string;
-  busModel: string;
+  busDescription: string;
   capacity: number;
 };
 
@@ -49,10 +50,18 @@ type TripResponse = {
   drivers: Driver[];
 };
 
+type Currency = "GHS" | "USD" | "EUR" | "NGN";
+
+type CommissionType = "FIXED" | "PERCENTAGE";
+
 type TripForm = {
   date?: string | null;
   recurring: boolean;
+  daysOfWeek: number[];
   price: number;
+  currency: Currency;
+  commission: number;
+  commissionType: CommissionType;
   departureTime: string;
   busId: string;
   routeId: string;
@@ -60,6 +69,16 @@ type TripForm = {
 };
 
 type Props = { onAddSuccess: () => void };
+
+const DAYS_OF_WEEK = [
+  { value: 1, label: "Monday" },
+  { value: 2, label: "Tuesday" },
+  { value: 3, label: "Wednesday" },
+  { value: 4, label: "Thursday" },
+  { value: 5, label: "Friday" },
+  { value: 6, label: "Saturday" },
+  { value: 7, label: "Sunday" },
+];
 
 function TripSheet({ onAddSuccess }: Props) {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -70,12 +89,17 @@ function TripSheet({ onAddSuccess }: Props) {
     drivers: [],
   });
 
+  // Form state
   const [departureTime, setDepartureTime] = useState("");
   const [price, setPrice] = useState<number>(0);
+  const [currency, setCurrency] = useState<Currency>("GHS");
+  const [commission, setCommission] = useState<number>(0);
+  const [commissionType, setCommissionType] = useState<CommissionType>("FIXED");
   const [busId, setBusId] = useState("");
   const [routeId, setRouteId] = useState("");
   const [driverId, setDriverId] = useState<string | null>(null);
   const [recurring, setRecurring] = useState(false);
+  const [daysOfWeek, setDaysOfWeek] = useState<number[]>([]);
   const [date, setDate] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,16 +142,29 @@ function TripSheet({ onAddSuccess }: Props) {
     setDate(selectedDate ? selectedDate.toISOString() : null);
   };
 
+  const handleDayOfWeekToggle = (day: number) => {
+    setDaysOfWeek(prev => 
+      prev.includes(day) 
+        ? prev.filter(d => d !== day) 
+        : [...prev, day]
+    );
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!departureTime || !price || !busId || !routeId) {
+    if (!departureTime || price === undefined || !busId || !routeId) {
       setError("All fields are required.");
       return;
     }
 
     if (!recurring && (!date || !driverId)) {
       setError("Date and Driver are required for non-recurring trips.");
+      return;
+    }
+
+    if (recurring && daysOfWeek.length === 0) {
+      setError("Please select at least one day of the week for recurring trips.");
       return;
     }
 
@@ -140,12 +177,16 @@ function TripSheet({ onAddSuccess }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           date,
+          recurring,
+          daysOfWeek: recurring ? daysOfWeek : [],
           departureTime,
           price,
+          currency,
+          commission,
+          commissionType,
           busId,
           routeId,
           driverId,
-          recurring,
         }),
       });
 
@@ -192,20 +233,43 @@ function TripSheet({ onAddSuccess }: Props) {
                   </SelectContent>
                 </Select>
               </div>
+              {/* Recurring Trip Toggle */}
               <div className="grid grid-cols-1 items-center gap-4">
-                <Label>Recurring Trip</Label>
-                <Input
-                  type="checkbox"
-                  checked={recurring}
-                  onChange={() => setRecurring(!recurring)}
-                />
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="recurring" 
+                    checked={recurring} 
+                    onCheckedChange={() => setRecurring(!recurring)} 
+                  />
+                  <Label htmlFor="recurring">Recurring Trip</Label>
+                </div>
               </div>
+              {/* Days of Week for Recurring Trips */}
+              {recurring && (
+                <div className="grid grid-cols-1 items-center gap-4">
+                  <Label>Days of Week</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {DAYS_OF_WEEK.map((day) => (
+                      <div key={day.value} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`day-${day.value}`} 
+                          checked={daysOfWeek.includes(day.value)} 
+                          onCheckedChange={() => handleDayOfWeekToggle(day.value)} 
+                        />
+                        <Label htmlFor={`day-${day.value}`}>{day.label}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Date for One-Time Trip */}
               {!recurring && (
                 <div className="grid grid-cols-1 items-center gap-4">
                   <Label>Date</Label>
                   <CalendarDate onDateChange={handleDateChange} />
                 </div>
               )}
+              {/* Departure Time */}
               <div className="grid grid-cols-1 items-center gap-4">
                 <Label>Departure Time</Label>
                 <Input
@@ -214,6 +278,7 @@ function TripSheet({ onAddSuccess }: Props) {
                   onChange={(e) => setDepartureTime(e.target.value)}
                 />
               </div>
+              {/* Price */}
               <div className="grid grid-cols-1 items-center gap-4">
                 <Label>Price</Label>
                 <Input
@@ -222,68 +287,108 @@ function TripSheet({ onAddSuccess }: Props) {
                   onChange={(e) => setPrice(Number(e.target.value))}
                 />
               </div>
+              {/* Currency */}
               <div className="grid grid-cols-1 items-center gap-4">
-  <Label>Bus</Label>
-  {buses.length === 0 ? (
-    <p>No available buses</p>
-  ) : (
-    <Select value={busId} onValueChange={setBusId}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a bus" />
-      </SelectTrigger>
-      <SelectContent className="z-[999]">
-        {buses.map((bus) => (
-          <SelectItem key={bus.id} value={bus.id}>
-            {bus.busModel} ({bus.capacity})
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )}
-</div>
-
-<div className="grid grid-cols-1 items-center gap-4">
-  <Label>Route</Label>
-  {routes.length === 0 ? (
-    <p>No available routes</p>
-  ) : (
-    <Select value={routeId} onValueChange={setRouteId}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a route" />
-      </SelectTrigger>
-      <SelectContent  className="z-[999]">
-        {routes.map((route) => (
-          <SelectItem key={route.id} value={route.id}>
-            {route.startCity} - {route.endCity}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )}
-</div>
-
-{!recurring && (
-  <div className="grid grid-cols-1 items-center gap-4">
-    <Label>Driver</Label>
-    {drivers.length === 0 ? (
-      <p>No available drivers</p>
-    ) : (
-      <Select value={driverId ?? ""} onValueChange={setDriverId}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select a driver" />
-        </SelectTrigger>
-        <SelectContent className="z-[999]">
-          {drivers.map((driver) => (
-            <SelectItem key={driver.id} value={driver.id}>
-              {driver.firstName} {driver.lastName}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    )}
-  </div>
-)}
-
+                <Label>Currency</Label>
+                <Select value={currency} onValueChange={(value: Currency) => setCurrency(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[999]">
+                    <SelectItem value="GHS">GHS</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                    <SelectItem value="NGN">NGN</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Commission */}
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label>Commission</Label>
+                <Input
+                  type="number"
+                  value={commission}
+                  onChange={(e) => setCommission(Number(e.target.value))}
+                />
+              </div>
+              {/* Commission Type */}
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label>Commission Type</Label>
+                <Select 
+                  value={commissionType} 
+                  onValueChange={(value: CommissionType) => setCommissionType(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select commission type" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[999]">
+                    <SelectItem value="FIXED">Fixed</SelectItem>
+                    <SelectItem value="PERCENTAGE">Percentage</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Bus */}
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label>Bus</Label>
+                {buses.length === 0 ? (
+                  <p>No available buses</p>
+                ) : (
+                  <Select value={busId} onValueChange={setBusId}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a bus" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[999]">
+                      {buses.map((bus) => (
+                        <SelectItem key={bus.id} value={bus.id}>
+                          {bus.busDescription} ({bus.capacity})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              {/* Route */}
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label>Route</Label>
+                {routes.length === 0 ? (
+                  <p>No available routes</p>
+                ) : (
+                  <Select value={routeId} onValueChange={setRouteId}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a route" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[999]">
+                      {routes.map((route) => (
+                        <SelectItem key={route.id} value={route.id}>
+                          {route.startCity} - {route.endCity}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              {/* Driver (for non-recurring trips) */}
+              {!recurring && (
+                <div className="grid grid-cols-1 items-center gap-4">
+                  <Label>Driver</Label>
+                  {drivers.length === 0 ? (
+                    <p>No available drivers</p>
+                  ) : (
+                    <Select value={driverId ?? ""} onValueChange={setDriverId}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a driver" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[999]">
+                        {drivers.map((driver) => (
+                          <SelectItem key={driver.id} value={driver.id}>
+                            {driver.firstName} {driver.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              )}
             </div>
             {error && <p className="text-red-500">{error}</p>}
             <Button type="submit" disabled={isSubmitting}>

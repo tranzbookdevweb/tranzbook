@@ -24,7 +24,7 @@ type Trip = {
     id: string;
     plateNumber: string;
     capacity: number;
-    busModel: string;
+    busDescription: string;
     image: string;
     companyId: string;
     createdAt: string;
@@ -204,7 +204,7 @@ const SearchResults = () => {
                         className='w-48 rounded-full h-24 object-cover'
                         src={ 
                           trip.bus.company.logo
-                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${trip.bus.image}`
+                          ? `https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/images/${trip.bus.image}`
                           : defaultlogo
                         }
                         alt="Company Logo"
@@ -232,12 +232,14 @@ const SearchResults = () => {
                 </div>
                 <div className="rightloca flex flex-col items-center justify-between">
                   <div className="flex items-center text-center h-full py-5 justify-between flex-col text-[2vh]">
+                  <h1 className='text-sm text-blue-600 font-semibold'>{trip.bus.busDescription}</h1>
+
                     <div>
                       <img
                         className="w-full rounded-full h-12 object-fill"
                         src={ 
                           trip.bus.image
-                          ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.bus.company.logo}`
+                          ? `https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/${trip.bus.company.logo}`
                           : defaultlogo
                         }
                         alt="Bus Image"

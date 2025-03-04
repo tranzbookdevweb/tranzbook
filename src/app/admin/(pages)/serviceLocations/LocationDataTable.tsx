@@ -33,41 +33,50 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ServiceLocation from '../../components/Sheetpop/serviceLocations/serviceLocationsSheet';
 
-interface Data {
+
+interface City {
   id: string;
-  startCityId: string;
-  endCityId: string;
+  name: string;
+  imageUrl: string | null;
+  country: string;
+  currency: string;
+}
+
+interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  phoneNumber: string | null;
+  city: string;
+  companyId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface RouteData {
+  id: string;
   duration: number;
   distance: number;
-  companyId: string;
+  startCity: City;
+  endCity: City;
+  branch: Branch;
 }
 
-interface Location {
-  id: string;
-  name: string;
-}
-
-interface BusCompany {
-  id: string;
-  name: string;
-}
-
-const columns: ColumnDef<Data & { startCityName: string; endCityName: string; companyName: string; }>[] = [
+const columns: ColumnDef<RouteData>[] = [
   {
     accessorKey: "Sno",
     header: "Sr No",
     cell: ({ row }) => <div>{row.index + 1}</div>,
   },
-  
   {
-    accessorKey: "startCityName",
+    accessorKey: "startCity.name",
     header: "Start Location",
-    cell: ({ row }) => <div>{row.getValue("startCityName")}</div>,
+    cell: ({ row }) => <div>{row.original.startCity.name}</div>,
   },
   {
-    accessorKey: "endCityName",
+    accessorKey: "endCity.name",
     header: "End Location",
-    cell: ({ row }) => <div>{row.getValue("endCityName")}</div>,
+    cell: ({ row }) => <div>{row.original.endCity.name}</div>,
   },
   {
     accessorKey: "duration",
@@ -80,70 +89,41 @@ const columns: ColumnDef<Data & { startCityName: string; endCityName: string; co
     cell: ({ row }) => <div>{row.getValue("distance")} km</div>,
   },
   {
-    accessorKey: "companyName",
+    accessorKey: "branch.name",
     header: "Company",
-    cell: ({ row }) => <div>{row.getValue("companyName")}</div>,
+    cell: ({ row }) => <div>{row.original.branch.name}</div>,
   },
 ];
-
 export function Location() {
-  const [data, setData] = useState<Data[]>([]);
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
-  const [sortedData, setSortedData] = useState<(Data & { startCityName: string; endCityName: string; companyName: string; })[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [data, setData] = useState<RouteData[]>([]);
 
-  const fetchLocations = async () => {
+
+  const fetchServiceLocations = async () => {
     try {
-      const [routeResponse, locationsResponse, companiesResponse] = await Promise.all([
-        fetch('/api/GET/getRoute'),
-        fetch('/api/GET/getLocation'),
-        fetch('/api/GET/getbusCompany'),
-      ]);
-
-      if (!routeResponse.ok || !locationsResponse.ok || !companiesResponse.ok) {
-        throw new Error('Failed to fetch data');
+      const response = await fetch('/api/GET/getServicelocations');
+      if (!response.ok) {
+        throw new Error('Failed to fetch service locations');
       }
-
-      const routes = await routeResponse.json();
-      const locationData = await locationsResponse.json();
-      const companyData = await companiesResponse.json();
-
-      setData(Array.isArray(routes) ? routes : []);
-      setLocations(Array.isArray(locationData) ? locationData : []);
-      setBusCompanies(Array.isArray(companyData) ? companyData : []);
+      const result = await response.json();
+      setData(result.routes);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching service locations:', error);
     }
   };
 
   useEffect(() => {
-    fetchLocations();
+    fetchServiceLocations();
   }, []);
-
-  useEffect(() => {
-    const locationMap = new Map(locations.map(location => [location.id, location.name]));
-    const companyMap = new Map(busCompanies.map(company => [company.id, company.name]));
-
-    const newSortedData = data.map(route => ({
-      ...route,
-      startCityName: locationMap.get(route.startCityId) || route.startCityId,
-      endCityName: locationMap.get(route.endCityId) || route.endCityId,
-      companyName: companyMap.get(route.companyId) || route.companyId,
-    }));
-
-    setSortedData(newSortedData);
-  }, [data, locations, busCompanies]);
-
   const handleAddSuccess = () => {
-    fetchLocations();
+    fetchServiceLocations();
   };
 
   const table = useReactTable({
-    data: sortedData,
+    data: data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

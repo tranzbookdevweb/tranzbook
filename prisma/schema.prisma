@@ -16,7 +16,7 @@ model User {
   profileImage       String?
   phoneNumber        String?
   bookings           Booking[]
-  busCancellations   BusCancellation[] // Opposite relation field for BusCancellation
+  busCancellations   BusCancellation[]
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 }
@@ -25,7 +25,7 @@ model BusCompany {
   id           String     @id @default(uuid())
   name         String
   email        String     @unique
-  logo      String?
+  logo         String?
   branches     Branch[]
   buses        Bus[]
   drivers      Driver[]
@@ -50,25 +50,24 @@ model Branch {
 model Role {
   id          String       @id @default(uuid())
   name        String       @unique
-  permissions Permission[] // One-to-many relationship with Permission
-  admins      Admin[]      //roles are assigned to admins
+  permissions Permission[]
+  admins      Admin[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
 
 model Permission {
-  id         String  @id @default(uuid())
-  name       String  @unique
-  canCreate  Boolean @default(false)
-  canRead    Boolean @default(false)
-  canUpdate  Boolean @default(false)
-  canDelete  Boolean @default(false)
-  roleId     String  // Foreign key for Role
-  role       Role    @relation(fields: [roleId], references: [id]) // Belongs to one Role
+  id         String   @id @default(uuid())
+  name       String   @unique
+  canCreate  Boolean  @default(false)
+  canRead    Boolean  @default(false)
+  canUpdate  Boolean  @default(false)
+  canDelete  Boolean  @default(false)
+  roleId     String
+  role       Role     @relation(fields: [roleId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
-
 
 model Admin {
   id           String     @id @default(uuid())
@@ -87,100 +86,167 @@ model Admin {
 }
 
 model Bus {
-  id            String     @id @default(uuid())
-  plateNumber   String?
-  capacity      Int
-  busModel      String?
+  id              String     @id @default(uuid())
+  plateNumber     String?
+  capacity        Int
+  busDescription        String?
   onArrival       Boolean    @default(false)
-  status        String     @default("available") // Status field added
-  image         String?
+  status          String     @default("available")
+  image           String?
+  company         BusCompany @relation(fields: [companyId], references: [id])
+  companyId       String
+  trips           Trip[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  // Amenities
+  airConditioning Boolean    @default(false)
+  chargingOutlets Boolean    @default(false)
+  wifi            Boolean    @default(false)
+  restRoom        Boolean    @default(false)
+  seatBelts       Boolean    @default(false)
+  onboardFood     Boolean    @default(false)
+}
+
+model Driver {
+  id            String     @id @default(uuid())
+  firstName     String
+  lastName      String
+  licenseNumber String     @unique
+  email         String     @unique
+  mobile        String
+  status        String     @default("Available")
   company       BusCompany @relation(fields: [companyId], references: [id])
   companyId     String
   trips         Trip[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
-  airConditioning Boolean   @default(false)   // Boolean for air conditioning
-  chargingOutlets Boolean   @default(false)   // Boolean for charging outlets
-  wifi           Boolean   @default(false)   // Boolean for Wi-Fi
-  restRoom       Boolean   @default(false)   // Boolean for restroom availability
-  seatBelts      Boolean   @default(false)   // Boolean for seat belts availability
-  onboardFood    Boolean   @default(false)   // Boolean for onboard food
-}
-
-
-model Driver {
-  id           String     @id @default(uuid())
-  firstName    String
-  lastName     String
-  licenseNumber String    @unique
-  email        String     @unique
-  mobile       String
-  status       String     @default("Available") // Status field added
-  company      BusCompany @relation(fields: [companyId], references: [id])
-  companyId    String
-  trips        Trip[]
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
 }
 
 model Trip {
-  id             String    @id @default(uuid())
-  date           DateTime? // Nullable for recurring trips
-  recurring      Boolean   @default(false) // True if the trip is constant
-  price          Float
-  departureTime  String
-  bus            Bus?       @relation(fields: [busId], references: [id])
-  busId          String?
-  route          Route     @relation(fields: [routeId], references: [id])
-  routeId        String
-  driver         Driver?    @relation(fields: [driverId], references: [id])
-  driverId       String?
-  bookings       Booking[]
-  busCancellations BusCancellation[] // Opposite relation field for BusCancellation
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id               String            @id @default(uuid())
+  // Trip scheduling
+  date             DateTime?         // For one-time trips
+  recurring        Boolean           @default(false)
+  daysOfWeek       Int[]             // Days of week the trip occurs (1=Monday, 7=Sunday)
+  specificDates    TripDate[]        // For trips that occur on specific dates
+  // Trip pricing
+  price            Float
+  currency         Currency          @default(GHS)
+  commission       Float             @default(0.00)
+  commissionType   CommissionType    @default(FIXED)
+  // Trip details
+  departureTime    String
+  // Relationships
+  bus              Bus?              @relation(fields: [busId], references: [id])
+  busId            String?
+  route            Route             @relation(fields: [routeId], references: [id])
+  routeId          String
+  driver           Driver?           @relation(fields: [driverId], references: [id])
+  driverId         String?
+  bookings         Booking[]
+  busCancellations BusCancellation[]
+  // Timestamps
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
+enum CommissionType {
+  FIXED
+  PERCENTAGE
+}
+
+enum Currency {
+  USD  // US Dollar ($)
+  EUR  // Euro (€)
+  GBP  // British Pound (£)
+  JPY  // Japanese Yen (¥)
+  CAD  // Canadian Dollar (C$)
+  AUD  // Australian Dollar (A$)
+  CNY  // Chinese Yuan (¥)
+  INR  // Indian Rupee (₹)
+
+  // African Currencies
+  NGN  // Nigerian Naira (₦)
+  KES  // Kenyan Shilling (KSh)
+  ZAR  // South African Rand (R)
+  GHS  // Ghanaian Cedi (₵)
+  EGP  // Egyptian Pound (E£)
+  MAD  // Moroccan Dirham (د.م.)
+  XOF  // West African CFA Franc (CFA)
+  XAF  // Central African CFA Franc (FCFA)
+  RWF  // Rwandan Franc (FRw)
+  UGX  // Ugandan Shilling (USh)
+  TZS  // Tanzanian Shilling (TSh)
+  MWK  // Malawian Kwacha (MK)
+  ZMW  // Zambian Kwacha (ZK)
+  BWP  // Botswana Pula (P)
+  SCR  // Seychellois Rupee (SR)
+  MUR  // Mauritian Rupee (₨)
+  DJF  // Djiboutian Franc (Fdj)
+  LSL  // Lesotho Loti (M)
+  SZL  // Swazi Lilangeni (E)
+  SOS  // Somali Shilling (Sh)
+  GMD  // Gambian Dalasi (D)
+  SLL  // Sierra Leonean Leone (Le)
+  MZN  // Mozambican Metical (MT)
+  LYD  // Libyan Dinar (LD)
+  SDG  // Sudanese Pound (SD)
+  ERN  // Eritrean Nakfa (Nfk)
+  CDF  // Congolese Franc (FC)
+  MGA  // Malagasy Ariary (Ar)
+}
+
+model TripDate {
+  id        String   @id @default(uuid())
+  date      DateTime
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 model City {
-  id           String       @id @default(uuid())
+  id           String   @id @default(uuid())
   name         String
   imageUrl     String?
   country      String
-  routesFrom   Route[]      @relation("routesFrom")
-  routesTo     Route[]      @relation("routesTo")
+  currency     Currency @default(USD)
+  routesFrom   Route[]  @relation("routesFrom")
+  routesTo     Route[]  @relation("routesTo")
 }
 
 model Route {
-  id           String     @id @default(uuid())
-  startCity    City       @relation("routesFrom", fields: [startCityId], references: [id])
+  id           String   @id @default(uuid())
+  startCity    City     @relation("routesFrom", fields: [startCityId], references: [id])
   startCityId  String
-  endCity      City       @relation("routesTo", fields: [endCityId], references: [id])
+  endCity      City     @relation("routesTo", fields: [endCityId], references: [id])
   endCityId    String
   duration     Int
   distance     Int
-  branch       Branch     @relation(fields: [branchId], references: [id])
+  branch       Branch   @relation(fields: [branchId], references: [id])
   branchId     String
   trips        Trip[]
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Booking {
-  id           String    @id @default(uuid())
-  reference    String    @unique 
-  date         DateTime  @default(now())
-  user         User      @relation(fields: [userId], references: [id])
+  id           String        @id @default(uuid())
+  reference    String        @unique 
+  date         DateTime      @default(now())
+  user         User          @relation(fields: [userId], references: [id])
   userId       String
-  trip         Trip      @relation(fields: [tripId], references: [id])
+  trip         Trip          @relation(fields: [tripId], references: [id])
   tripId       String
   seatNumber   Int[]
-  status       BookingStatus    @default(pending) // New field for status with a default value
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  totalAmount  Float
+  currency     Currency
+  status       BookingStatus @default(pending)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
-enum BookingStatus{
+enum BookingStatus {
   pending
   confirmed
   cancelled
@@ -188,39 +254,39 @@ enum BookingStatus{
   retained
 }
 
-
-
 model BusCancellation {
-  id           String    @id @default(uuid())
+  id           String   @id @default(uuid())
   bookingDate  DateTime
-  user         User      @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
   userId       String
-  trip         Trip      @relation(fields: [tripId], references: [id])
+  trip         Trip     @relation(fields: [tripId], references: [id])
   tripId       String
   seatNumber   Int
-  status       String    @default("cancelled") // refunded, retained, or pending
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  refundAmount Float?
+  currency     Currency
+  status       String   @default("cancelled")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Blog {
-  id           String    @id @default(uuid())
+  id           String   @id @default(uuid())
   title        String
   content      String
   image        String?
-  admin        Admin     @relation(fields: [adminId], references: [id])
+  admin        Admin    @relation(fields: [adminId], references: [id])
   adminId      String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Gallery {
-  id           String    @id @default(uuid())
+  id           String   @id @default(uuid())
   title        String
-  image     String
-  description  String? 
-  admin        Admin     @relation(fields: [adminId], references: [id])
+  image        String
+  description  String?
+  admin        Admin    @relation(fields: [adminId], references: [id])
   adminId      String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
