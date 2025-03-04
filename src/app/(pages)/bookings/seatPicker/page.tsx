@@ -64,6 +64,7 @@ type SeatsAvailable = Record<
 const PageContainer: React.FC = () => {
   const searchParams = useSearchParams();
   const tripId = searchParams.get("tripId");
+  const dateParam = searchParams.get("date");
   const apiUrl = `/api/GET/getTripById?id=${tripId}`;
 
   const [currency] = useState<string>("GHS");
@@ -74,7 +75,7 @@ const PageContainer: React.FC = () => {
     "default-logo-url"
   );
   const [bookedSeats, setBookedSeats] = useState<SeatsAvailable["bookedSeats"]>([]);
-
+  const currentDate = dateParam ? new Date(dateParam) : new Date();
   useEffect(() => {
     if (!tripId) return;
 
@@ -133,7 +134,6 @@ const PageContainer: React.FC = () => {
   }
 
   const {
-    date,
     price: busFare,
     departureTime,
     bus,
@@ -264,7 +264,7 @@ const PageContainer: React.FC = () => {
             handleBooking={handleBooking}
             isBooked={isBooked}
             id={tripData.id}
-            currentDate={new Date()}
+            currentDate={currentDate}
           />
         </section>
         <section className='flex flex-col items-center p-5 w-full rounded-lg overflow-hidden'>
@@ -284,7 +284,7 @@ const PageContainer: React.FC = () => {
               currency={currency}
               tripDuration={route.duration}
               totalCost={busFare * selectedSeats.length}
-              currentDate={new Date()}
+              currentDate={currentDate}
               selectedSeats={selectedSeats}
               isBooked={isBooked}
             />

@@ -76,7 +76,7 @@ const SearchResults = () => {
   const searchParams = useSearchParams();
   const fromLocation = searchParams.get("fromLocation") || "";
   const toLocation = searchParams.get("toLocation") || "";
-  const date = searchParams.get("date") || "";
+  const date = searchParams.get("date") ;
 
 
   const fetchResults = async () => {
@@ -251,7 +251,7 @@ const SearchResults = () => {
                     <Link
                       href={{
                         pathname: "/bookings/seatPicker",
-                        query: { tripId: trip.id },
+                        query: { tripId: trip.id, date: date },
                       }}
                       className="bg-[#48A0FF] p-2 rounded-[0.4pc] text-white font-bold"
                     >
