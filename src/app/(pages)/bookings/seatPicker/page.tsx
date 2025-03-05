@@ -20,7 +20,7 @@ interface Bus {
   id: string;
   plateNumber: string;
   capacity: number;
-  busModel: string;
+  busDescription: string;
   image: string;
   company: { id: string; name: string };
   airConditioning: boolean;
@@ -87,7 +87,7 @@ const PageContainer: React.FC = () => {
 
         if (data.bus.image) {
           setBusImage(
-            `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${data.bus.image}`
+            `https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/images/${data.bus.image}`
           );
         }
       } catch (error) {
@@ -251,7 +251,7 @@ const PageContainer: React.FC = () => {
             busExtras={busExtras}
             busDriverID={`${driver?.firstName} ${driver?.lastName}`}
             busCapacity={bus.capacity}
-            busModel={bus.busModel}
+            busDescription={bus.busDescription}
             busRoute={{
               origin: route.startCity.name,
               destination: route.endCity.name,
@@ -280,7 +280,7 @@ const PageContainer: React.FC = () => {
                 destination: route.endCity.name,
               }}
               busFare={busFare}
-              busModel={bus.busModel}
+              busDescription={bus.busDescription}
               currency={currency}
               tripDuration={route.duration}
               totalCost={busFare * selectedSeats.length}

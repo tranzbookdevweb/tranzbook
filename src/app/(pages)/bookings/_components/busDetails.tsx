@@ -24,7 +24,7 @@ interface BusDetailsProps {
   busImage: string | undefined;
   busNumber: string | number;
   busCompany: string | number;
-  busModel: string | number;
+  busDescription: string | number;
   busCapacity: number;
   busRoute: { origin: string; destination: string };
   tripDuration: string | number;
@@ -46,7 +46,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   busImage,
   busNumber,
   busCompany,
-  busModel,
+  busDescription,
   busCapacity,
   busRoute,
   tripDuration,
@@ -79,7 +79,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
           <h2 className='text-lg font-semibold text-gray-800'>
             {busCompany}
           </h2>
-          <p className='text-sm text-gray-500'>{busModel}</p>
+          <p className='text-sm text-gray-500'>{busDescription}</p>
         </div>
       </div>
 

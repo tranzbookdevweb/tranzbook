@@ -16,13 +16,13 @@ module.exports = {
       },
       {
         protocol: "https",
-        hostname: "dzviyoyyyopfsokiylmm.supabase.co", 
+        hostname: "kqvxondwjmttypsecwds.supabase.co", 
         port: "",
         pathname: "/**/**", 
       },
     ],
     domains: ["lh3.googleusercontent.com",
-      "i.pinimg.com",'gravatar.com'
+      "i.pinimg.com",'gravatar.com',
     ],
   },
 };
