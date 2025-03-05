@@ -5,6 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   try {
     console.log("Incoming Request:", req.method, req.url);
+    const { searchParams } = new URL(req.url);
+    const currentDate = searchParams.get("currentDate");
+    const bookedDate = currentDate ? new Date(currentDate) : new Date();
 
     // Get the current user using Kinde authentication
     const { getUser } = getKindeServerSession();
@@ -33,26 +36,38 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    const trip = await prisma.trip.findUnique({
+      where: { id: tripId },
+      select: { price: true }
+    });
 
-    // Create a new booking in the database using Prisma
+    if (!trip) {
+      return NextResponse.json({ 
+        error: 'Trip not found' 
+      }, { status: 404 });
+    }
+
+    // Calculate total amount based on number of seats
+    const totalAmount = trip.price * seatNumber.length;
+
+    // Create the booking
     const booking = await prisma.booking.create({
       data: {
         reference,
-        userId: user.id,
         tripId,
         seatNumber,
         status: "pending",
-      },
+        date: bookedDate, // Use the passed or current date
+        userId: user.id || '', // Ensure userId is provided
+        totalAmount
+      }
     });
 
-    console.log("Booking Created:", booking);
-
     return NextResponse.json(booking, { status: 201 });
-  } catch (error: any) {
-    console.error("Error during booking creation:", error);
-    return NextResponse.json(
-      { message: "Failed to create booking", error: error.message },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error('Booking creation error:', error);
+    return NextResponse.json({ 
+      error: 'Failed to create booking' 
+    }, { status: 500 });
   }
 }

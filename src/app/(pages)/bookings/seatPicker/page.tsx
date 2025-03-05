@@ -220,7 +220,7 @@ const PageContainer: React.FC = () => {
       };
 
       // Send the booking request to the server
-      const response = await fetch("/api/POST/Booking", {
+      const response = await fetch(`/api/POST/Booking?date=${currentDate}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingData),
