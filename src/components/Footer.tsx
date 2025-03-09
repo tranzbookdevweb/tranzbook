@@ -36,9 +36,7 @@ export default function Footer() {
         <div>
           <div className="p-6 space-y-4 rounded-lg">
             <img src='/pictures/logoNav.png' alt='Tranzbook Logo'/>
-            <p className="mt-1">📧 hello@Tranzbook.com</p>
-            <p className="mt-1">📞 +233 55 454 8978</p>
-            <p className="mt-1">📞 +233 502 606 270</p>
+
           </div>
         </div>
 
