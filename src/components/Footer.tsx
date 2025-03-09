@@ -6,13 +6,36 @@ import { Facebook, Linkedin, X } from "lucide-react";
 import { Instagram } from "@mui/icons-material";
 
 export default function Footer() {
+  // Links in array format with their href values
+  const otherPages = [
+    { name: "Home", href: "/home" },
+    { name: "About Us", href: "/About" },
+    { name: "Careers", href: "/careers" },
+    { name: "Blog", href: "/Blogs" },
+
+    ];
+
+  const quickLinks = [
+    { name: "Privacy Policy", href: "/privacy-policy" },
+    { name: "FAQ", href: "#faq" },
+    { name: "Bus Terms and Conditions", href: "/bus-terms-and-conditions" },
+    { name: "Cargo Terms and Conditions", href: "/cargo-terms-and-conditions" }
+  ];
+
+  const socialLinks = [
+    { icon: <Facebook />, href: "https://facebook.com/tranzbook", label: "Facebook" },
+    { icon: <X />, href: "https://x.com/tranzbook", label: "X" },
+    { icon: <Instagram />, href: "https://instagram.com/tranzbook", label: "Instagram" },
+    { icon: <Linkedin />, href: "https://linkedin.com/company/tranzbook", label: "LinkedIn" }
+  ];
+
   return (
     <footer className="bg-white text-gray-500 py-12">
       <div className="container mx-auto px-6 grid md:grid-cols-3 gap-8">
         {/* Logo & Contact Info */}
         <div>
-          <div className=" p-6 space-y-4 rounded-lg">
-                   <img src='/pictures/logoNav.png' alt=''/>
+          <div className="p-6 space-y-4 rounded-lg">
+            <img src='/pictures/logoNav.png' alt='Tranzbook Logo'/>
             <p className="mt-1">📧 hello@Tranzbook.com</p>
             <p className="mt-1">📞 +233 55 454 8978</p>
             <p className="mt-1">📞 +233 502 606 270</p>
@@ -24,10 +47,10 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-[#1B31FF]">Other Pages</h3>
             <ul className="mt-2 space-y-2">
-              {["Home", "About Us", "Careers", "Shop", "Contact"].map((page) => (
-                <li key={page}>
-                  <Link href={`/${page.toLowerCase().replace(/\s+/g, "-")}`}>
-                    <span className="hover:text-[#1B31FF] cursor-pointer">{page}</span>
+              {otherPages.map((page) => (
+                <li key={page.name}>
+                  <Link href={page.href}>
+                    <span className="hover:text-[#1B31FF] cursor-pointer">{page.name}</span>
                   </Link>
                 </li>
               ))}
@@ -36,10 +59,10 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-[#1B31FF]">Quick Links</h3>
             <ul className="mt-2 space-y-2">
-              {["Privacy Policy", "Blog", "News", "FAQ"].map((link) => (
-                <li key={link}>
-                  <Link href={`/${link.toLowerCase().replace(/\s+/g, "-")}`}>
-                    <span className="hover:text-[#1B31FF] cursor-pointer">{link}</span>
+              {quickLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href}>
+                    <span className="hover:text-[#1B31FF] cursor-pointer">{link.name}</span>
                   </Link>
                 </li>
               ))}
@@ -57,25 +80,23 @@ export default function Footer() {
           </div>
           {/* Social Media Icons */}
           <div className="flex space-x-4 mt-6">
-            <a href="#" className="p-2 bg-[#1B31FF] rounded-full text-white">
-              <Facebook />
-            </a>
-            <a href="#" className="p-2 bg-[#1B31FF] rounded-full text-white">
-              <X />
-            </a>
-            <a href="#" className="p-2 bg-[#1B31FF] rounded-full text-white">
-              <Instagram />
-            </a>
-            <a href="#" className="p-2 bg-[#1B31FF] rounded-full text-white">
-              <Linkedin />
-            </a>
+            {socialLinks.map((social) => (
+              <a 
+                key={social.label}
+                href={social.href} 
+                className="p-2 bg-[#1B31FF] rounded-full text-white"
+                aria-label={social.label}
+              >
+                {social.icon}
+              </a>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Copyright */}
       <div className="text-center mt-12 text-gray-400">
-        © 2025 Tranzbook Ltd. All rights reserved.
+        © {new Date().getFullYear()} Tranzbook Ltd. All rights reserved.
       </div>
     </footer>
   );
