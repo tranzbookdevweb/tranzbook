@@ -1,11 +1,8 @@
 'use client';
-
-import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -22,6 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const FormSchema = z.object({
   dob: z.date({
@@ -33,13 +31,13 @@ export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChang
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-
+  
   const [isClient, setIsClient] = useState(false);
-
+  
   useEffect(() => {
     setIsClient(true);
   }, []);
-
+  
   function onSubmit(data: z.infer<typeof FormSchema>) {
     toast({
       title: "You submitted the following values:",
@@ -50,11 +48,11 @@ export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChang
       ),
     });
   }
-
+  
   if (!isClient) {
     return null;
   }
-
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 font-semibold w-full">
@@ -89,11 +87,30 @@ export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChang
                       field.onChange(date);
                       onDateChange(date ?? null);
                     }}
-                    disabled={(date) =>
-                      date.getTime() < new Date().setHours(0, 0, 0, 0) || 
-                      disabledDates.some(disabledDate => disabledDate.getTime() === date.getTime())
-                    }
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      
+                      // Disable dates before today
+                      if (date < today) {
+                        return true;
+                      }
+                      
+                      // For the return date calendar, disable the selected departure date
+                      // and all dates before it
+                      if (disabledDates.length > 0) {
+                        return disabledDates.some(disabledDate => 
+                          date.getTime() <= disabledDate.getTime()
+                        );
+                      }
+                      
+                      return false;
+                    }}
                     initialFocus
+                    classNames={{
+                      day_selected: "text-blue-500 font-semibold focus:text-orange-500",
+                      day_today: "bg-blue-100 text-blue-900 font-medium"
+                    }}
                   />
                 </PopoverContent>
               </Popover>

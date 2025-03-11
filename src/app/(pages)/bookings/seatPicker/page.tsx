@@ -22,7 +22,7 @@ interface Bus {
   capacity: number;
   busDescription: string;
   image: string;
-  company: { id: string; name: string };
+  company: { id: string; name: string, logo:string; };
   airConditioning: boolean;
   chargingOutlets: boolean;
   wifi: boolean;
@@ -244,6 +244,7 @@ const PageContainer: React.FC = () => {
         <section className='min-h-screen border-r border-gray-200 custom-scrollbar overflow-y-auto'>
           <BusDetails
             busImage={busImage}
+            busCompanyLogo={bus?.company.logo}
             busNumber={bus?.plateNumber}
             busCompany={bus.company.name}
             tripDepartureTime={departureTime}
@@ -290,6 +291,7 @@ const PageContainer: React.FC = () => {
             />
           ) : (
             <SeatSelection
+            busDescription={bus.busDescription}
               tripId={tripData.id}
               busCapacity={bus.capacity}
               bookedSeats={bookedSeats}

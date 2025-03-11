@@ -64,11 +64,7 @@ const cargoWidgets: Widget[] = [
     title: 'Real-Time Tracking',
     subtitle: 'Stay informed! Track your cargo every step of the way for peace of mind.',
   },
-  {
-    icon: MonetizationOnOutlinedIcon,
-    title: 'Affordable and Transparent Pricing',
-    subtitle: 'Enjoy competitive rates with no hidden fees, ensuring value for your money.',
-  },
+
 ];
 
 function Widgets({ activeButton }: Props) {

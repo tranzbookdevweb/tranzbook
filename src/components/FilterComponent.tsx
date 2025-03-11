@@ -1,33 +1,35 @@
 'use client';
+
+import { useState } from "react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { DepartureBoard } from "@mui/icons-material";
-import { BusFront, Moon, Stars, Sun, Sunrise, Sunset } from "lucide-react";
-import { useEffect, useState } from "react";
+import { BusFront, Sunrise, Sun, Sunset, Moon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 type CompanyData = {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   logo?: string;
 };
 
 interface BookingFilterAccordionProps {
   onCompanyFilterChange: (companies: string[]) => void;
   onTimeFilterChange: (time: string) => void;
+  companyData: CompanyData[];
 }
 
 export function BookingFilterAccordion({
   onCompanyFilterChange,
   onTimeFilterChange,
+  companyData,
 }: BookingFilterAccordionProps) {
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [selectedDepartureTime, setSelectedDepartureTime] = useState<string>('');
-  const [companyData, setCompanyData] = useState<CompanyData[]>([]);
 
   const handleCompanyChange = (company: string) => {
     setSelectedCompanies((prevCompanies) => {
@@ -35,107 +37,130 @@ export function BookingFilterAccordion({
         ? prevCompanies.filter((comp) => comp !== company)
         : [...prevCompanies, company];
 
-      onCompanyFilterChange(updatedCompanies); // Trigger prop function
+      onCompanyFilterChange(updatedCompanies);
       return updatedCompanies;
     });
   };
 
   const handleDepartureTimeChange = (time: string) => {
-    if (selectedDepartureTime === time) {
-      setSelectedDepartureTime("");  // Deselect if already selected
-    } else {
-      setSelectedDepartureTime(time);
-    }
-    onTimeFilterChange(time); // Trigger prop function
+    const newTime = selectedDepartureTime === time ? "" : time;
+    setSelectedDepartureTime(newTime);
+    onTimeFilterChange(newTime);
   };
 
-  const fetchData = async () => {
-    try {
-      const companyResponse = await fetch('/api/GET/getbusCompany');
-      if (!companyResponse.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const companyData = await companyResponse.json();
-      setCompanyData(Array.isArray(companyData) ? companyData : []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const timeOptions = [
+    { value: 'morning', label: 'Morning', icon: <Sunrise className="h-4 w-4" /> },
+    { value: 'afternoon', label: 'Afternoon', icon: <Sun className="h-4 w-4" /> },
+    { value: 'evening', label: 'Evening', icon: <Sunset className="h-4 w-4" /> },
+    { value: 'night', label: 'Night', icon: <Moon className="h-4 w-4" /> },
+  ];
 
   return (
-    <Accordion type="multiple" className="w-full items-center">
-      <h1 className="font-semibold text-gray-300 text-[18px]">Filter Trip</h1>
+    <div className="bg-white rounded-lg shadow-lg p-4 w-full">
+      <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Filter Your Trip</h2>
       
-      {/* Company Filter */}
-      <AccordionItem value="company">
-        <AccordionTrigger className="flex justify-between p-2">
-          <div className="flex items-center">
-            <BusFront />
-            Bus Operator
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="w-full">
-          <div className="grid grid-cols-1 p-2 gap-3">
-            {companyData.map((company) => (
-              <label
-                className={`items-center flex ${selectedCompanies.includes(company.id) ? 'bg-blue-200' : ''}`}
-                key={company.id}
-              >
-                <input
-                  type="checkbox"
-                  value={company.id}
-                  checked={selectedCompanies.includes(company.id)}
-                  onChange={() => handleCompanyChange(company.id)}
-                  className="mr-2"
-                />
-                <h2 className={`font-semibold ml-2 ${selectedCompanies.includes(company.id) ? 'text-blue-600' : 'text-[#48A0FF]'}`}>
-                  {company.name}
-                </h2>
-              </label>
-            ))}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
+      <Accordion type="multiple" className="w-full">
+        {/* Company Filter */}
+        <AccordionItem value="company" className="border rounded-md mb-2 overflow-hidden">
+          <AccordionTrigger className="px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div className="flex items-center gap-2 text-gray-700">
+              <BusFront className="h-5 w-5 text-blue-500" />
+              <span className="font-medium">Bus Operators</span>
+              {selectedCompanies.length > 0 && (
+                <Badge className="ml-2 bg-blue-500">{selectedCompanies.length}</Badge>
+              )}
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="p-2">
+            <div className="grid gap-2">
+              {companyData.map((company) => (
+                <div
+                  key={company.id}
+                  className={`flex items-center p-2 rounded-md transition-colors ${
+                    selectedCompanies.includes(company.id)
+                      ? 'bg-blue-50 border border-blue-200'
+                      : 'hover:bg-gray-50'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    id={`company-${company.id}`}
+                    value={company.id}
+                    checked={selectedCompanies.includes(company.id)}
+                    onChange={() => handleCompanyChange(company.id)}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor={`company-${company.id}`}
+                    className={`ml-3 cursor-pointer flex-1 font-medium ${
+                      selectedCompanies.includes(company.id) ? 'text-blue-700' : 'text-gray-700'
+                    }`}
+                  >
+                    {company.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
-      {/* Departure Time Filter */}
-      <AccordionItem value="departure-time">
-        <AccordionTrigger className="flex justify-between p-2">
-          <div className="flex items-center">
-            <DepartureBoard />
-            Departure Time
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="grid grid-cols-1 p-2 gap-3 items-center">
-            {['morning', 'afternoon', 'evening', 'night'].map((time) => (
-              <label
-                key={time}
-                className={`font-semibold flex items-center ${
-                  selectedDepartureTime === time ? 'text-blue-600' : ''
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="departureTime"
-                  value={time}
-                  checked={selectedDepartureTime === time}
-                  onChange={() => handleDepartureTimeChange(time)}
-                  className="mr-2"
-                />
-                {time === 'morning' && <Sunrise size={16} className="ml-2" />}
-                {time === 'afternoon' && <Sun size={16} className="ml-2" />}
-                {time === 'evening' && <Moon size={16} className="ml-2" />}
-                {time === 'night' && <Stars size={16} className="ml-2" />}
-                {time.charAt(0).toUpperCase() + time.slice(1)}
-              </label>
-            ))}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+        {/* Departure Time Filter */}
+        <AccordionItem value="departure-time" className="border rounded-md overflow-hidden">
+          <AccordionTrigger className="px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div className="flex items-center gap-2 text-gray-700">
+              <Sunrise className="h-5 w-5 text-amber-500" />
+              <span className="font-medium">Departure Time</span>
+              {selectedDepartureTime && (
+                <Badge className="ml-2 bg-amber-500 capitalize">{selectedDepartureTime}</Badge>
+              )}
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="p-2">
+            <div className="grid grid-cols-2 gap-2">
+              {timeOptions.map((time) => (
+                <div
+                  key={time.value}
+                  onClick={() => handleDepartureTimeChange(time.value)}
+                  className={`flex items-center p-3 rounded-md cursor-pointer transition-all ${
+                    selectedDepartureTime === time.value
+                      ? 'bg-amber-50 border border-amber-200 shadow-sm'
+                      : 'hover:bg-gray-50 border border-transparent'
+                  }`}
+                >
+                  <div className={`mr-3 p-2 rounded-full ${
+                    selectedDepartureTime === time.value 
+                      ? 'bg-amber-100 text-amber-600' 
+                      : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {time.icon}
+                  </div>
+                  <span className={`font-medium ${
+                    selectedDepartureTime === time.value ? 'text-amber-700' : 'text-gray-700'
+                  }`}>
+                    {time.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      
+      {(selectedCompanies.length > 0 || selectedDepartureTime) && (
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => {
+              setSelectedCompanies([]);
+              setSelectedDepartureTime('');
+              onCompanyFilterChange([]);
+              onTimeFilterChange('');
+            }}
+            className="text-sm text-gray-600 hover:text-gray-800 underline"
+          >
+            Clear All Filters
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

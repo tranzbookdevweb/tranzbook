@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
+import { ChevronDownIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -29,110 +29,258 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
 import TripSheet from '../../components/Sheetpop/Trips/TripSheet';
 
-type Bus = {
-  id: string;
-  name: string;
-  plateNumber: string;
-  busType: string;
-};
-
+// Updated type definitions to match the new API response
 type TripData = {
   id: string;
-  date: string;
+  date: string | null;
+  recurring: boolean;
+  daysOfWeek: number[];
   price: number;
+  currency: string;
+  commission: number;
+  commissionType: string;
+  departureTime: string;
   busId: string;
   routeId: string;
-  startCityId: string;
-  endCityId: string;
-  duration: number;
-  distance: number;
-  companyId: string;
+  driverId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  bus: {
+    busDescription: string;
+    company: {
+      name: string;
+    };
+  };
+  route: {
+    startCity: {
+      name: string;
+    };
+    endCity: {
+      name: string;
+    };
+  };
 };
-
-type Route = {
-  id: string;
-  startCityId: string;
-  endCityId: string;
-};
-
-type Location = {
-  id: string;
-  name: string;
-};
-
-const columns: ColumnDef<TripData & { startCityName: string; endCityName: string; busType: string; }>[] = [
-  {
-    accessorKey: "Sno",
-    header: "Sr No",
-    cell: ({ row }) => <div>{row.index + 1}</div>,
-  },
-
-  {
-    accessorKey: "date",
-    header: "Date",
-    cell: ({ row }) => <div>{row.getValue("date")}</div>,
-  },
-  {
-    accessorKey: "price",
-    header: "Price",
-    cell: ({ row }) => <div>{row.getValue("price")}</div>,
-  },
-  {
-    accessorKey: "busType",
-    header: "Bus Type",
-    cell: ({ row }) => <div>{row.getValue("busType")}</div>,
-  },
-  {
-    accessorKey: "startCityName",
-    header: "Start Location",
-    cell: ({ row }) => <div>{row.getValue("startCityName")}</div>,
-  },
-  {
-    accessorKey: "endCityName",
-    header: "End Location",
-    cell: ({ row }) => <div>{row.getValue("endCityName")}</div>,
-  },
-];
 
 export function Trip() {
   const [data, setData] = useState<TripData[]>([]);
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [routes, setRoutes] = useState<Route[]>([]);
-  const [buses, setBuses] = useState<Bus[]>([]);
-  const [sortedData, setSortedData] = useState<(TripData & { startCityName: string; endCityName: string; busType: string; })[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [editingRow, setEditingRow] = useState<string | null>(null);
+  const [editData, setEditData] = useState<Partial<TripData>>({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [tripToDelete, setTripToDelete] = useState<string | null>(null);
+
+  // Define columns with the new action column
+  const columns: ColumnDef<TripData>[] = [
+    {
+      accessorKey: "Sno",
+      header: "Sr No",
+      cell: ({ row }) => <div>{row.index + 1}</div>,
+    },
+  
+    {
+      accessorKey: "departureTime",
+      header: "Departure Time",
+      cell: ({ row }) => {
+        const isEditing = editingRow === row.original.id;
+        if (isEditing) {
+          return (
+            <Input
+              type="time"
+              value={editData.departureTime || row.getValue("departureTime")}
+              onChange={(e) => setEditData({ ...editData, departureTime: e.target.value })}
+              className="w-full"
+            />
+          );
+        }
+        return <div>{row.getValue("departureTime")}</div>;
+      },
+    },
+    {
+      accessorKey: "price",
+      header: "Price",
+      cell: ({ row }) => {
+        const trip = row.original;
+        const isEditing = editingRow === trip.id;
+        
+        if (isEditing) {
+          return (
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                value={editData.price !== undefined ? editData.price : trip.price}
+                onChange={(e) => setEditData({ ...editData, price: parseFloat(e.target.value) })}
+                className="w-20"
+              />
+              <Input
+                value={editData.currency || trip.currency}
+                onChange={(e) => setEditData({ ...editData, currency: e.target.value })}
+                className="w-16"
+              />
+            </div>
+          );
+        }
+        return <div>{trip.price} {trip.currency}</div>;
+      },
+    },
+    {
+      accessorKey: "bus.busDescription",
+      header: "Bus Type",
+      cell: ({ row }) => <div>{row.original.bus.busDescription}</div>,
+    },
+    {
+      accessorKey: "bus.company.name",
+      header: "Company",
+      cell: ({ row }) => <div>{row.original.bus.company.name}</div>,
+    },
+    {
+      accessorKey: "route.startCity.name",
+      header: "From",
+      cell: ({ row }) => <div>{row.original.route.startCity.name}</div>,
+    },
+    {
+      accessorKey: "route.endCity.name",
+      header: "To",
+      cell: ({ row }) => <div>{row.original.route.endCity.name}</div>,
+    },
+    {
+      accessorKey: "daysOfWeek",
+      header: "Days",
+      cell: ({ row }) => {
+        const trip = row.original;
+        const isEditing = editingRow === trip.id;
+        
+        if (isEditing && trip.recurring) {
+          const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+          const currentSelectedDays = editData.daysOfWeek || trip.daysOfWeek;
+          
+          return (
+            <div className="flex flex-wrap gap-1">
+              {dayNames.map((day, index) => (
+                <label key={day} className="flex items-center space-x-1">
+                  <input
+                    type="checkbox"
+                    checked={currentSelectedDays.includes(index + 1)}
+                    onChange={(e) => {
+                      const newDays = [...currentSelectedDays];
+                      if (e.target.checked) {
+                        if (!newDays.includes(index + 1)) {
+                          newDays.push(index + 1);
+                        }
+                      } else {
+                        const dayIndex = newDays.indexOf(index + 1);
+                        if (dayIndex > -1) {
+                          newDays.splice(dayIndex, 1);
+                        }
+                      }
+                      setEditData({ ...editData, daysOfWeek: newDays });
+                    }}
+                  />
+                  <span className="text-xs">{day}</span>
+                </label>
+              ))}
+            </div>
+          );
+        }
+        
+        if (!trip.recurring) return <div>-</div>;
+        
+        const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const activeDays = trip.daysOfWeek.map(dayNum => dayNames[dayNum - 1]).join(", ");
+        return <div>{activeDays}</div>;
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const trip = row.original;
+        const isEditing = editingRow === trip.id;
+        
+        if (isEditing) {
+          return (
+            <div className="flex items-center gap-2">
+              <Button 
+                size="sm" 
+                variant="default" 
+                onClick={() => handleSaveEdit(trip.id)}
+              >
+                Save
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => {
+                  setEditingRow(null);
+                  setEditData({});
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          );
+        }
+        
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                Actions
+                <ChevronDownIcon className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                onClick={() => handleEdit(trip.id)}
+                className="flex items-center cursor-pointer"
+              >
+                <Pencil2Icon className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => handleDeleteClick(trip.id)}
+                className="flex items-center cursor-pointer text-red-600"
+              >
+                <TrashIcon className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   const fetchData = async () => {
     try {
-      const [tripResponse, locationResponse, routeResponse, busResponse] = await Promise.all([
-        fetch('/api/GET/getTrip'),
-        fetch('/api/GET/getLocation'),
-        fetch('/api/GET/getRoute'),
-        fetch('/api/GET/getBuses'),
-      ]);
+      const response = await fetch('/api/GET/getTripData');
 
-      if (!tripResponse.ok || !locationResponse.ok || !routeResponse.ok || !busResponse.ok) {
-        throw new Error('Failed to fetch data');
+      if (!response.ok) {
+        throw new Error('Failed to fetch trip data');
       }
 
-      const tripData = await tripResponse.json();
-      const locationData = await locationResponse.json();
-      const routeData = await routeResponse.json();
-      const busData = await busResponse.json();
-
+      const tripData = await response.json();
       setData(Array.isArray(tripData) ? tripData : []);
-      setLocations(Array.isArray(locationData) ? locationData : []);
-      setRoutes(Array.isArray(routeData) ? routeData : []);
-      setBuses(Array.isArray(busData) ? busData : []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching trip data:', error);
     }
   };
 
@@ -140,30 +288,96 @@ export function Trip() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const locationMap = new Map(locations.map(location => [location.id, location.name]));
-    const routeMap = new Map(routes.map(route => [route.id, route]));
-    const busMap = new Map(buses.map(bus => [bus.id, bus.busType]));
-
-    const newSortedData = data.map(trip => {
-      const route = routeMap.get(trip.routeId);
-      return {
-        ...trip,
-        startCityName: route ? locationMap.get(route.startCityId) || route.startCityId : trip.startCityId,
-        endCityName: route ? locationMap.get(route.endCityId) || route.endCityId : trip.endCityId,
-        busType: busMap.get(trip.busId) || trip.busId,
-      };
-    });
-
-    setSortedData(newSortedData);
-  }, [data, locations, routes, buses]);
-
   const handleAddSuccess = () => {
     fetchData();
   };
 
+  const handleEdit = (id: string) => {
+    setEditingRow(id);
+    setEditData({});
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    try {
+      // Create the updated trip data by merging the original data with edited data
+      const originalTrip = data.find(trip => trip.id === id);
+      if (!originalTrip) return;
+      
+      const updatedTrip = { ...originalTrip, ...editData };
+      
+      // Make the API call to update
+      const response = await fetch(`/api/PUT/updateTrip?id=${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTrip),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update trip');
+      }
+
+      // Reset editing state
+      setEditingRow(null);
+      setEditData({});
+      
+      // Refresh data
+      fetchData();
+      
+      toast({
+        title: "Success",
+        description: "Trip updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating trip:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update trip",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setTripToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!tripToDelete) return;
+    
+    try {
+      const response = await fetch(`/api/DELETE/deleteTrip?id=${tripToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete trip');
+      }
+
+      // Refresh data
+      fetchData();
+      
+      toast({
+        title: "Success",
+        description: "Trip deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting trip:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete trip",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setTripToDelete(null);
+    }
+  };
+
   const table = useReactTable({
-    data: sortedData,
+    data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -188,8 +402,8 @@ export function Trip() {
         <div className="flex items-center py-4">
           <Input
             placeholder="Filter by Bus Type..."
-            value={(table.getColumn("busType")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("busType")?.setFilterValue(event.target.value)}
+            value={(table.getColumn("bus.busDescription")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("bus.busDescription")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
           <DropdownMenu>
@@ -214,7 +428,7 @@ export function Trip() {
         </div>
         <div className="rounded-md border">
           <Table>
-            <TableCaption>A list of your promo codes.</TableCaption>
+            <TableCaption>All available trips</TableCaption>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -271,6 +485,26 @@ export function Trip() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Trip</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this trip? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -147,9 +147,32 @@ model Trip {
   driverId         String?
   bookings         Booking[]
   busCancellations BusCancellation[]
+  tripOccurrences  TripOccurrence[]  // New relationship to track specific occurrences
   // Timestamps
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+}
+
+// New model to track specific occurrences of a trip
+model TripOccurrence {
+  id             String     @id @default(uuid())
+  trip           Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  tripId         String
+  occurrenceDate DateTime   // The specific date this trip occurrence happens
+  availableSeats Int        // Number of available seats for this specific occurrence
+  bookedSeats    Int[]      // Array of seat numbers that are already booked
+  status         TripStatus @default(scheduled)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  
+  @@unique([tripId, occurrenceDate]) // Ensure uniqueness of trip occurrence on a specific date
+}
+
+enum TripStatus {
+  scheduled
+  inProgress
+  completed
+  cancelled
 }
 
 enum CommissionType {

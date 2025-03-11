@@ -21,6 +21,7 @@ const PaymentButton = dynamic(
 );
 
 interface BusDetailsProps {
+  busCompanyLogo: string | undefined;
   busImage: string | undefined;
   busNumber: string | number;
   busCompany: string | number;
@@ -43,6 +44,7 @@ interface BusDetailsProps {
 }
 
 const BusDetails: React.FC<BusDetailsProps> = ({
+  busCompanyLogo,
   busImage,
   busNumber,
   busCompany,
@@ -67,13 +69,13 @@ const BusDetails: React.FC<BusDetailsProps> = ({
 
   return (
     <aside className='bg-white dark:text-black md:space-y-3 -w-72 max-sm:w-full sm:max-md:w-full min-h-full max-sm:min-h-fit p-5 flex flex-col items-center max-sm:justify-between sm:max-md:justify-between rounded-lg overflow-y-scroll custom-scrollbar'>
-      <div className='flex items-center w-full mb-5 flex-wrap max-[230px]:justify-center'>
+      <div className='flex items-center w-full mb-5 flex-wrap max-lg:justify-center'>
         <Image
-          src={`${busImage}`}
+          src={`https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/${busCompanyLogo}`}
           alt='Bus'
-          height={100}
-          width={100}
-          className=' object-cover shadow-sm border border-slate-100 rounded-[5px]'
+          height={80}
+          width={80}
+          className=' object-cover shadow-sm border border-slate-100 rounded-full'
         />
         <div className='ml-4 max-[230px]:text-center'>
           <h2 className='text-lg font-semibold text-gray-800'>

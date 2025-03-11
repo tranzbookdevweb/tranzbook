@@ -24,7 +24,7 @@ export async function Navbar() {
   const user = await getUser();
 
   return (
-    <div className=' flex sticky bottom-0 top-0 left-0 right-0 z-[99] p-[1.6vh] w-full overflow-x-hidden bg-[#DEF5FB] items-center'>
+    <div className=' flex sticky bottom-0 top-0 left-0 right-0 z-[99999] p-[1.6vh] w-full overflow-x-hidden bg-[#DEF5FB] items-center'>
       <div className='flex w-[100%] justify-between items-center max-w-6xl mx-auto'>
         {/* Logo and navigation links */}
         <div className='logoContainer items-center flex mr-5 space-x-3'>

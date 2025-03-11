@@ -151,6 +151,8 @@ export async function GET(request: Request) {
             company: {
               select: {
                 logo: true,
+                name:true,
+                id:true,
               },
             },
           },
