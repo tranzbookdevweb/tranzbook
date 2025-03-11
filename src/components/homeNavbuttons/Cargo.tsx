@@ -7,7 +7,7 @@ import FormCargo from '../FormCargo';
 
 const Cargo: React.FC = () => {
   const [text] = useTypewriter({
-    words: ['Check Cargo Truck Availability, Compare Prices, Book Your Truck to Move Your Goods'],
+    words: ['Book A Truck, Move Your Goods Easily'],
     loop: false,
     delaySpeed: 3000,
   });
