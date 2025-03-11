@@ -94,7 +94,7 @@ export default function Footer() {
 
       {/* Copyright */}
       <div className="text-center mt-12 text-gray-400">
-        © {new Date().getFullYear()} Tranzbook Ltd. All rights reserved.
+        © {new Date().getFullYear()} Tranzbook Technologies. All rights reserved.
       </div>
     </footer>
   );
