@@ -79,7 +79,7 @@ const AboutUs = () => {
             {/* Left column with text */}
             <div className="flex-1 flex flex-col">
               <p className="text-gray-700 mb-4 md:mb-6">
-                TranziBook Technology is a transportation and logistics technology solution that enables travelers and goods owners to book bus tickets and cargo vehicles for their goods through web and mobile applications.
+              TranzBook Technologies is a transportation and logistics technology solution that enables travelers and goods owners to book bus tickets and cargo vehicles for their goods through web and mobile applications.
               </p>
               
               <p className="text-gray-700 mb-4 md:mb-6">
