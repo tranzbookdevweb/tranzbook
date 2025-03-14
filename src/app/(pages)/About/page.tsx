@@ -1,240 +1,124 @@
-/* eslint-disable @next/next/no-img-element */
-import React from "react";
+import React from 'react';
 
-const AboutUs: React.FC = () => {
-  const sections = [
-    {
-      title: "About TranzBook",
-      imageSrc: "/about/transport.png",
-      imageAlt: "Transportation and logistics",
-      content: `TranzBook Technology is a transportation and logistics solution that enables travelers to book bus tickets and cargo vehicles for their goods through web and mobile applications. Travelers can search for available bus routes, view schedules, choose seats, and securely book tickets, with real-time updates on bus status and arrival times.`,
-    },
-    {
-      title: "Cargo Booking Services",
-      imageSrc: "/about/cargo.jpg",
-      imageAlt: "Cargo vehicle booking",
-      content: `For cargo vehicle booking, the platform enables businesses or individuals to locate nearby vehicles, book transportation for goods, track movements in real-time, receive delivery notifications, and manage shipments effectively.`,
-    },
-    {
-      title: "Technology & Efficiency",
-      imageSrc: "/about/technology.gif",
-      imageAlt: "Logistics management software",
-      content: `Our solution uses advanced logistics management software and GPS tracking to optimize routes, reduce costs, and improve delivery times, providing a seamless experience for both travelers and cargo shippers.`,
-    },
-  ];
-
-  const visionMission = [
-    {
-      title: "Vision Statement",
-      imageSrc: "/about/vision.webp",
-      imageAlt: "Vision of the future",
-      content: `To be Africa’s preferred transportation and logistics platform, fostering a connected, inclusive, and sustainable community of travelers, shippers, and carriers.`,
-    },
-    {
-      title: "Mission Statement",
-      imageSrc: "/about/mission.jpg",
-      imageAlt: "Mission for Africa",
-      content: `To be the leading digital platform for seamless bus ticketing and cargo booking across Africa, prioritizing convenience, safety, and sustainable practices while promoting customer-centered innovation.`,
-    },
-  ];
-
-  const coreValues = [
-    {
-      name: "Safety & Security",
-      description:
-        "Ensuring all customers' journeys and cargo are safe.",
-      imageSrc: "/about/safety.webp",
-    },
-    {
-      name: "Comfort",
-      description:
-        "Providing the best experience for every trip and shipment.",
-      imageSrc: "/about/comfort.jpg",
-    },
-    {
-      name: "Integrity",
-      description:
-        "Upholding high ethical standards and transparent practices.",
-      imageSrc: "/about/integrity.jpg",
-    },
-    {
-      name: "Respect",
-      description: "Fostering an inclusive and respectful community.",
-      imageSrc: "/about/respect.jpg",
-    },
-  ];
-
-  const teamMembers = [
-    {
-      name: "Andres Berlin",
-      role: "CEO",
-      description: "Leading TranzBook's growth and vision.",
-      imageSrc: "/about/avatar1.png",
-    },
-    {
-      name: "Alice Mbeke",
-      role: "CTO",
-      description: "Overseeing technology and innovation.",
-      imageSrc: "/about/avatar2.png",
-    },
-    {
-      name: "Michael Owusu",
-      role: "COO",
-      description: "Optimizing operations and customer experience.",
-      imageSrc: "/about/avatar3.jpg",
-    },
-  ];
-
+const AboutUs = () => {
   return (
-    <div className='bg-gray-50 min-h-screen flex'>
-      {/* Left Aside - Ad */}
-      {/* <aside className='hidden lg:flex lg:w-1/5 bg-white p-4 border-r border-gray-200 lg:justify-center '>
-        <div className='flex flex-col p-5 sticky'>
-          <div className='space-y-3'>
-            <img
-              src='/about/ad1.jpg'
-              alt='Ad 1'
-              className='rounded-xl  p-2 object-cover opacity-60'
-            />
-            <img
-              src='/about/ad2.jpg'
-              alt='Ad 2'
-              className='rounded-xl  p-2 object-cover opacity-60'
-            />
-            <div className='bg-green-50 text-center text-green-700 font-semibold p-4 rounded-lg shadow'>
-              Advertise with Us
-            </div>
-          </div>
-        </div>
-      </aside> */}
-
-      <div className='container px-6 py-12 bg-gray-50'>
-        {/* Hero Section */}
-        <div className='text-center mb-16'>
-          <div className='relative mb-6'>
-            <h1 className='text-4xl font-extrabold text-gray-900 relative z-10'>
-              All you need to know about us
-            </h1>
-            <div className='absolute inset-0 bg-blue-50 rounded-full blur-3xl h-32 w-32 md:h-64 md:w-64 mx-auto -top-8 opacity-20'></div>
-          </div>
-          <p className='text-lg text-gray-600'>
-            Connecting Africa through innovative transportation and
-            logistics solutions.
+    <div className="flex flex-col w-full bg-gray-50">
+    
+      {/* Hero Section with rounded edges and background image */}
+      <div 
+        className="relative w-full h-96 bg-gray-900 -mb-5 z-50 flex items-center justify-center text-white rounded-b-3xl overflow-hidden"
+        style={{
+          backgroundImage: "url('/womaninbus.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center"
+        }}
+      >
+        {/* Dark overlay over background image */}
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+             
+        {/* Content */}
+        <div className="z-10 text-center px-4 max-w-2xl">
+          <h1 className="text-6xl font-bold mb-4">About Us</h1>
+          <p className="text-xl">
+            Driving innovation in transportation and logistics
+            making travel and cargo booking seamless, secure,
+            and efficient across Africa.
           </p>
         </div>
+      </div>
 
-        {/* About Sections */}
-        {sections.map((section, index) => (
-          <div
-            key={index}
-            className={`flex flex-col md:flex-row items-center mb-16 bg-white shadow-lg rounded-xl ${
-              index % 2 === 0 ? "md:flex-row-reverse" : ""
-            }`}>
-            <div className='md:w-1/2 p-4'>
-              <img
-                src={section.imageSrc}
-                alt={section.imageAlt}
-                className='w-full h-auto rounded-xl object-cover'
-              />
-            </div>
-            <div className='md:w-1/2 p-6'>
-              <h2 className='text-2xl font-semibold mb-4'>
-                {section.title}
-              </h2>
-              <p className='text-gray-600'>{section.content}</p>
-            </div>
-          </div>
-        ))}
-
-        {/* Vision & Mission Section */}
-        <div className='grid md:grid-cols-2 gap-8 mb-16'>
-          {visionMission.map((vm, index) => (
-            <div
-              key={index}
-              className='bg-white shadow-lg rounded-xl p-6'>
-              <img
-                src={vm.imageSrc}
-                alt={vm.imageAlt}
-                className='w-full h-64 object-cover rounded-xl mb-4'
-              />
-              <h3 className='text-xl font-semibold'>{vm.title}</h3>
-              <p className='text-gray-600'>{vm.content}</p>
-            </div>
-          ))}
+      {/* Vision & Mission Section with World Map Background */}
+      <div className="bg-blue-600 text-white p-20 relative overflow-hidden">
+        {/* World Map Background */}
+        <div className="absolute inset-0 opacity-20">
+          {/* This would be replaced with the actual world map with connection dots */}
+          <div 
+            className="w-full h-full bg-contain bg-no-repeat bg-right"
+            style={{
+              backgroundImage: "url('/world-map.png')"
+            }}
+          ></div>
         </div>
-
-        {/* Core Values */}
-        <div className='mb-16'>
-          <h2 className='text-3xl font-semibold text-center mb-8'>
-            Core Values
-          </h2>
-          <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6'>
-            {coreValues.map((value, index) => (
-              <div
-                key={index}
-                className='flex flex-col items-center text-center bg-white shadow-lg rounded-xl p-6'>
-                <img
-                  src={value.imageSrc}
-                  alt={value.name}
-                  className='w-20 h-20 mb-4 rounded-full bg-gray-100 p-2 '
-                />
-                <h4 className='text-lg font-semibold'>
-                  {value.name}
-                </h4>
-                <p className='text-gray-600'>{value.description}</p>
-              </div>
-            ))}
+        <div className="container mx-auto px-6 relative z-10">
+          {/* Vision */}
+          <div className="mb-12">
+            <h2 className="text-4xl font-bold mb-4">Our Vision</h2>
+            <p className="text-lg max-w-lg">
+              To be Africa&apos;s preferred transportation and logistics platform, 
+              fostering a connected, efficient, and sustainable community
+              of travelers, shippers, and carriers.
+            </p>
           </div>
-        </div>
-
-        {/* Team Section */}
-        <div>
-          <h2 className='text-3xl font-semibold text-center mb-8'>
-            Our Team
-          </h2>
-          <div className='grid md:grid-cols-3 gap-8'>
-            {teamMembers.map((member, index) => (
-              <div
-                key={index}
-                className='flex flex-col items-center text-center bg-white shadow-lg rounded-xl p-6'>
-                <img
-                  src={member.imageSrc}
-                  alt={member.name}
-                  className='w-32 h-32 rounded-full mb-4 object-cover'
-                />
-                <h4 className='text-lg font-semibold'>
-                  {member.name}
-                </h4>
-                <p className='text-gray-600'>{member.role}</p>
-                <p className='text-gray-500 text-sm'>
-                  {member.description}
-                </p>
-              </div>
-            ))}
+          
+          {/* Mission */}
+          <div>
+            <h2 className="text-4xl font-bold mb-4">Our Mission</h2>
+            <p className="text-lg max-w-lg">
+              To be the leading digital platform for seamless bus ticketing
+              and cargo booking across Africa, prioritizing convenience,
+              safety, and sustainable practices while expanding our reach
+              and promoting customer-centered innovation.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Right Aside - Ad */}
-      {/* <aside className='hidden lg:flex lg:w-1/5 bg-white p-4 border-l border-gray-200 lg:justify-center '>
-        <div className='flex flex-col p-5 sticky'>
-          <div className='space-y-3'>
-            <img
-              src='/about/ad3.jpg'
-              alt='Ad 3'
-              className='rounded-xl  p-2 object-cover opacity-60'
-            />
-            <img
-              src='/about/ad4.jpg'
-              alt='Ad 4'
-              className='rounded-xl  p-2 object-cover opacity-60'
-            />
-            <div className='bg-green-50 text-center text-green-700 font-semibold p-4 rounded-lg shadow'>
-              Advertise with Us
+      {/* White section with rounded top corners and background pattern */}
+      <div 
+        className="bg-white rounded-t-3xl px-20 -mt-4 relative z-20"
+        style={{
+          backgroundImage: "url('/subtle-pattern.png')",
+          backgroundRepeat: "repeat"
+        }}
+      >
+        {/* Who We Are Section */}
+        <div className="py-12 container mx-auto px-16">
+          <h2 className="text-3xl font-bold text-orange-400 mb-8">WHO WE ARE!</h2>
+          
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Left column with text */}
+            <div className="flex-1 flex flex-col">
+              <p className="text-gray-700 mb-6">
+                TranziBook Technology is a transportation and logistics technology solution that enables travelers and goods owners to book bus tickets and cargo vehicles for their goods through web and mobile applications.
+              </p>
+              
+              <p className="text-gray-700 mb-6">
+                The platform allows travelers to search for available bus routes, view schedules, and book tickets online. They can also choose their preferred seat and pay for their ticket securely through the platform. The solution also provides real-time updates on the status of the bus and estimated arrival times.
+              </p>
+              
+              {/* Image below text on left side */}
+              <div className="mt-4 mb-6 lg:mb-0">
+                <img 
+                  src="/womaninbus.jpg" 
+                  alt="Happy woman customer" 
+                  className="rounded-[2pc] shadow-md w-full h-full object-cover" 
+                />
+              </div>
+            </div>
+            
+            {/* Right column with image and more text */}
+            <div className="flex-1 flex flex-col">
+              {/* Image on top of right side */}
+              <div className="mb-6">
+                <img 
+                  src="/manwithson.jpg" 
+                  alt="Bus driver" 
+                  className="rounded-[2pc] shadow-md w-full h-full object-cover" 
+                />
+              </div>
+              
+              {/* Text below image on right side */}
+              <p className="text-gray-700 mb-6">
+                For cargo trucks booking, the platform enables businesses and individuals seamlessly book for truck services to move their goods safely and conveniently, and book transportation services for their goods. They can also track the movement of their goods in real-time, receive delivery notifications, and manage their shipments through the platform.
+              </p>
+              
+              <p className="text-gray-700">
+                Our solution typically uses advanced logistics management software and GPS tracking technology to optimize routes and improve delivery efficiency. This helps to reduce costs and improve delivery times, while providing a seamless customer experience for both travelers and cargo shippers.
+              </p>
             </div>
           </div>
         </div>
-      </aside> */}
+      </div>
     </div>
   );
 };

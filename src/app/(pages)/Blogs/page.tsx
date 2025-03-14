@@ -94,7 +94,7 @@ const Blog: React.FC = () => {
               >
                 {post.image && (
                   <motion.img
-                    src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${post.image}`}
+                    src={`https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/${post.image}`}
                   
                     alt={post.title}
                     className="w-full h-full object-cover max-h-64 object-center"

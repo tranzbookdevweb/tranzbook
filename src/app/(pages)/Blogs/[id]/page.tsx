@@ -88,7 +88,7 @@ const BlogDetail: React.FC = () => {
         <h1 className="text-4xl font-bold mb-2">{blogPost.title}</h1>
         <p className="text-sm text-gray-600 mb-4">By {adminName} on {new Date(blogPost.createdAt).toLocaleDateString()}</p>
         {blogPost.image && (
-          <img src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${blogPost.image}`} alt={blogPost.title} className="w-full h-auto rounded-md mb-4" />
+          <img src={`https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/${blogPost.image}`} alt={blogPost.title} className="w-full h-auto rounded-md mb-4" />
         )}
         <div className="text-gray-800" >{blogPost.content } </div>
       </div>
@@ -98,7 +98,7 @@ const BlogDetail: React.FC = () => {
         {relatedPosts.map((post) => (
           <div key={post.id} className="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow">
             {post.image && (
-              <img src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${post.image}`} alt={post.title} className="w-full h-40 object-cover rounded-md mb-2" />
+              <img src={`https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/${post.image}`} alt={post.title} className="w-full h-40 object-cover rounded-md mb-2" />
             )}
             <h3 className="text-lg font-semibold mb-1">{post.title}</h3>
             <p className="text-sm text-gray-600">{new Date(post.createdAt).toLocaleDateString()}</p>

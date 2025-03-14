@@ -90,7 +90,7 @@ export function Priveleges() {
     {
       accessorKey: "logo",
       header: "Logo",
-      cell: ({ row }) => <img className='h-24 w-24' src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${row.getValue("logo") || 'N/A'}`} alt=''/>,
+      cell: ({ row }) => <img className='h-24 w-24' src={`https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/${row.getValue("logo") || 'N/A'}`} alt=''/>,
     },
   ];
 
