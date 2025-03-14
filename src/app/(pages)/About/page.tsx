@@ -35,7 +35,7 @@ const AboutUs = () => {
           <div 
             className="w-full h-full bg-contain bg-no-repeat bg-center md:bg-right"
             style={{
-              backgroundImage: "url('/world-map.png')"
+              backgroundImage: "url('/map.png')"
             }}
           ></div>
         </div>
