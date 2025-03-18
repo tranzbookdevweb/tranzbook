@@ -120,86 +120,91 @@ const AboutUs = () => {
         </div>
       </div>
       
-      {/* What We Offer Section with images on both ends */}
-      <div className="w-full bg-white py-16 relative overflow-hidden">
-        {/* Left side image */}
-        <div className="absolute left-0 top-0 bottom-0 w-1/4 hidden lg:block">
-          <img 
-            src="/arch.jpeg" 
-            alt="Transportation logistics" 
-            className="w-full h-full object-cover"
-          />
-        </div>
+    {/* What We Offer Section with images on both sides */}
+<div className="w-full bg-white py-16">
+  <div className="container mx-auto px-4">
+    <div className="flex flex-col lg:flex-row">
+      {/* Left side image */}
+      <div className="hidden lg:block lg:w-1/4">
+        <img 
+          src="/arch.jpeg" 
+          alt="Transportation logistics" 
+          className="w-full h-full rounded-r-[2pc] object-cover"
+        />
+      </div>
+      
+      {/* Center content */}
+      <div className="w-full lg:w-1/2 px-4">
+        {/* Section Header */}
+        <h2 className="text-4xl md:text-5xl font-bold text-center mb-12">What We Offer</h2>
         
-        {/* Right side image */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/4 hidden lg:block">
-          <img 
-            src="/arch.jpeg" 
-            alt="Cargo logistics" 
-            className="w-full h-full object-cover"
-          />
-        </div>
-        
-        <div className="container bg-white w-fit h-full mx-auto px-4 relative z-10">
-          {/* Section Header */}
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-12">What We Offer</h2>
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Card 1 - Professional Development */}
+          <div className="bg-white rounded-lg p-6 shadow-md">
+            <div className="bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold mb-2">Professional Development</h3>
+            <p className="text-gray-600">
+              From in-depth training to career advancement programs, we support your growth every step of the way.
+            </p>
+          </div>
           
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {/* Card 1 - Professional Development */}
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Professional Development</h3>
-              <p className="text-gray-600">
-                From in-depth training to career advancement programs, we support your growth every step of the way.
-              </p>
+          {/* Card 2 - Flexible Work Options */}
+          <div className="bg-white rounded-lg p-6 shadow-md">
+            <div className="bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
             </div>
-            
-            {/* Card 2 - Flexible Work Options */}
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Flexible Work Options</h3>
-              <p className="text-gray-600">
-                We offer flexibility in working hours and remote options, so you can bring your best wherever you are.
-              </p>
+            <h3 className="text-xl font-bold mb-2">Flexible Work Options</h3>
+            <p className="text-gray-600">
+              We offer flexibility in working hours and remote options, so you can bring your best wherever you are.
+            </p>
+          </div>
+          
+          {/* Card 3 - Health & Wellness Benefits */}
+          <div className="bg-white rounded-lg p-6 shadow-md">
+            <div className="bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
             </div>
-            
-            {/* Card 3 - Health & Wellness Benefits */}
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Health & Wellness Benefits</h3>
-              <p className="text-gray-600">
-                Comprehensive health coverage to keep you in top form.
-              </p>
+            <h3 className="text-xl font-bold mb-2">Health & Wellness Benefits</h3>
+            <p className="text-gray-600">
+              Comprehensive health coverage to keep you in top form.
+            </p>
+          </div>
+          
+          {/* Card 4 - Travel and Shipping Discounts */}
+          <div className="bg-white rounded-lg p-6 shadow-md">
+            <div className="bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
             </div>
-            
-            {/* Card 4 - Travel and Shipping Discounts */}
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <div className="bg-blue-400 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Travel and Shipping Discounts:</h3>
-              <p className="text-gray-600">
-                Enjoy exclusive discounts on TranzBook&apos;s travel and logistics services!
-              </p>
-            </div>
+            <h3 className="text-xl font-bold mb-2">Travel and Shipping Discounts:</h3>
+            <p className="text-gray-600">
+              Enjoy exclusive discounts on TranzBook&apos;s travel and logistics services!
+            </p>
           </div>
         </div>
       </div>
+      
+      {/* Right side image */}
+      <div className="hidden lg:block lg:w-1/4">
+        <img 
+          src="/arch.jpeg" 
+          alt="Cargo logistics" 
+          className="w-full rounded-l-[2pc] h-full object-cover"
+        />
+      </div>
+    </div>
+  </div>
+</div>
       
       {/* Ready to Start Your Journey Section with rounded top-right corner */}
       <div className="w-full bg-yellow-500 relative overflow-hidden rounded-tr-[16pc]">
