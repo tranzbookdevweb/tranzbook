@@ -102,7 +102,7 @@ const BlogDetail: React.FC = () => {
             )}
             <h3 className="text-lg font-semibold mb-1">{post.title}</h3>
             <p className="text-sm text-gray-600">{new Date(post.createdAt).toLocaleDateString()}</p>
-            <a href={`/blogs/${post.id}`} className="text-blue-500 hover:underline mt-2 block">Read More</a>
+            <a href={`/blog/${post.id}`} className="text-blue-500 hover:underline mt-2 block">Read More</a>
           </div>
         ))}
       </div>

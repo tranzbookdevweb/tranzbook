@@ -3,7 +3,6 @@ import Carousel from '@/components/Carousel';
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-
 interface BlogPost {
   id: string;
   title: string;
@@ -71,7 +70,7 @@ const Blog: React.FC = () => {
   };
 
   const handlePostClick = (id: string) => {
-    router.push(`/Blogs/${id}`); // Navigate to the blog detail page
+    router.push(`/blog/${id}`); // Navigate to the blog detail page
   };
 
   return (
