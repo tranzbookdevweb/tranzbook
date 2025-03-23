@@ -66,7 +66,7 @@ const AboutUs = () => {
                 <img 
                   src="/womaninbus.jpg" 
                   alt="Happy woman customer" 
-                  className="rounded-[1pc] md:rounded-[2pc] shadow-md w-full h-48 sm:h-64 md:h-72 lg:h-full object-cover" 
+                  className="rounded-[1pc] md:rounded-[2pc] shadow-md w-full h-48 sm:h-64 md:h-96 object-cover" 
                 />
               </div>
             </div>
@@ -78,7 +78,7 @@ const AboutUs = () => {
                 <img 
                   src="/manwithson.jpg" 
                   alt="Bus driver" 
-                  className="rounded-[1pc] md:rounded-[2pc] shadow-md w-full h-48 sm:h-64 md:h-72 lg:h-full object-cover" 
+                  className="rounded-[1pc] md:rounded-[2pc] shadow-md w-full h-48 sm:h-64 md:h-96 object-cover" 
                 />
               </div>
               
