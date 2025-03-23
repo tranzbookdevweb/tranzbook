@@ -2,7 +2,7 @@ import React from 'react';
 
 const AboutUs = () => {
   return (
-    <div className="flex flex-col w-full bg-gray-50">
+    <div className="flex flex-col w-full bg-white">
       
       {/* Hero Section with rounded edges and background image */}
       <div 
@@ -194,68 +194,71 @@ const AboutUs = () => {
 </div>
       
       {/* Ready to Start Your Journey Section with rounded top-right corner */}
-      <div className="w-full bg-[#FEA603] relative overflow-hidden rounded-tr-[16pc]">
-        <div className="container mx-auto py-12 px-4 md:px-8 lg:px-12">
-          <div className="flex flex-col md:flex-row">
-            {/* Left Content */}
-            <div className="w-full md:w-3/5 text-white z-10">
-              {/* Main Heading */}
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">Ready to Start Your Journey?</h2>
+      <div className="w-full bg-[#FEA603] relative rounded-tr-[32rem] max-lg:rounded-tr-[12pc]">
+      <div className="container mx-auto justify-center px-32 max-lg:px-20 py-12 pb-32">
+        {/* Title in separate div */}
+        <div className="mb-8">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">Ready to Start Your Journey?</h2>
+        </div>
+        
+        {/* Grid layout for content */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+          {/* Left Content - 3/5 of the grid */}
+          <div className="md:col-span-3 text-white z-10">
+            {/* Description */}
+            <p className="mb-8 max-w-xl">
+              For cargo trucks booking, the platform enables businesses and individuals, seamlessly book for truck services to move their goods safely and conveniently, and book transportation services for their goods. They can also track the movement of their goods in real-time, receive delivery notifications, and manage their shipments through the platform.
+            </p>
+            
+            <p className="mb-10 max-w-xl">
+              Our solution typically uses advanced logistics management software and GPS tracking technology to optimize routes and improve delivery efficiency. This helps to reduce costs and improve delivery times, while providing a seamless customer experience for both travelers and cargo shippers.
+            </p>
+            
+            {/* Open Roles Section */}
+            <div>
+              <h3 className="text-2xl md:text-3xl font-bold mb-6">Open Roles</h3>
               
-              {/* Description */}
-              <p className="mb-8 max-w-xl">
-                For cargo trucks booking, the platform enables businesses and individuals, seamlessly book for truck services to move their goods safely and conveniently, and book transportation services for their goods. They can also track the movement of their goods in real-time, receive delivery notifications, and manage their shipments through the platform.
-              </p>
+              {/* Role 1 */}
+              <div className="mb-6">
+                <div className="flex items-center mb-2">
+                  <div className="bg-white rounded-full w-6 h-6 flex items-center justify-center mr-3">
+                    <div className="bg-blue-500 rounded-full w-4 h-4"></div>
+                  </div>
+                  <h4 className="text-xl font-bold">Customer Support Specialists</h4>
+                </div>
+                <p className="ml-9">
+                  Assisting both travelers and logistics clients with a top-tier support experience.
+                </p>
+              </div>
               
-              <p className="mb-10 max-w-xl">
-                Our solution typically uses advanced logistics management software and GPS tracking technology to optimize routes and improve delivery efficiency. This helps to reduce costs and improve delivery times, while providing a seamless customer experience for both travelers and cargo shippers.
-              </p>
-              
-              {/* Open Roles Section */}
+              {/* Role 2 */}
               <div>
-                <h3 className="text-2xl md:text-3xl font-bold mb-6">Open Roles</h3>
-                
-                {/* Role 1 */}
-                <div className="mb-6">
-                  <div className="flex items-center mb-2">
-                    <div className="bg-white rounded-full w-6 h-6 flex items-center justify-center mr-3">
-                      <div className="bg-blue-500 rounded-full w-4 h-4"></div>
-                    </div>
-                    <h4 className="text-xl font-bold">Customer Support Specialists</h4>
+                <div className="flex items-center mb-2">
+                  <div className="bg-white rounded-full w-6 h-6 flex items-center justify-center mr-3">
+                    <div className="bg-blue-500 rounded-full w-4 h-4"></div>
                   </div>
-                  <p className="ml-9">
-                    Assisting both travelers and logistics clients with a top-tier support experience.
-                  </p>
+                  <h4 className="text-xl font-bold">Marketing & Brand Managers</h4>
                 </div>
-                
-                {/* Role 2 */}
-                <div>
-                  <div className="flex items-center mb-2">
-                    <div className="bg-white rounded-full w-6 h-6 flex items-center justify-center mr-3">
-                      <div className="bg-blue-500 rounded-full w-4 h-4"></div>
-                    </div>
-                    <h4 className="text-xl font-bold">Marketing & Brand Managers</h4>
-                  </div>
-                  <p className="ml-9">
-                    Growing our presence across Africa and building trust with customers.
-                  </p>
-                </div>
+                <p className="ml-9">
+                  Growing our presence across Africa and building trust with customers.
+                </p>
               </div>
             </div>
-            
-            {/* Right Image */}
-            <div className="w-full md:w-2/5 mt-8 md:mt-0 flex items-center justify-center z-10">
-              <div className="rounded-xl overflow-hidden shadow-lg">
-                <img 
-                  src="/womanout.jpg" 
-                  alt="Woman using mobile phone"
-                  className="w-full h-full object-cover" 
-                />
-              </div>
+          </div>
+          
+          {/* Right Image - 2/5 of the grid */}
+          <div className="md:col-span-2 flex items-center justify-center z-10">
+            <div className="rounded-xl overflow-hidden shadow-lg h-full w-full">
+              <img 
+                src="/womanout.jpg" 
+                alt="Woman using mobile phone"
+                className="w-full h-full max-h-[500px] object-cover" 
+              />
             </div>
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

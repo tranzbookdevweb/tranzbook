@@ -23,13 +23,13 @@ export function ResourcesToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className=" z-[999] text-black bg-white">
       <DropdownMenuItem className="" >
-        <Link href='/Blogs' className="rounded-[8px] hover:bg-orange-200 p-2 hover:text-white w-full hover:cursor-pointer  items-center flex font-semibold">
+        <Link href='/blogs' className="rounded-[8px] hover:bg-orange-200 p-2 hover:text-white w-full hover:cursor-pointer  items-center flex font-semibold">
            <CampaignOutlined className="mr-2"/>
           Blog  
         </Link>
         </DropdownMenuItem>
         <DropdownMenuItem >
-        <Link href='/Careers' className="rounded-[8px] hover:bg-orange-200 p-2 hover:text-white w-full hover:cursor-pointer  items-center flex font-semibold">
+        <Link href='/careers' className="rounded-[8px] hover:bg-orange-200 p-2 hover:text-white w-full hover:cursor-pointer  items-center flex font-semibold">
         <WorkOutlineOutlined className="mr-2"/>
           Careers
           </Link>

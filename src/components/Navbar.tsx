@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import { ModeToggle } from "./Modetoggle";
-import { ProductToggle } from "./Producttoggle";
 import { ResourcesToggle } from "./ResourcesToggle";
 import {
   RegisterLink,
@@ -40,8 +38,9 @@ export async function Navbar() {
 
           {/* Middle menu links for larger screens */}
           <div className='menuMiddle max-lg:hidden flex text-blue-500 items-center text-[14px] font-medium space-x-3'>
-            <Link href='/About'>About Us</Link>
+            <Link href='/about-us'>About Us</Link>
             <ResourcesToggle />
+            <Link href='/contact-us'>Contact Us</Link>
           </div>
           {user && (
             <div className='menuMiddle max-lg:hidden flex text-blue-500 items-center text-[14px] font-medium space-x-3'>

@@ -10,7 +10,6 @@ import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ModeToggle } from './Modetoggle'; // Assuming ModeToggle is a component for switching themes
-import { ProductToggle } from './Producttoggle';
 import { ResourcesToggle } from './ResourcesToggle';
 import { RegisterLink, LoginLink, LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
@@ -36,10 +35,8 @@ export async function MenuSheet() {
         <nav className="flex flex-col space-y-6 p-6 text-center">
           {/* Main Navigation Links with Hover Effects */}
           <Link href="/" className="text-blue-500 dark:text-white font-medium text-lg hover:text-blue-700 dark:hover:text-gray-300 transition duration-300">Home</Link>
-          <Link href="/About" className="text-blue-500 dark:text-white font-medium text-lg hover:text-blue-700 dark:hover:text-gray-300 transition duration-300">About Us</Link>
-          <div className="text-blue-500 dark:text-white font-medium text-lg hover:text-blue-700 dark:hover:text-gray-300 transition duration-300">
-            <ProductToggle />
-          </div>
+          <Link href="/about-us" className="text-blue-500 dark:text-white font-medium text-lg hover:text-blue-700 dark:hover:text-gray-300 transition duration-300">About Us</Link>
+
           <div className="text-blue-500 dark:text-white font-medium text-lg hover:text-blue-700 dark:hover:text-gray-300 transition duration-300">
             <ResourcesToggle />
           </div>
@@ -57,10 +54,7 @@ export async function MenuSheet() {
             </>
           )}
 
-          {/* Optional Mode Toggle */}
-          <div className="mt-4">
-            <ModeToggle />
-          </div>
+          
         </nav>
       </SheetContent>
     </Sheet>

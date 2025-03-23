@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { cn } from "@/lib/utils";
-import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import Footer from "@/components/Footer";
 
@@ -26,15 +25,11 @@ export default function RootLayout({
           "h-full m-0 w-full font-sans antialiased",
           inter.className
         )}>
-        <ThemeProvider
-          attribute='class'
-          defaultTheme='system'
-          enableSystem>
+    
           <Navbar />
           <Toaster />
            {children}
           <Footer />
-        </ThemeProvider>
       </body>
     </html>
   );
