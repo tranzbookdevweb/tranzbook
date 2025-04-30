@@ -1,100 +1,115 @@
 'use client'
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Facebook, Linkedin, X } from "lucide-react";
-import { Instagram } from "@mui/icons-material";
+import { Facebook, Twitter, Youtube } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
-  // Links in array format with their href values
+  // Maintaining original links and hrefs
   const otherPages = [
     { name: "Home", href: "/home" },
     { name: "About Us", href: "/About" },
     { name: "Careers", href: "/Careers" },
     { name: "Blog", href: "/blog" },
-
-    ];
+  ];
 
   const quickLinks = [
     { name: "Privacy Policy", href: "/privacy-policy" },
-    { name: "FAQ", href: "#faq" },
-    { name: "Bus Terms and Conditions", href: "/bus-terms-and-conditions" },
-    { name: "Cargo Terms and Conditions", href: "/cargo-terms-and-conditions" }
-  ];
-
-  const socialLinks = [
-    { icon: <Facebook />, href: "https://facebook.com/tranzbook", label: "Facebook" },
-    { icon: <X />, href: "https://x.com/tranzbook", label: "X" },
-    { icon: <Instagram />, href: "https://instagram.com/tranzbook", label: "Instagram" },
-    { icon: <Linkedin />, href: "https://linkedin.com/company/tranzbook", label: "LinkedIn" }
+    { name: "Bus T&C's", href: "/bus-terms-and-conditions" },
+    { name: "Cargo T&C's", href: "/cargo-terms-and-conditions" },
   ];
 
   return (
-    <footer className="bg-white text-gray-500 py-12">
-      <div className="container mx-auto px-6 grid md:grid-cols-3 gap-8">
-        {/* Logo & Contact Info */}
-        <div>
-          <div className="p-6 space-y-4 rounded-lg">
-            <img src='/pictures/logoNav.png' alt='Tranzbook Logo'/>
-
-          </div>
-        </div>
-
-        {/* Navigation Links */}
-        <div className="grid grid-cols-2 gap-6">
+    <footer className="bg-blue-500 text-white p-10 px-5 w-full">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-2">          {/* Logo Section */}
           <div>
-            <h3 className="text-lg font-semibold text-[#1B31FF]">Other Pages</h3>
-            <ul className="mt-2 space-y-2">
+            <div className="flex items-center mb-4">
+                <div className=" flex items-center justify-center">
+                  <Image src='/footerlogo.png' width={100} height={80} alt="" />
+                </div>
+            </div>
+          </div>
+
+          {/* Other Pages */}
+          <div>
+            <h3 className="text-sm font-semibold mb-3">Other pages</h3>
+            <ul className="space-y-1 text-sm">
               {otherPages.map((page) => (
                 <li key={page.name}>
-                  <Link href={page.href}>
-                    <span className="hover:text-[#1B31FF] cursor-pointer">{page.name}</span>
-                  </Link>
+                  <Link href={page.href}>{page.name}</Link>
                 </li>
               ))}
             </ul>
           </div>
+          
+          {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold text-[#1B31FF]">Quick Links</h3>
-            <ul className="mt-2 space-y-2">
+            <h3 className="text-sm font-semibold mb-3">Quick Links</h3>
+            <ul className="space-y-1 text-sm">
               {quickLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href}>
-                    <span className="hover:text-[#1B31FF] cursor-pointer">{link.name}</span>
-                  </Link>
+                  <Link href={link.href}>{link.name}</Link>
                 </li>
               ))}
             </ul>
           </div>
-        </div>
 
-        {/* Newsletter & Socials */}
-        <div>
-          <h3 className="text-lg font-semibold text-[#1B31FF]">Newsletter</h3>
-          <p className="text-gray-400 mt-2">Get the latest news & updates</p>
-          <div className="flex items-center mt-4">
-            <Input placeholder="Your Email Address" className="bg-white text-black rounded-l-lg px-4 py-2 flex-1" />
-            <Button className="bg-[#1B31FF] text-white px-4 rounded-r-lg">Subscribe</Button>
+          {/* Contact Us */}
+          <div>
+            <h3 className="text-sm font-semibold mb-3">Contact Us</h3>
+            <ul className="space-y-1 text-sm">
+              <li>Hotel Reservation: 123-456-7890</li>
+              <li>Ticket Office: 123-456-7890</li>
+            </ul>
           </div>
-          {/* Social Media Icons */}
-          <div className="flex space-x-4 mt-6">
-            {socialLinks.map((social) => (
-              <a 
-                key={social.label}
-                href={social.href} 
-                className="p-2 bg-[#1B31FF] rounded-full text-white"
-                aria-label={social.label}
-              >
-                {social.icon}
-              </a>
-            ))}
+
+          {/* Subscribe */}
+          <div className="lg:col-span-2">
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold mb-2">Subscribe</h3>
+              <div className="flex w-full">
+                <input 
+                  type="email" 
+                  placeholder="Enter your email" 
+                  className="px-4 py-2  mr-3  rounded text-blue-800 w-full focus:outline-none focus:ring-2 focus:ring-blue-400" 
+                />
+                <button className="bg-blue-600 rounded text-white px-3 py-2 rounded-r whitespace-nowrap">
+                  Subscribe
+                </button>
+              </div>
+            </div>
+            
+            {/* Social Media */}
+            <div >
+              <h3 className="text-sm font-semibold mb-2">Social</h3>
+              <div className="flex space-x-2">
+                <a href="https://facebook.com/tranzbook" className="bg-white p-1 rounded">
+                  <Facebook size={16} className="text-blue-500" />
+                </a>
+                <a href="https://x.com/tranzbook" className="bg-white p-1 rounded">
+                  <Twitter size={16} className="text-blue-500" />
+                </a>
+                <a href="#" className="bg-white p-1 rounded">
+                  <Youtube size={16} className="text-blue-500" />
+                </a>
+                <a href="#" className="bg-white p-1 rounded">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-blue-500">
+                    <path fill="currentColor" d="M20,2H4C2.9,2,2,2.9,2,4v16c0,1.1,0.9,2,2,2h16c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z M17.2,12.2L17.2,12.2L17.2,12.2
+                    c0,2.3-1.9,4.2-4.2,4.2h0H9.8v-8.4h3.2C15.3,8,17.2,9.9,17.2,12.2z"/>
+                    <path fill="currentColor" d="M13,9.8h-1.6v4.8H13c1.3,0,2.4-1.1,2.4-2.4S14.3,9.8,13,9.8z"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Copyright */}
-      <div className="text-center mt-12 text-gray-400">
-        © {new Date().getFullYear()} Tranzbook Technologies. All rights reserved.
+          {/* Divider */}
+          <div className="border-t border-blue-400 my-8 opacity-30"></div>
+        {/* Copyright */}
+        <div className="text-center mt-8 text-sm">
+          © 2025 Tranzbook Technologies | All Rights Reserved
+        </div>
       </div>
     </footer>
   );
