@@ -193,17 +193,17 @@ export function VehicleMakeDataTable() {
       header: "Company",
       cell: ({ row }) => <div>{row.original.company?.name || "N/A"}</div>,
     },
-    {
-      accessorKey: "image",
-      header: "Image",
-      cell: ({ row }) => (
-        <img 
-          className='h-24 w-24 object-cover rounded-md' 
-          src={`https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/images/${row.original.image || 'default-bus.png'}`} 
-          alt='Bus Image'
-        />
-      ),
-    },
+    // {
+    //   accessorKey: "image",
+    //   header: "Image",
+    //   cell: ({ row }) => (
+    //     <img 
+    //       className='h-24 w-24 object-cover rounded-md' 
+    //       src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${row.original.image || 'default-bus.png'}`} 
+    //       alt='Bus Image'
+    //     />
+    //   ),
+    // },
     {
       accessorKey: "features",
       header: "Features",

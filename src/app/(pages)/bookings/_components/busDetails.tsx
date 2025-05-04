@@ -71,7 +71,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
     <aside className='bg-white dark:text-black md:space-y-3 -w-72 max-sm:w-full sm:max-md:w-full min-h-full max-sm:min-h-fit p-5 flex flex-col items-center max-sm:justify-between sm:max-md:justify-between rounded-lg overflow-y-scroll custom-scrollbar'>
       <div className='flex items-center w-full mb-5 flex-wrap max-lg:justify-center'>
         <Image
-          src={`https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/${busCompanyLogo}`}
+          src={`https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${busCompanyLogo}`}
           alt='Bus'
           height={80}
           width={80}

@@ -358,7 +358,7 @@ const SearchResults = () => {
                             className="w-full h-full object-cover"
                             src={
                               trip.bus.company.logo
-                                ? `https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/${trip.bus.company.logo}`
+                                ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.bus.company.logo}`
                                 : defaultLogo
                             }
                             alt={trip.bus.company.name || "Bus company"}

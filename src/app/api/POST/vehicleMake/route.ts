@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const capacity = parseInt(formData.get("capacity") as string, 10);
     const busDescription = formData.get("busDescription") as string;
     const companyId = formData.get("companyId") as string;
-    const image = formData.get("image") as File;
+    // const image = formData.get("image") as File;
 
     // Extract all boolean extras dynamically
     const extras = [
@@ -30,21 +30,21 @@ export async function POST(req: NextRequest) {
     }, {} as Record<string, boolean>);
 
     // Validate required fields
-    if (!capacity || !companyId || !image) {
+    if (!capacity || !companyId ) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
     // Upload image to Supabase storage
-    const { data: imageData, error: uploadError } = await supabase.storage
-      .from("images")
-      .upload(`buses/${image.name}-${Date.now()}`, image, {
-        cacheControl: "2592000",
-        contentType: image.type,
-      });
+    // const { data: imageData, error: uploadError } = await supabase.storage
+    //   .from("images")
+    //   .upload(`buses/${image.name}-${Date.now()}`, image, {
+    //     cacheControl: "2592000",
+    //     contentType: image.type,
+    //   });
 
-    if (uploadError) {
-      throw new Error(uploadError.message);
-    }
+    // if (uploadError) {
+    //   throw new Error(uploadError.message);
+    // }
 
     // Create a new bus record including the dynamic boolean extras
     const newBus = await prisma.bus.create({
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         capacity,
         busDescription,
         companyId,
-        image: imageData?.path,  // Store the image path in Prisma
+        // image: imageData?.path,  // Store the image path in Prisma
         status: "available",     // Default status is set to available
         ...busExtras,            // Dynamically include the boolean extras
       },

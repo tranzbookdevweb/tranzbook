@@ -87,7 +87,7 @@ const PageContainer: React.FC = () => {
 
         if (data.bus.image) {
           setBusImage(
-            `https://kqvxondwjmttypsecwds.supabase.co/storage/v1/object/public/images/${data.bus.image}`
+            `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${data.bus.image}`
           );
         }
       } catch (error) {

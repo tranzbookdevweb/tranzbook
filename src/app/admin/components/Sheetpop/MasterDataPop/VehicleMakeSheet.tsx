@@ -100,7 +100,7 @@ function BusSheet({ onAddSuccess }: Props) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!capacity || !companyId || !image || (onArrival && plateNumber)) {
+    if (!capacity || !companyId ||  (onArrival && plateNumber)) {
       setError('All fields are required, and plate number should not be entered if the bus is on arrival.');
       return;
     }
@@ -110,11 +110,11 @@ function BusSheet({ onAddSuccess }: Props) {
 
     try {
       const formData = new FormData();
-      formData.append('plateNumber', onArrival ? '' : plateNumber); // Skip plate number if onArrival is true
+      // formData.append('plateNumber', onArrival ? '' : plateNumber); // Skip plate number if onArrival is true
       formData.append('capacity', capacity.toString());
       formData.append('busDescription', busDescription);
       formData.append('companyId', companyId);
-      formData.append('image', image);
+      // formData.append('image', image);
 
       formData.append('airConditioning', airCondition.toString());
       formData.append('chargingOutlets', chargingOutlets.toString());
@@ -173,7 +173,7 @@ function BusSheet({ onAddSuccess }: Props) {
               )}
               <div className="grid grid-cols-1 items-center gap-4">
                     <Label htmlFor="busDescription" className="text-left">
-                      Bus Model
+                      Bus Description
                     </Label>
                     <Input
                      name="busDescription"
