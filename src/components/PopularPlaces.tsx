@@ -80,18 +80,16 @@ export function PopularPlace() {
             }}
             passHref
           >
-            <div className="relative h-48 md:h-64 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 group cursor-pointer">
+            <div className="relative h-48 md:h-64 rounded-[2pc] overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 group cursor-pointer">
               {/* Background Image */}
-              <Image
+              <img
                 src={location.image}
                 alt={`${location.from} to ${location.to}`}
-                layout="fill"
-                objectFit="cover"
-                className="group-hover:scale-110 transform transition-transform duration-300"
+                className="group-hover:scale-110 transform transition-transform object-cover h-full w-full duration-300"
               />
 
               {/* Text Overlay */}
-              <div className="absolute inset-0 bg-black/50 flex flex-col justify-end p-4">
+              <div className="absolute inset-0 bg-black/30 flex flex-col justify-end p-4">
                 <h2 className="text-white text-xl font-bold flex items-center">
                   {location.from}
                   <span className="ml-2 text-[#48A0FF] group-hover:translate-x-1 transition-transform duration-300">

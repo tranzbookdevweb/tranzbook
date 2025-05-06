@@ -3,11 +3,10 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    // Fetch routes with their related city data
+    // Fetch a large number of routes ordered by popularity (trip count)
     const routes = await prisma.route.findMany({
       select: {
         id: true,
-        // Include the related city data through the relations
         startCity: {
           select: {
             id: true,
@@ -17,38 +16,69 @@ export async function GET() {
         endCity: {
           select: {
             id: true,
-            name: true,      
-             imageUrl: true,
+            name: true,
+            imageUrl: true,
           }
         },
-        // Count of bookings per route (through trips)
-        _count: {
+        // Count trips as a popularity metric
+        trips: {
           select: {
-            trips: true
-          }
-        }
+            id: true,
+          },
+        },
       },
-      // Limit to 6 routes
-      take: 6,
-      // Order by number of trips (as a proxy for popularity)
-      // This is the correct syntax for Prisma orderBy
       orderBy: {
         trips: {
           _count: 'desc'
         }
-      }
+      },
+      take: 50, // Fetch more to have enough unique options
     });
 
-    // Transform the data to match the component's expected format
-    const popularRoutes = routes.map((route) => ({
+    // Process the routes to get trip counts
+    const processedRoutes = routes.map(route => ({
       id: route.id,
-      // Use the city's imageUrl or fallback to a default pattern
-      image: route.endCity.imageUrl || `/Regions/${route.startCity.name.replace(/\s+/g, '')}Region.png`,
-      from: route.startCity.name,
-      to: route.endCity.name,
+      startCityId: route.startCity.id,
+      startCityName: route.startCity.name,
+      endCityId: route.endCity.id,
+      endCityName: route.endCity.name,
+      imageUrl: route.endCity.imageUrl || "/default-city-image.jpg", // Fallback image
+      tripCount: route.trips.length,
     }));
 
-    return NextResponse.json({ routes: popularRoutes }, { status: 200 });
+    // Filter out routes where start and end city are the same
+    const uniqueRoutes = processedRoutes.filter(
+      route => route.startCityId !== route.endCityId
+    );
+
+    // Select routes with unique END cities only
+    const selectedRoutes = [];
+    const usedEndCityIds = new Set();
+
+    for (const route of uniqueRoutes) {
+      // Skip if this end city is already used
+      if (usedEndCityIds.has(route.endCityId)) {
+        continue;
+      }
+
+      // Add this route to our selection
+      selectedRoutes.push({
+        id: route.id,
+        image: route.imageUrl,
+        from: route.startCityName,
+        to: route.endCityName,
+      });
+
+      // Mark end city as used
+      usedEndCityIds.add(route.endCityId);
+
+      // Stop once we have enough routes
+      if (selectedRoutes.length >= 6) {
+        break;
+      }
+    }
+
+    return NextResponse.json({ routes: selectedRoutes }, { status: 200 });
   } catch (error) {
     console.error("Error fetching routes:", error);
     return NextResponse.json(
