@@ -2,8 +2,66 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import prisma from '@/app/lib/db';
 
-export async function GET(request: NextRequest) {
-  // Disable caching for this route
+// Define interfaces for type safety
+interface TripResponse {
+  id: string;
+  tripId: string;
+  company: string;
+  route: string;
+  date: string;
+  totalAmount: number;
+  currency: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+  seatNumbers: number[];
+  tripDetails: {
+    departureTime: string;
+    basePrice: number;
+    commission: number;
+    commissionType: string;
+    recurring: boolean;
+    daysOfWeek: number[] | null;
+    bus: {
+      plateNumber: string;
+      capacity: number;
+      description: string | null;
+      status: string;
+      image: string | null;
+      amenities: {
+        airConditioning: boolean;
+        chargingOutlets: boolean;
+        wifi: boolean;
+        restRoom: boolean;
+        seatBelts: boolean;
+        onboardFood: boolean;
+      };
+    } | null;
+    route: {
+      duration: number;
+      distance: number;
+    };
+    driver: {
+      name: string;
+      mobile: string | null;
+      status: string;
+    } | null;
+    occurrence: {
+      occurrenceDate: string;
+      status: string;
+      availableSeats: number;
+      bookedSeats: number[];
+    } | null;
+  };
+}
+
+interface TripOccurrence {
+  id: string;
+  occurrenceDate: Date;
+  status: string;
+  availableSeats: number;
+  bookedSeats: number[];
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   const noStoreHeaders = new Headers({
     'Cache-Control': 'no-store',
   });
@@ -19,9 +77,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find the user in Prisma by email to get the userId
     const dbUser = await prisma.user.findUnique({
       where: { email: user.email },
+      select: { id: true },
     });
 
     if (!dbUser) {
@@ -31,193 +89,177 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const userId = dbUser.id;
-
-    // Fetch user's bookings
     const bookings = await prisma.booking.findMany({
-      where: { userId },
-      include: {
+      where: { userId: dbUser.id },
+      select: {
+        id: true,
+        status: true,
+        date: true,
+        seatNumber: true,
+        totalAmount: true,
         trip: {
-          include: {
+          select: {
+            id: true,
+            departureTime: true,
+            price: true,
+            currency: true,
+            recurring: true,
+            daysOfWeek: true,
+            commission: true,
+            commissionType: true,
+            date: true,
             bus: {
-              include: {
-                company: true,
+              select: {
+                plateNumber: true,
+                capacity: true,
+                busDescription: true,
+                status: true,
+                image: true,
+                airConditioning: true,
+                chargingOutlets: true,
+                wifi: true,
+                restRoom: true,
+                seatBelts: true,
+                onboardFood: true,
+                company: {
+                  select: { name: true },
+                },
               },
             },
             route: {
-              include: {
-                startCity: true,
-                endCity: true,
+              select: {
+                startCity: { select: { name: true, country: true } },
+                endCity: { select: { name: true, country: true } },
+                duration: true,
+                distance: true,
               },
             },
-            tripOccurrences: true,
+            driver: {
+              select: {
+                firstName: true,
+                lastName: true,
+                mobile: true,
+                status: true,
+              },
+            },
+            tripOccurrences: {
+              select: {
+                id: true,
+                occurrenceDate: true,
+                status: true,
+                availableSeats: true,
+                bookedSeats: true,
+              },
+            },
           },
         },
       },
     });
 
-    // Categorize trips
-    const trips = bookings.map((booking) => {
+    const currentDate = new Date();
+    const trips: TripResponse[] = bookings.map((booking) => {
       const trip = booking.trip;
-      const occurrence = trip.tripOccurrences[0]; // Use the first occurrence for simplicity
-      const currentDate = new Date();
+
+      // Find the relevant TripOccurrence
+      const relevantOccurrence: TripOccurrence | undefined = trip.tripOccurrences.find((occ) => {
+        const occDate = new Date(occ.occurrenceDate);
+        const bookingDate = new Date(booking.date);
+        return (
+          occDate.getFullYear() === bookingDate.getFullYear() &&
+          occDate.getMonth() === bookingDate.getMonth() &&
+          occDate.getDate() === bookingDate.getDate()
+        );
+      });
+
       let status: 'upcoming' | 'completed' | 'cancelled' = 'upcoming';
+      let tripDate: string | undefined;
 
       if (booking.status === 'cancelled') {
         status = 'cancelled';
-      } else if (occurrence) {
-        const occurrenceDate = new Date(occurrence.occurrenceDate);
-        if (occurrence.status === 'completed') {
+      } else if (relevantOccurrence) {
+        tripDate = relevantOccurrence.occurrenceDate.toISOString();
+        switch (relevantOccurrence.status) {
+          case 'cancelled':
+            status = 'cancelled';
+            break;
+          case 'completed':
+            status = 'completed';
+            break;
+          case 'inProgress':
+          case 'scheduled':
+            status = new Date(relevantOccurrence.occurrenceDate) < currentDate ? 'completed' : 'upcoming';
+            break;
+        }
+      } else {
+        // Fallback to trip.date if no occurrence is found
+        tripDate = trip.date?.toISOString();
+        if (tripDate && new Date(tripDate) < currentDate) {
           status = 'completed';
-        } else if (occurrence.status === 'cancelled') {
-          status = 'cancelled';
-        } else if (occurrenceDate < currentDate) {
-          status = 'completed'; // Assume past trips are completed if not cancelled
         }
       }
 
       return {
-        id: booking.id, // Booking ID for cancellation
+        id: booking.id,
         tripId: trip.id,
-        company: trip.bus?.company?.name || 'Unknown',
-        route: `${trip.route.startCity.name} to ${trip.route.endCity.name}`,
-        date: occurrence?.occurrenceDate.toISOString() || trip.date?.toISOString() || '',
-        price: trip.price,
+        company: trip.bus?.company?.name ?? 'Unknown',
+        route: `${trip.route.startCity.name}, ${trip.route.startCity.country} to ${trip.route.endCity.name}, ${trip.route.endCity.country}`,
+        date: tripDate ?? '',
+        totalAmount: booking.totalAmount ?? 0,
         currency: trip.currency,
         status,
+        seatNumbers: booking.seatNumber,
+        tripDetails: {
+          departureTime: trip.departureTime,
+          basePrice: trip.price,
+          commission: trip.commission,
+          commissionType: trip.commissionType,
+          recurring: trip.recurring,
+          daysOfWeek: trip.recurring ? trip.daysOfWeek : null,
+          bus: trip.bus
+            ? {
+                plateNumber: trip.bus.plateNumber ?? 'N/A',
+                capacity: trip.bus.capacity,
+                description: trip.bus.busDescription ?? null,
+                status: trip.bus.status,
+                image: trip.bus.image ?? null,
+                amenities: {
+                  airConditioning: trip.bus.airConditioning,
+                  chargingOutlets: trip.bus.chargingOutlets,
+                  wifi: trip.bus.wifi,
+                  restRoom: trip.bus.restRoom,
+                  seatBelts: trip.bus.seatBelts,
+                  onboardFood: trip.bus.onboardFood,
+                },
+              }
+            : null,
+          route: {
+            duration: trip.route.duration,
+            distance: trip.route.distance,
+          },
+          driver: trip.driver
+            ? {
+                name: `${trip.driver.firstName} ${trip.driver.lastName}`,
+                mobile: trip.driver.mobile ?? null,
+                status: trip.driver.status,
+              }
+            : null,
+          occurrence: relevantOccurrence
+            ? {
+                occurrenceDate: relevantOccurrence.occurrenceDate.toISOString(),
+                status: relevantOccurrence.status,
+                availableSeats: relevantOccurrence.availableSeats,
+                bookedSeats: relevantOccurrence.bookedSeats,
+              }
+            : null,
+        },
       };
     });
-
-    return NextResponse.json(
-      { trips },
-      { status: 200, headers: noStoreHeaders }
-    );
+    console.log('data',trips)
+    return NextResponse.json({ trips }, { status: 200, headers: noStoreHeaders });
   } catch (error) {
     console.error('Error fetching trips:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500, headers: noStoreHeaders }
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
-  // Disable caching for this route
-  const noStoreHeaders = new Headers({
-    'Cache-Control': 'no-store',
-  });
-
-  try {
-    const { getUser } = getKindeServerSession();
-    const user = await getUser();
-
-    if (!user || !user.email) {
-      return NextResponse.json(
-        { error: 'User not authenticated or email not found' },
-        { status: 401, headers: noStoreHeaders }
-      );
-    }
-
-    // Find the user in Prisma by email to get the userId
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
-    });
-
-    if (!dbUser) {
-      return NextResponse.json(
-        { error: 'User not found in database' },
-        { status: 404, headers: noStoreHeaders }
-      );
-    }
-
-    const userId = dbUser.id;
-    const { bookingId } = await request.json();
-
-    if (!bookingId) {
-      return NextResponse.json(
-        { error: 'Booking ID is required' },
-        { status: 400, headers: noStoreHeaders }
-      );
-    }
-
-    // Fetch the booking
-    const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      include: { trip: { include: { tripOccurrences: true } } },
-    });
-
-    if (!booking) {
-      return NextResponse.json(
-        { error: 'Booking not found' },
-        { status: 404, headers: noStoreHeaders }
-      );
-    }
-
-    if (booking.userId !== userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized to cancel this booking' },
-        { status: 403, headers: noStoreHeaders }
-      );
-    }
-
-    // Check if the booking is already cancelled
-    if (booking.status === 'cancelled') {
-      return NextResponse.json(
-        { error: 'Booking already cancelled' },
-        { status: 400, headers: noStoreHeaders }
-      );
-    }
-
-    // Check if the trip is upcoming
-    const occurrence = booking.trip.tripOccurrences[0];
-    const currentDate = new Date();
-    const occurrenceDate = occurrence ? new Date(occurrence.occurrenceDate) : booking.trip.date ? new Date(booking.trip.date) : null;
-
-    if (!occurrenceDate || occurrenceDate < currentDate) {
-      return NextResponse.json(
-        { error: 'Cannot cancel past or completed trips' },
-        { status: 400, headers: noStoreHeaders }
-      );
-    }
-
-    // Update booking status to cancelled
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: { status: 'cancelled' },
-    });
-
-    // Create a BusCancellation record
-    await prisma.busCancellation.create({
-      data: {
-        bookingDate: new Date(),
-        userId,
-        tripId: booking.tripId,
-        seatNumber: booking.seatNumber[0] || 0, // Use first seat for simplicity
-        refundAmount: booking.totalAmount * 0.9, // Example: 90% refund
-        currency: booking.trip.currency,
-        status: 'cancelled',
-      },
-    });
-
-    // Update TripOccurrence to free up seats
-    if (occurrence) {
-      await prisma.tripOccurrence.update({
-        where: { id: occurrence.id },
-        data: {
-          availableSeats: { increment: booking.seatNumber.length },
-          bookedSeats: { set: occurrence.bookedSeats.filter((seat) => !booking.seatNumber.includes(seat)) },
-        },
-      });
-    }
-
-    return NextResponse.json(
-      { message: 'Trip cancelled successfully' },
-      { status: 200, headers: noStoreHeaders }
-    );
-  } catch (error) {
-    console.error('Error cancelling trip:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to fetch trips. Please try again later.' },
       { status: 500, headers: noStoreHeaders }
     );
   }

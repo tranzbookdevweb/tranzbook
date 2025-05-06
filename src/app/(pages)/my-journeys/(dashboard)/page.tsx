@@ -1,8 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bus, User, Settings, LogOut } from 'lucide-react';
+import { Calendar, MapPin, Clock, CreditCard, Bus } from 'lucide-react';
 
 interface Trip {
   id: string;
@@ -10,16 +9,42 @@ interface Trip {
   company: string;
   route: string;
   date: string;
-  price: number;
+  totalAmount: number;
   currency: string;
   status: 'upcoming' | 'completed' | 'cancelled';
+  seatNumbers: number[];
+  tripDetails: {
+    departureTime: string;
+    basePrice: number;
+    commission: number;
+    commissionType: string;
+    recurring: boolean;
+    daysOfWeek: string[];
+    bus: any;
+    route: any;
+    driver: any | null;
+    occurrence: any;
+  };
 }
 
 const currencySymbols: Record<string, string> = {
   USD: '$',
   EUR: '€',
   GBP: '£',
-  // Add more currency symbols as needed
+  GHS: '₵',
+  NGN: '₦',
+  ZAR: 'R',
+  KES: 'KSh',
+};
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
 };
 
 const MyJourneys: React.FC = () => {
@@ -28,15 +53,6 @@ const MyJourneys: React.FC = () => {
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed' | 'cancelled'>('upcoming');
   const [error, setError] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const router = useRouter();
-
-  const navItems = [
-    { name: 'Trips', href: '/my-journeys', icon: Bus, active: true },
-    { name: 'Passengers', href: '/passengers', icon: User, active: false },
-    { name: 'Settings', href: '/settings', icon: Settings, active: false },
-    { name: 'Sign Out', href: '/api/auth/signout', icon: LogOut, active: false },
-  ];
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -51,7 +67,7 @@ const MyJourneys: React.FC = () => {
         setTrips(data.trips || []);
       } catch (error) {
         console.error('Error fetching trips:', error);
-        setError('Failed to load your trips. Please try again later.');
+        setError('Failed to load your journeys. Please try again later.');
       } finally {
         setIsPageLoading(false);
       }
@@ -65,9 +81,9 @@ const MyJourneys: React.FC = () => {
   }, [trips, activeTab]);
 
   const handleCancelTrip = async (id: string) => {
-    if (confirm('Are you sure you want to cancel this trip?')) {
+    if (confirm('Are you sure you want to cancel this journey? Cancellation policies may apply.')) {
       try {
-        const response = await fetch('/api/GET/getUserTrips', {
+        const response = await fetch('/api/cancelTrip', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -77,7 +93,7 @@ const MyJourneys: React.FC = () => {
         
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to cancel trip');
+          throw new Error(errorData.error || 'Failed to cancel journey');
         }
         
         // Update the trips array with the cancelled trip
@@ -85,150 +101,163 @@ const MyJourneys: React.FC = () => {
           trip.id === id ? { ...trip, status: 'cancelled' } : trip
         ));
       } catch (error) {
-        console.error('Error cancelling trip:', error);
-        alert(error instanceof Error ? error.message : 'Failed to cancel trip. Please try again later.');
+        console.error('Error cancelling journey:', error);
+        alert(error instanceof Error ? error.message : 'Failed to cancel journey. Please try again later.');
       }
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col md:flex-row">
-      {/* Mobile Sidebar Toggle */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-40 p-2 bg-blue-600 text-white rounded"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        {isSidebarOpen ? 'Close' : 'Menu'}
-      </button>
+    <>
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">My Journeys</h1>
+        <p className="text-gray-600">View and manage your bus bookings</p>
+      </header>
 
-      {/* Sidebar - now part of flex layout, not fixed */}
-      <aside
-        className={`bg-white shadow-md w-full md:w-64 flex-shrink-0 
-          ${isSidebarOpen ? 'block' : 'hidden'} md:block`}
-      >
-        <div className="p-4">
-          <h2 className="text-xl font-semibold text-gray-800">Bus Booking</h2>
-        </div>
-        <nav className="mt-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center px-4 py-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 ${
-                item.active ? 'bg-blue-50 text-blue-600' : ''
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-8 overflow-x-auto">
+        {['upcoming', 'completed', 'cancelled'].map((tab) => (
+          <button
+            key={tab}
+            className={`px-6 py-3 text-sm font-medium capitalize whitespace-nowrap
+              ${activeTab === tab
+                ? 'border-b-2 border-blue-600 text-blue-600'
+                : 'text-gray-600 hover:text-blue-600'
               }`}
-            >
-              <item.icon className="w-5 h-5 mr-3" />
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-      </aside>
+            onClick={() => setActiveTab(tab as 'upcoming' | 'completed' | 'cancelled')}
+          >
+            {tab} Journeys
+          </button>
+        ))}
+      </div>
 
-      {/* Main Content */}
-      <main className="flex-1 p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">My Journeys</h1>
-
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-6">
-          {['upcoming', 'completed', 'cancelled'].map((tab) => (
-            <button
-              key={tab}
-              className={`px-4 py-2 text-sm font-medium capitalize ${
-                activeTab === tab
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-600 hover:text-blue-600'
-              }`}
-              onClick={() => setActiveTab(tab as 'upcoming' | 'completed' | 'cancelled')}
-            >
-              {tab}
-            </button>
-          ))}
+      {isPageLoading ? (
+        <div className="flex flex-col items-center justify-center h-64 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading your journeys...</p>
         </div>
-
-        {isPageLoading ? (
-          <div className="flex flex-col items-center justify-center h-64 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            <p className="mt-4 text-gray-500">Loading your trips...</p>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center h-64 text-center">
+          <p className="text-red-600">{error}</p>
+          <button 
+            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
+        </div>
+      ) : filteredTrips.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center border border-gray-200 rounded-lg shadow-sm bg-white">
+          <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
+            <Bus className="h-12 w-12 text-blue-600" />
           </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center h-64 text-center">
-            <p className="text-red-500">{error}</p>
-            <button 
-              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              onClick={() => window.location.reload()}
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+            No {activeTab} journeys found
+          </h2>
+          {activeTab === 'upcoming' ? (
+            <>
+              <p className="text-gray-600 max-w-md mx-auto mb-6">
+                You don&apos;t have any upcoming journeys. Discover convenient and affordable transport options for your next trip.
+              </p>
+              <Link href="/search">
+                <button className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                  Book a Journey
+                </button>
+              </Link>
+            </>
+          ) : activeTab === 'completed' ? (
+            <p className="text-gray-600 max-w-md mx-auto mb-4">
+              You haven&apos;t completed any journeys yet. Once you travel with us, your trip history will appear here.
+            </p>
+          ) : (
+            <p className="text-gray-600 max-w-md mx-auto mb-4">
+              You don&apos;t have any cancelled bookings. If you need to cancel a journey, you can do so from your upcoming journeys.
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          {filteredTrips.map((trip) => (
+            <div
+              key={trip.id}
+              className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
             >
-              Try Again
-            </button>
-          </div>
-        ) : filteredTrips.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center border border-gray-100 rounded-lg shadow-sm bg-white">
-            <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-              <Bus className="h-12 w-12 text-blue-500" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              No {activeTab} journeys found
-            </h2>
-            {activeTab === 'upcoming' ? (
-              <>
-                <p className="text-gray-600 max-w-md mx-auto mb-6">
-                  You don&apos;t have any upcoming bus trips. Discover convenient and affordable transport options for your next journey.
-                </p>
-                <Link href="/">
-                  <button className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium">
-                    Book a Trip
-                  </button>
-                </Link>
-              </>
-            ) : activeTab === 'completed' ? (
-              <p className="text-gray-600 max-w-md mx-auto mb-4">
-                You haven&apos;t completed any bus journeys yet. Once you travel with us, your trip history will appear here.
-              </p>
-            ) : (
-              <p className="text-gray-600 max-w-md mx-auto mb-4">
-                You don&apos;t have any cancelled bookings. If you need to cancel a trip, you can do so from your upcoming journeys.
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {filteredTrips.map((trip) => (
-              <div
-                key={trip.id}
-                className="bg-white p-4 rounded-lg shadow-sm border border-gray-100"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <h2 className="text-lg font-semibold text-gray-800">{trip.company}</h2>
-                  <span className={`text-xs px-2 py-1 rounded ${
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span className={`inline-flex items-center text-xs px-3 py-1 rounded-full font-medium ${
                     trip.status === 'upcoming' ? 'bg-blue-100 text-blue-700' : 
                     trip.status === 'completed' ? 'bg-green-100 text-green-700' : 
                     'bg-red-100 text-red-700'
                   }`}>
-                    {trip.status}
+                    {trip.status === 'upcoming' ? 'Upcoming' : 
+                     trip.status === 'completed' ? 'Completed' : 'Cancelled'}
                   </span>
                 </div>
-                <p className="text-gray-600 mb-1">{trip.route}</p>
-                <p className="text-gray-600 mb-2">{new Date(trip.date).toLocaleString()}</p>
-                <p className="text-gray-800 font-medium mb-3">
-                  {currencySymbols[trip.currency] || trip.currency}{trip.price}
-                </p>
+                <span className="text-lg font-bold text-gray-900">
+                  {currencySymbols[trip.currency] || ''}{trip.totalAmount.toFixed(2)} {trip.currency}
+                </span>
+              </div>
+
+              <h2 className="text-xl font-bold text-gray-800 mb-2">{trip.company}</h2>
+              
+              <div className="space-y-3 mb-4">
+                <div className="flex items-start">
+                  <MapPin className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-gray-800 font-medium">Route</p>
+                    <p className="text-gray-600">{trip.route}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <Calendar className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-gray-800 font-medium">Date</p>
+                    <p className="text-gray-600">{formatDate(trip.date)}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <Clock className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-gray-800 font-medium">Departure Time</p>
+                    <p className="text-gray-600">{trip.tripDetails.departureTime}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <CreditCard className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-gray-800 font-medium">Seat{trip.seatNumbers.length > 1 ? 's' : ''}</p>
+                    <p className="text-gray-600">
+                      {trip.seatNumbers.join(', ')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex space-x-3 mt-6">
+                <Link 
+                  href={`/journey-details/${trip.id}`}
+                  className="flex-1 bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-md hover:bg-blue-100 transition-colors text-center font-medium"
+                >
+                  View Details
+                </Link>
+                
                 {trip.status === 'upcoming' && (
                   <button
-                    className="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mt-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCancelTrip(trip.id);
-                    }}
+                    className="flex-1 bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-md hover:bg-red-100 transition-colors font-medium"
+                    onClick={() => handleCancelTrip(trip.id)}
                   >
-                    Cancel Trip
+                    Cancel Journey
                   </button>
                 )}
               </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 };
 
