@@ -30,6 +30,12 @@ type CompanyData = {
   logo?: string;
 };
 
+type SeatAvailability = {
+  date: string;
+  availableSeats: number;
+  bookedSeats: number[];
+};
+
 type Trip = {
   id: string;
   date: string | null;
@@ -37,25 +43,27 @@ type Trip = {
   departureTime: string;
   busId: string;
   routeId: string;
-  driverId: string;
+  driverId: string | null;
   currency: string;
   branchId: string;
   createdAt: string;
   updatedAt: string;
+  recurring?: boolean;
+  daysOfWeek?: number[];
   bus: {
     id: string;
-    plateNumber: string;
+    plateNumber: string | null;
     capacity: number;
     busDescription: string;
-    image: string;
+    image: string | null;
     companyId: string;
     createdAt: string;
     updatedAt: string;
     company: {
       logo: string;
       name: string;
-      id: string; // Added id field for company filtering
-    }
+      id: string;
+    };
   };
   route: {
     id: string;
@@ -85,7 +93,8 @@ type Trip = {
     companyId: string;
     createdAt: string;
     updatedAt: string;
-  };
+  } | null;
+  seatAvailability: SeatAvailability[];
 };
 
 const defaultLogo = '/images/default-logo.png';
@@ -142,7 +151,6 @@ const SearchResults = () => {
   const fetchResults = async () => {
     try {
       setLoading(true);
-      // Fetch without company/time filters - we'll filter on the client side
       const response = await fetch(
         `/api/GET/getSearchByQuery?fromLocation=${fromLocation}&toLocation=${toLocation}&date=${date}&sort=${sort}`
       );
@@ -209,7 +217,7 @@ const SearchResults = () => {
     
     setFilteredResults(results);
     setTotalPages(Math.ceil(results.length / resultsPerPage));
-    setPage(1); // Reset to first page when filters change
+    setPage(1);
   }, [allResults, selectedCompanies, selectedTime, sort]);
 
   useEffect(() => {
@@ -240,6 +248,14 @@ const SearchResults = () => {
     } catch (error) {
       return dateString;
     }
+  };
+
+  // Get available seats for the specific date
+  const getAvailableSeats = (trip: Trip, searchDate: string) => {
+    const availability = trip.seatAvailability.find(
+      avail => new Date(avail.date).toDateString() === new Date(searchDate).toDateString()
+    );
+    return availability ? availability.availableSeats : trip.bus.capacity;
   };
 
   const renderPagination = () => {
@@ -409,7 +425,7 @@ const SearchResults = () => {
                       <div className="flex items-center gap-2 sm:gap-4 mt-2 sm:mt-3 text-xs text-gray-500">
                         <div className="flex items-center gap-1 text-green-600">
                           <Calendar className="w-3 h-3" />
-                          <span>{trip.bus.capacity} seats left</span>
+                          <span>{getAvailableSeats(trip, date)} seats left</span>
                         </div>
                       </div>
                     </div>

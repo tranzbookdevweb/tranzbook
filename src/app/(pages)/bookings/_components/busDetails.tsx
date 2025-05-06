@@ -27,6 +27,7 @@ interface BusDetailsProps {
   busCompany: string | number;
   busDescription: string | number;
   busCapacity: number;
+  remainingSeats: number; // New prop for remaining seats
   busRoute: { origin: string; destination: string };
   tripDuration: string | number;
   tripDepartureTime: string | number;
@@ -50,6 +51,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   busCompany,
   busDescription,
   busCapacity,
+  remainingSeats,
   busRoute,
   tripDuration,
   tripDepartureTime,
@@ -89,15 +91,18 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         <p className='text-sm font-semibold text-red-500 p-2'>
           *Disclaimer: Selected seats may not be guaranteed.
         </p>
-        {/* <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">Bus Number</span>
-          <span className="text-sm font-semibold text-gray-700">{busNumber}</span>
-        </div> */}
 
         <div className='flex items-center justify-between'>
-          <span className='text-xs text-gray-500'>Capacity</span>
+          <span className='text-xs text-gray-500'>Total Capacity</span>
           <span className='text-sm font-semibold text-gray-700'>
             {busCapacity} seats
+          </span>
+        </div>
+
+        <div className='flex items-center justify-between'>
+          <span className='text-xs text-gray-500'>Remaining Seats</span>
+          <span className='text-sm font-semibold text-gray-700'>
+            {remainingSeats} seats
           </span>
         </div>
 
@@ -161,11 +166,6 @@ const BusDetails: React.FC<BusDetailsProps> = ({
             ))}
           </div>
         </div>
-
-        {/* <div className="flex items-center">
-          <FiUser className="text-blue-600 mr-2" />
-          <span className="text-sm font-semibold text-gray-700">Driver ID: {busDriverID}</span>
-        </div> */}
 
         <div>
           <div className='flex flex-col justify-between border-t border-b py-4 border-gray-300'>

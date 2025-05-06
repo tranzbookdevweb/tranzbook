@@ -1,14 +1,23 @@
 import prisma from "@/app/lib/db";
 import { NextResponse } from "next/server";
+import { TripStatus } from "@prisma/client";
+
+// Define the type for seat availability
+interface SeatAvailability {
+  date: Date;
+  availableSeats: number;
+  bookedSeats: number[];
+  status: TripStatus;
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const fromLocation = url.searchParams.get("fromLocation") as string;
   const toLocation = url.searchParams.get("toLocation") as string;
   const date = url.searchParams.get("date") as string;
-  const sort = url.searchParams.get("sort") as string; // New sort parameter
-  const company = url.searchParams.get("company") as string; // Company filter
-  const time = url.searchParams.get("time") as string; // Time filter
+  const sort = url.searchParams.get("sort") as string;
+  const company = url.searchParams.get("company") as string;
+  const time = url.searchParams.get("time") as string;
 
   try {
     let orderBy: any[] = [];
@@ -17,8 +26,8 @@ export async function GET(request: Request) {
     // Get the current date and time
     const currentDateTime = new Date();
     const currentDateTimeISOString = currentDateTime.toISOString();
-    const currentDate = currentDateTimeISOString.split("T")[0]; // Date part (YYYY-MM-DD)
-    const currentTime = currentDateTimeISOString.split("T")[1].split(".")[0]; // Time part (HH:mm:ss)
+    const currentDate = currentDateTimeISOString.split("T")[0];
+    const currentTime = currentDateTimeISOString.split("T")[1].split(".")[0];
 
     // Set sorting logic
     if (sort === "cheapest") {
@@ -61,21 +70,19 @@ export async function GET(request: Request) {
     }
 
     // Compare the trip date with the current date and time
-    const tripDateTime = new Date(date); // Trip date (without time)
-    const tripDate = tripDateTime.toISOString().split("T")[0]; // Extract trip date (YYYY-MM-DD)
+    const tripDateTime = new Date(date);
+    const tripDate = tripDateTime.toISOString().split("T")[0];
 
     // Create a filter for trips happening now or in the future
     let departureTimeFilter: any = {
-      gte: currentDate + "T" + currentTime, // Filter for trips from the current time onward
+      gte: currentDate + "T" + currentTime,
     };
 
-    // If the trip's date is in the future, it's valid no matter the time
     if (tripDate > currentDate) {
-      departureTimeFilter = {}; // No filter needed for future dates
+      departureTimeFilter = {};
     } else if (tripDate === currentDate) {
-      // For trips on the current date, we need to ensure the time is later than now
       departureTimeFilter = {
-        gte: currentDate + "T" + currentTime, // Ensure future trips for today are included
+        gte: currentDate + "T" + currentTime,
       };
     }
 
@@ -84,55 +91,55 @@ export async function GET(request: Request) {
       route: {
         startCity: {
           name: {
-            // Use `ilike` for case-insensitive comparison in PostgreSQL
-            // or `lower()` for other databases (like MySQL)
             contains: fromLocation,
             mode: "insensitive",
-          },        },
+          },
+        },
         endCity: {
           name: {
-            // Use `ilike` for case-insensitive comparison in PostgreSQL
-            // or `lower()` for other databases (like MySQL)
             contains: toLocation,
             mode: "insensitive",
-          },        },
+          },
+        },
       },
-      date: new Date(date), // Specific date filter
-      departureTime: departureTimeFilter, // Apply the departure time filter
+      date: new Date(date),
+      departureTime: departureTimeFilter,
       ...timeFilter,
+      tripOccurrences: {
+        some: {
+          occurrenceDate: new Date(date),
+        },
+      },
     };
 
     const recurringFilter: any = {
       route: {
         startCity: {
           name: {
-            // Use `ilike` for case-insensitive comparison in PostgreSQL
-            // or `lower()` for other databases (like MySQL)
             contains: fromLocation,
             mode: "insensitive",
-          },        },
+          },
+        },
         endCity: {
           name: {
-            // Use `ilike` for case-insensitive comparison in PostgreSQL
-            // or `lower()` for other databases (like MySQL)
             contains: toLocation,
             mode: "insensitive",
           },
         },
       },
-      recurring: true, // Include recurring trips
-      departureTime: departureTimeFilter, // Apply the departure time filter
+      recurring: true,
+      departureTime: departureTimeFilter,
       ...timeFilter,
     };
 
     // Add company filter if provided
     if (company) {
-      specificDateFilter.branch = {
+      specificDateFilter.bus = {
         company: {
           id: company,
         },
       };
-      recurringFilter.branch = {
+      recurringFilter.bus = {
         company: {
           id: company,
         },
@@ -151,8 +158,8 @@ export async function GET(request: Request) {
             company: {
               select: {
                 logo: true,
-                name:true,
-                id:true,
+                name: true,
+                id: true,
               },
             },
           },
@@ -164,10 +171,61 @@ export async function GET(request: Request) {
           },
         },
         driver: true,
+        tripOccurrences: {
+          where: {
+            occurrenceDate: new Date(date),
+          },
+        },
       },
     });
 
-    return NextResponse.json(trips, { status: 200 });
+    // Process seat availability for each trip
+    const tripsWithAvailability = trips.map((trip) => {
+      let seatAvailability: SeatAvailability[] = [];
+
+      // Check for existing occurrence on the specified date
+      const occurrenceForDate = trip.tripOccurrences[0];
+
+      if (occurrenceForDate) {
+        seatAvailability = [{
+          date: occurrenceForDate.occurrenceDate,
+          availableSeats: occurrenceForDate.availableSeats,
+          bookedSeats: occurrenceForDate.bookedSeats,
+          status: occurrenceForDate.status,
+        }];
+      } else if (trip.bus) {
+        // If no occurrence exists, check if the date is valid for the trip
+        const requestedDate = new Date(date);
+        const dayOfWeek = requestedDate.getDay() === 0 ? 7 : requestedDate.getDay();
+        const isValidDate =
+          !trip.recurring ||
+          (trip.recurring && trip.daysOfWeek?.includes(dayOfWeek)) ||
+          (trip.date && new Date(trip.date).toDateString() === requestedDate.toDateString());
+
+        if (isValidDate) {
+          seatAvailability = [{
+            date: requestedDate,
+            availableSeats: trip.bus.capacity,
+            bookedSeats: [],
+            status: "scheduled" as TripStatus,
+          }];
+        }
+      }
+
+      // Create response object with seat availability
+      const response = {
+        ...trip,
+        seatAvailability,
+        tripOccurrences: undefined, // Mark as optional
+      };
+
+      // Remove tripOccurrences from response
+      delete response.tripOccurrences;
+
+      return response;
+    });
+
+    return NextResponse.json(tripsWithAvailability, { status: 200 });
   } catch (error) {
     console.error("Server error:", error);
     return NextResponse.json(

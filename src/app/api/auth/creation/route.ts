@@ -29,5 +29,5 @@ export async function GET(){
             }
         })
     }
-    return NextResponse.redirect("https://tranzbook.co//") 
+    return NextResponse.redirect("https://tranzbook.co/") 
 }

@@ -1,19 +1,11 @@
 import prisma from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
-// https://tranzbook.co//bookings/seatPicker?tripId=a6623405-3742-45e0-86e4-45eb5b567e60&date=2024-12-30T00%3A00%3A00.000Z
-
-// `/api/GET/getSeatsAvailable?tripId=a6623405-3742-45e0-86e4-45eb5b567e60&date=2024-12-30T00%3A00%3A00.000Z`
-// no seats booked at tripId=15de2f28-cb53-4164-afcb-0c0b7e237d27
-
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const tripId =
-      searchParams.get("tripId") ;
-    const date =
-      searchParams.get("date") ||
-       `2024-12-30T00%3A00%3A00.000Z`; 
+    const tripId = searchParams.get("tripId");
+    const date = searchParams.get("date");
 
     if (!tripId) {
       return NextResponse.json(
@@ -22,9 +14,16 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // ignore the date for now
+    if (!date) {
+      return NextResponse.json(
+        { error: "Missing date" },
+        { status: 400 }
+      );
+    }
+
     const selectedDate = new Date(date);
 
+    // Fetch trip with bus capacity and validate date for recurring/non-recurring trips
     const trip = await prisma.trip.findUnique({
       where: { id: tripId },
       select: {
@@ -33,6 +32,9 @@ export async function GET(req: NextRequest) {
             capacity: true,
           },
         },
+        recurring: true,
+        daysOfWeek: true,
+        date: true,
       },
     });
 
@@ -43,28 +45,49 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Validate if the date is valid for the trip
+    const dayOfWeek = selectedDate.getDay() === 0 ? 7 : selectedDate.getDay(); // 1=Monday, ..., 7=Sunday
+    const isValidDate = !trip.recurring || 
+                       (trip.recurring && trip.daysOfWeek.includes(dayOfWeek)) || 
+                       (trip.date && new Date(trip.date).toDateString() === selectedDate.toDateString());
+
+    if (!isValidDate) {
+      return NextResponse.json(
+        { error: "Selected date is not valid for this trip" },
+        { status: 400 }
+      );
+    }
+
     const totalSeats = trip.bus.capacity;
 
-    const bookings = await prisma.booking.findMany({
+    // Fetch trip occurrence for the specific date
+    const tripOccurrence = await prisma.tripOccurrence.findUnique({
       where: {
-        tripId: tripId,
-        status: "pending",
+        tripId_occurrenceDate: {
+          tripId: tripId,
+          occurrenceDate: selectedDate,
+        },
       },
       select: {
-        seatNumber: true,
+        availableSeats: true,
+        bookedSeats: true,
       },
     });
 
-    const bookedSeats = bookings.flatMap(
-      (booking) => booking.seatNumber
-    );
-    const allSeats = Array.from(
-      { length: totalSeats },
-      (_, i) => i + 1
-    );
-    const availableSeats = allSeats.filter(
-      (seat) => !bookedSeats.includes(seat)
-    );
+    // If no occurrence exists, return full capacity
+    if (!tripOccurrence) {
+      const allSeats = Array.from({ length: totalSeats }, (_, i) => i + 1);
+      return NextResponse.json({
+        availableSeats: allSeats,
+        bookedSeats: [],
+        totalSeats: totalSeats,
+      });
+    }
+
+    // Calculate available seats from trip occurrence
+    const bookedSeats = tripOccurrence.bookedSeats;
+    const allSeats = Array.from({ length: totalSeats }, (_, i) => i + 1);
+    const availableSeats = allSeats.filter(seat => !bookedSeats.includes(seat));
 
     return NextResponse.json({
       availableSeats: availableSeats,

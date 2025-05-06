@@ -47,7 +47,7 @@ export async function Navbar() {
               {/* I intially made it /bookings/u/${randomUUID}/seatPicker to 
               test the seatSelection and ticket generation since I couldnt access the db
                */}
-              {/* <Link href={`/bookings/manage/trips`}>Bookings</Link> */}
+              {/* <Link href={`/my-journeys`}>Bookings</Link> */}
             </div>
           )}
         </div>
@@ -77,7 +77,7 @@ export async function Navbar() {
                     className='z-[999] text-black bg-white'>
                     <DropdownMenuItem className='rounded-[8px] hover:cursor-pointer items-center flex font-semibold'>
                       <Link
-                        href='/bookings/manage/trips'
+                        href='/my-journeys'
                         className='rounded-[8px] hover:bg-orange-200 p-2 hover:text-white w-full hover:cursor-pointer items-center flex font-semibold'>
                         My Journeys
                       </Link>
