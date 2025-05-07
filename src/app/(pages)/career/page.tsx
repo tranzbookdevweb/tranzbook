@@ -1,6 +1,6 @@
 import React from 'react';
 
-const AboutUs = () => {
+const Career = () => {
   return (
     <div className="flex flex-col w-full bg-white">
       
@@ -263,4 +263,4 @@ const AboutUs = () => {
   );
 };
 
-export default AboutUs;
+export default Career;

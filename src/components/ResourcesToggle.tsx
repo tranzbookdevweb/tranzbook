@@ -29,7 +29,7 @@ export function ResourcesToggle() {
         </Link>
         </DropdownMenuItem>
         <DropdownMenuItem >
-        <Link href='/careers' className="rounded-[8px] hover:bg-orange-200 p-2 hover:text-white w-full hover:cursor-pointer  items-center flex font-semibold">
+        <Link href='/career' className="rounded-[8px] hover:bg-orange-200 p-2 hover:text-white w-full hover:cursor-pointer  items-center flex font-semibold">
         <WorkOutlineOutlined className="mr-2"/>
           Careers
           </Link>

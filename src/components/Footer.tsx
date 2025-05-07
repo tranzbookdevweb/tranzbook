@@ -8,7 +8,7 @@ export default function Footer() {
   const otherPages = [
     { name: "Home", href: "/home" },
     { name: "About Us", href: "/about-us" },
-    { name: "Careers", href: "/careers" },
+    { name: "Careers", href: "/career" },
     { name: "Blog", href: "/blog" },
   ];
 
