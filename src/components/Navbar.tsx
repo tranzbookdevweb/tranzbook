@@ -91,6 +91,9 @@ export async function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <div className='lg:hidden'>
+                  <MenuSheet />
+                </div>
               </>
             ) : (
               <>
