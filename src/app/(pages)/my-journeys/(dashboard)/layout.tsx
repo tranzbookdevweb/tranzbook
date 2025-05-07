@@ -47,7 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </SheetTrigger>
           <SheetContent side="left" className="w-64 bg-white">
             <SheetHeader>
-              <SheetTitle className="text-lg font-bold">AfriTrans Connect</SheetTitle>
+              <SheetTitle className="text-lg font-bold">Bus Journeys</SheetTitle>
               <SheetClose className="absolute right-4 top-4">
                 <X className="h-4 w-4" />
               </SheetClose>
@@ -83,8 +83,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Desktop Sidebar */}
       <div className="hidden md:flex flex-col w-64 bg-white border-r">
         <div className="p-6">
-          <h1 className="text-xl font-bold">AfriTrans Connect</h1>
-          <p className="text-sm text-gray-500 mt-1">Bus Booking Platform</p>
+          <h1 className="text-xl font-bold">Bus Journeys</h1>
         </div>
         <nav className="flex-1 px-4 pb-4">
           <ul className="space-y-2">

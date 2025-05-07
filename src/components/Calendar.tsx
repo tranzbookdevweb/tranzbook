@@ -88,16 +88,21 @@ export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChang
                       onDateChange(date ?? null);
                     }}
                     disabled={(date) => {
+                      // Get today's date and reset the time to midnight
                       const today = new Date();
                       today.setHours(0, 0, 0, 0);
                       
-                      // Disable dates before today
-                      if (date < today) {
+                      // Get tomorrow's date
+                      const tomorrow = new Date(today);
+                      tomorrow.setDate(tomorrow.getDate() + 1);
+                      
+                      // Disable today and all dates before today
+                      if (date < tomorrow) {
                         return true;
                       }
                       
-                      // For the return date calendar, disable the selected departure date
-                      // and all dates before it
+                      // For the return date calendar, disable the selected departure dates
+                      // and all dates before them
                       if (disabledDates.length > 0) {
                         return disabledDates.some(disabledDate => 
                           date.getTime() <= disabledDate.getTime()

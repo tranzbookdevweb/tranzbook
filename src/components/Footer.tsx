@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import { Facebook, Twitter, Youtube } from "lucide-react";
+import { Facebook, Mail, Phone, Twitter, Youtube } from "lucide-react";
 import Image from "next/image";
 
 export default function Footer() {
@@ -57,12 +57,22 @@ export default function Footer() {
 
           {/* Contact Us */}
           <div>
-            <h3 className="text-sm font-semibold mb-3">Contact Us</h3>
-            <ul className="space-y-1 text-sm">
-              <li>Hotel Reservation: 123-456-7890</li>
-              <li>Ticket Office: 123-456-7890</li>
-            </ul>
-          </div>
+      <h3 className="text-sm font-semibold mb-3">Contact Us</h3>
+      <ul className="space-y-1 text-sm">
+        <li className="flex items-center">
+          <Phone className="mr-2" size={18} />
+          <a href="tel:0273754317" className="hover:text-blue-600 transition-colors">
+            0273754317
+          </a>
+        </li>
+        <li className="flex items-center">
+          <Mail className="mr-2" size={18} />
+          <a href="mailto:tranzbook1@gmail.com" className="hover:text-blue-600 transition-colors">
+            tranzbook1@gmail.com
+          </a>
+        </li>
+      </ul>
+    </div>
 
           {/* Subscribe */}
           <div className="lg:col-span-2">
