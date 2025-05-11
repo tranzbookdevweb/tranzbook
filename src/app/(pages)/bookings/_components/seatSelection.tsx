@@ -26,10 +26,9 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   handleClearSeats,
   handleSelectAllSeats,
 }) => {
-  const totalPassengerSeats = busCapacity - 1;
+  const totalPassengerSeats = busCapacity ;
   const numberOfDigits = totalPassengerSeats.toString().length;
-
-  const formatSeatNumber = (seatNumber: number) => {
+ const formatSeatNumber = (seatNumber: number) => {
     return (seatNumber + 1).toString().padStart(numberOfDigits, "0");
   };
 
@@ -173,34 +172,32 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
     return allSeats;
   };
 
-  const renderSeat = (seatId: string, seatIndex: number, isSelected: boolean) => {
-    return (
-      <div
-        className="m-1 max-sm:m-1 dark:text-gray-500 font-semibold"
-        key={seatId}>
-        <button
-          onClick={() => handleSeatSelection(seatId)}
-          className={`flex flex-col items-center justify-center w-12 h-16 min-[340px]:w-14 min-[390px]:w-16 min-[430px]:w-18 sm:w-20 md:w-20 lg:w-20 gap-1 border border-slate-200 rounded-xl p-1 transition-all duration-300 ${
-            isSelected
-              ? "bg-[#FFCC59] text-white"
-              : "bg-white text-gray-500"
-          } ${bookedSeats?.includes(seatIndex + 2) ? "opacity-30" : ""}`}
-          disabled={bookedSeats?.includes(seatIndex + 2) ? true : false}>
-          <Image
-            src="/seat.png"
-            alt="seat"
-            height={40}
-            width={40}
-            className="object-contain max-sm:w-6 max-sm:h-6 w-6 h-6"
-          />
-          <p className="text-center text-xs md:text-sm">
-            {seatId}
-          </p>
-        </button>
-      </div>
-    );
-  };
-
+const renderSeat = (seatId: string, seatIndex: number, isSelected: boolean) => {
+  console.log('Rendering seat:', { seatId, seatIndex, isBooked: bookedSeats?.includes(seatIndex + 1) });
+  return (
+    <div className="m-1 max-sm:m-1 dark:text-gray-500 font-semibold" key={seatId}>
+      <button
+        onClick={() => {
+          handleSeatSelection(seatId);
+          console.log('Seat clicked:', seatId);
+        }}
+        className={`flex flex-col items-center justify-center w-12 h-16 min-[340px]:w-14 min-[390px]:w-16 min-[430px]:w-18 sm:w-20 md:w-20 lg:w-20 gap-1 border border-slate-200 rounded-xl p-1 transition-all duration-300 ${
+          isSelected ? "bg-[#FFCC59] text-white" : "bg-white text-gray-500"
+        } ${bookedSeats?.includes(seatIndex + 1) ? "opacity-30" : ""}`}
+        disabled={bookedSeats?.includes(seatIndex + 1)}
+      >
+        <Image
+          src="/seat.png"
+          alt="seat"
+          height={40}
+          width={40}
+          className="object-contain max-sm:w-6 max-sm:h-6 w-6 h-6"
+        />
+        <p className="text-center text-xs md:text-sm">{seatId}</p>
+      </button>
+    </div>
+  );
+};
   return (
     <div className="bg-white flex flex-col items-center p-5 md:p-4 border border-slate-200 rounded-xl dark:text-black overflow-hidden w-full max-w-2xl mx-auto">
       {/* Bus outline */}

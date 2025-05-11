@@ -78,6 +78,7 @@ const PageContainer: React.FC = () => {
   const [bookedSeats, setBookedSeats] = useState<number[]>([]);
   const [remainingSeats, setRemainingSeats] = useState<number>(0);
   const currentDate = dateParam ? new Date(dateParam) : new Date();
+const [bookingReference, setBookingReference] = useState<string>("");
 
   const fetchTripData = async () => {
     if (isFetching.current) {
@@ -205,7 +206,7 @@ const PageContainer: React.FC = () => {
     },
   ].filter((extra) => extra !== false);
 
-  const handleSeatSelection = (seatId: string) => {
+    const handleSeatSelection = (seatId: string) => {
     setSelectedSeats((prev) =>
       prev.includes(seatId)
         ? prev.filter((s) => s !== seatId)
@@ -213,45 +214,47 @@ const PageContainer: React.FC = () => {
     );
   };
 
-  const handleBooking = async () => {
-    try {
-      const generateReference = (): string => {
-        return Math.random().toString(36).substr(2, 6).toUpperCase();
-      };
+const handleBooking = async () => {
+  try {
+    const generateReference = (): string => {
+      return Math.random().toString(36).substr(2, 6).toUpperCase();
+    };
 
-      const reference = generateReference();
-      const seatNumbers = selectedSeats.map((seat) => parseInt(seat, 10));
+    const reference = generateReference();
+    setBookingReference(reference); // Store the reference in state
+    
+    const seatNumbers = selectedSeats.map((seat) => parseInt(seat, 10));
 
-      const bookingData = {
-        reference,
-        tripId,
-        seatNumber: seatNumbers,
-      };
+    const bookingData = {
+      reference,
+      tripId,
+      seatNumber: seatNumbers,
+    };
 
-      console.log("Sending booking request with data:", bookingData);
-      const response = await fetch(
-        `/api/POST/Booking?currentDate=${currentDate.toISOString()}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(bookingData),
-        }
-      );
-
-      if (response.ok) {
-        alert("Booking successful");
-        setBooked(true);
-        await fetchTripData(); // Re-fetch to update seats
-      } else {
-        const errorData = await response.json();
-        console.error("Booking failed with error:", errorData);
-        alert(`Booking failed: ${errorData.error || "Unknown error"}`);
+    console.log("Sending booking request with data:", bookingData);
+    const response = await fetch(
+      `/api/POST/Booking?currentDate=${currentDate.toISOString()}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingData),
       }
-    } catch (error) {
-      console.error("Error during booking:", error);
-      alert("Booking failed due to a network error");
+    );
+
+    if (response.ok) {
+      alert("Booking successful");
+      setBooked(true);
+      await fetchTripData(); // Re-fetch to update seats
+    } else {
+      const errorData = await response.json();
+      console.error("Booking failed with error:", errorData);
+      alert(`Booking failed: ${errorData.error || "Unknown error"}`);
     }
-  };
+  } catch (error) {
+    console.error("Error during booking:", error);
+    alert("Booking failed due to a network error");
+  }
+};
 
   return (
     <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
@@ -288,7 +291,7 @@ const PageContainer: React.FC = () => {
           {isBooked ? (
             <Ticket
               ticketId={tripData.id}
-              busNumber={bus.plateNumber ?? "N/A"}
+              busNumber={bus?.plateNumber ?? ""}
               busCompany={bus.company.name}
               tripDepartureTime={departureTime}
               tripArrivalTime={tripArrivalTime}
@@ -303,6 +306,7 @@ const PageContainer: React.FC = () => {
               totalCost={busFare * selectedSeats.length}
               currentDate={currentDate}
               selectedSeats={selectedSeats}
+                reference={bookingReference} // Pass the reference
               isBooked={isBooked}
             />
           ) : (

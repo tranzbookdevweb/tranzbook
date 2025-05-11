@@ -1,7 +1,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Calendar, MapPin, Clock, CreditCard, Bus } from 'lucide-react';
+import { Calendar, MapPin, Clock, CreditCard, Bus, Download } from 'lucide-react';
+import generatePDF from "react-to-pdf";
+import QRCode from "react-qr-code";
+import Image from "next/image";
 
 interface Trip {
   id: string;
@@ -107,6 +110,140 @@ const MyJourneys: React.FC = () => {
     }
   };
 
+  const handleDownloadTicket = (trip: Trip) => {
+    // Create origin and destination from route string
+    const routeParts = trip.route.split(" - ");
+    const origin = routeParts[0];
+    const destination = routeParts[1] || "Destination";
+    
+    // Create unique ID for the PDF element
+    const pdfElementId = `ticket-${trip.id}`;
+    
+    // Create hidden ticket element if it doesn't exist
+    if (!document.getElementById(pdfElementId)) {
+      const ticketElement = document.createElement('div');
+      ticketElement.id = pdfElementId;
+      ticketElement.style.position = 'absolute';
+      ticketElement.style.left = '-9999px';
+      ticketElement.style.top = '-9999px';
+      document.body.appendChild(ticketElement);
+      
+      // Render the ticket content
+      ticketElement.innerHTML = `
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200" style="width: 800px; height: 400px;">
+          <!-- Ticket Header with Color Band -->
+          <div class="bg-gradient-to-r from-blue-600 to-blue-800 px-8 py-4 text-white">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-3">
+                <div class="bg-white p-2 rounded-full">
+                  <!-- Logo placeholder -->
+                  <div style="width: 40px; height: 40px; background-color: #f0f0f0; border-radius: 50%;"></div>
+                </div>
+                <div>
+                  <h1 class="text-2xl font-bold">${trip.company}</h1>
+                  <p class="text-blue-100 text-sm">E-Ticket Confirmation</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-lg font-medium">${formatDate(trip.date)}</p>
+                <p class="text-blue-100 text-sm">Ticket #${trip.id.substring(0, 8)}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Ticket Content -->
+          <div class="p-6">
+            <!-- Journey Details -->
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+              <div class="flex-1">
+                <p class="text-sm text-gray-500">From</p>
+                <h2 class="text-xl font-bold text-gray-800">${origin}</h2>
+                <p class="text-gray-700">${trip.tripDetails.departureTime}</p>
+              </div>
+              
+              <div class="flex-none px-4">
+                <div class="w-24 h-0.5 bg-gray-300 relative">
+                  <div class="absolute -top-1 left-0 w-2 h-2 rounded-full bg-blue-600"></div>
+                  <div class="absolute -top-1 right-0 w-2 h-2 rounded-full bg-blue-600"></div>
+                </div>
+              </div>
+              
+              <div class="flex-1 text-right">
+                <p class="text-sm text-gray-500">To</p>
+                <h2 class="text-xl font-bold text-gray-800">${destination}</h2>
+                <p class="text-gray-700">Arrival time</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-6">
+              <!-- Left column -->
+              <div class="col-span-2">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-sm text-gray-500">Bus Number</p>
+                    <p class="font-semibold text-gray-800">${trip.tripDetails.bus?.busNumber || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Bus Type</p>
+                    <p class="font-semibold text-gray-800">${trip.tripDetails.bus?.busType || "Standard"}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Seat(s)</p>
+                    <p class="font-semibold text-gray-800">${trip.seatNumbers.join(", ")}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Price</p>
+                    <p class="font-semibold text-gray-800">
+                      ${currencySymbols[trip.currency] || ''}${trip.totalAmount.toFixed(2)} ${trip.currency}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-dashed border-gray-200">
+                  <h3 class="font-semibold text-gray-800 mb-2">Important Information:</h3>
+                  <ul class="text-sm text-gray-600 space-y-1">
+                    <li>• Please arrive 30 minutes before departure time</li>
+                    <li>• Present this ticket or QR code when boarding</li>
+                    <li>• Valid ID may be required during boarding</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Right column with QR code -->
+              <div class="flex flex-col items-center justify-center border-l border-gray-200 pl-6">
+                <div class="p-3 bg-white border border-gray-200 rounded-md mb-2">
+                  <!-- QR code placeholder -->
+                  <div style="width: 120px; height: 120px; background-color: #f0f0f0;"></div>
+                </div>
+                <p class="text-xs text-center text-gray-500 mt-2">Scan for verification</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="bg-gray-50 p-4 flex justify-between items-center border-t border-gray-200">
+            <div class="flex items-center gap-2">
+              <!-- Logo placeholder -->
+              <div style="width: 24px; height: 24px; background-color: #f0f0f0; border-radius: 50%;"></div>
+              <p class="text-xs text-gray-600">Powered by Tranzbook Technologies</p>
+            </div>
+            <p class="text-xs text-gray-500">Booking Reference: ${trip.id}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Generate PDF
+    generatePDF(() => document.getElementById(pdfElementId), {
+      method: "open",
+      filename: `${trip.company}-Ticket-${trip.id}.pdf`,
+      page: {
+        format: "a5",
+        orientation: "landscape",
+      },
+    });
+  };
+
   return (
     <>
       <header className="mb-8">
@@ -183,7 +320,7 @@ const MyJourneys: React.FC = () => {
               className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
             >
               <div className="flex justify-between items-start mb-4">
-                <div>
+                <div className="flex items-center space-x-2">
                   <span className={`inline-flex items-center text-xs px-3 py-1 rounded-full font-medium ${
                     trip.status === 'upcoming' ? 'bg-blue-100 text-blue-700' : 
                     trip.status === 'completed' ? 'bg-green-100 text-green-700' : 
@@ -192,6 +329,15 @@ const MyJourneys: React.FC = () => {
                     {trip.status === 'upcoming' ? 'Upcoming' : 
                      trip.status === 'completed' ? 'Completed' : 'Cancelled'}
                   </span>
+                  
+                  {/* Download Ticket Icon Button */}
+                  <button 
+                    onClick={() => handleDownloadTicket(trip)}
+                    className="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                    title="Download Ticket"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
                 </div>
                 <span className="text-lg font-bold text-gray-900">
                   {currencySymbols[trip.currency] || ''}{trip.totalAmount.toFixed(2)} {trip.currency}

@@ -1,13 +1,12 @@
 "use client";
-import React, { useState } from "react";
-import Barcode from "react-barcode";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import generatePDF, { Resolution, Margin } from "react-to-pdf";
-import { useMediaQuery } from "react-responsive";
-import { CircularProgress } from "@mui/material";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+import { Share2 } from "lucide-react";
+import generatePDF from "react-to-pdf";
+import QRCode from "react-qr-code";
+import Image from "next/image";
 
+// Interface to match the props from your existing code
 interface TicketProps {
   ticketId: string | string[];
   busNumber: string | number;
@@ -23,186 +22,155 @@ interface TicketProps {
   currentDate: Date;
   selectedSeats: string[];
   isBooked: boolean;
+  reference?: string;
 }
 
-const Ticket: React.FC<TicketProps> = ({
+const SimplifiedTicket: React.FC<TicketProps> = ({
   ticketId,
-  totalCost,
   busNumber,
   busCompany,
   busDescription,
   busRoute,
-  tripDuration,
   tripDepartureTime,
   tripArrivalTime,
-  busFare,
   currency,
+  totalCost,
   currentDate,
   selectedSeats,
   isBooked,
+  reference,
 }) => {
-  const options = {
-    method: "open",
-    resolution: 2,
-    format: "letter",
-    orientation: "landscape",
-  };
-  const [isClicked, setClicked] = useState(false);
-  
   const handleDownloadTicket = () => {
-    // setClicked(true);
-    try {
-      generatePDF(getTargetElement, {
-        method: "open",
-        resolution: Resolution.HIGH,
-        page: {
-          margin: Margin.NONE,
-          format: "letter",
-          orientation: "l",
-        },
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      // setClicked(false);
-    }
+    generatePDF(() => document.getElementById("ticket"), {
+      method: "open",
+      page: {
+        format: "a4",
+        orientation: "p",
+      },
+    });
   };
 
-  const getTargetElement = () => document.getElementById("ticket");
-  const isTablet = useMediaQuery({ minWidth: 768 });
-  const isPhone = useMediaQuery({ maxWidth: 648 });
+  // Format the route string
+  const routeString = `${busRoute.origin} - ${busRoute.destination}`;
+
+  // Format the date string
+  const dateString = currentDate.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    weekday: "long",
+  });
+
+  // Format seat numbers for display (handle case with many seats)
+  const displaySeats =
+    selectedSeats.length > 4
+      ? `${selectedSeats.slice(0, 2).join(", ")} +${selectedSeats.length - 2} more`
+      : selectedSeats.join(", ");
 
   return (
-    <div className='flex flex-col justify-start min-h-full max-sm:min-w-full items-center p-4 rounded-xl bg-white overflow-hidden '>
-      <div>
-        Selected seats{" "}
-        <p className='p-5 text-center border border-slate-100 rounded-[5px]'>
-          {`${selectedSeats}`}
-        </p>
-      </div>
-
-      <div
-        className=' flex flex-col flex-wrap justify-start lg:-mt-20'
-        id='ticket'>
-        <svg
-          version='1.1'
-          viewBox='0 0 2048 1150'
-          width={"700px"}
-          height='700px'
-          xmlns='http://www.w3.org/2000/svg'
-          className='flex justify-between max-sm:scale-[0.55] md:scale-[0.75] lg:scale-[1] -mt-20'
-          fontFamily='Raleway Dots'
-          fontWeight='bold'>
-          <path
-            transform='translate(212,272)'
-            d='m0 0h1188l11 1 6 8 7 3 8-1 5-5 4-5 6-1h351l34 1 16 2 10 5 6 7 4 11 2 15v521l-2 20-4 11-7 8-8 4-9 2-11 1h-387l-6-11-4-3h-11l-5 4-5 10h-1211l-14-2-9-3-9-8-4-9-2-11v-543l3-12 6-10 7-5 11-3z'
-            fill='#F1EBEBFF'
-          />
-
-          <text x='230' y='340' fontSize='50' fill='#333'>
-            {`Bus Ticket purchased on ${currentDate.toDateString()}`}
-          </text>
-          <text x='230' y='400' fontSize='35' fill='#333'>
-            {`Bus Company: ${busCompany}`}
-          </text>
-          <text x='230' y='450' fontSize='35' fill='#333'>
-            {`Bus Number: ${busNumber}`}
-          </text>
-          <text x='230' y='500' fontSize='35' fill='#333'>
-            {`Bus Type: ${busDescription}`}
-          </text>
-          <text x='230' y='550' fontSize='35' fill='#333'>
-            {`Route: ${busRoute.origin} → ${busRoute.destination}`}
-          </text>
-          <text x='230' y='600' fontSize='35' fill='#333'>
-            {`Departure: ${tripDepartureTime}`}
-          </text>
-          <text x='230' y='650' fontSize='35' fill='#333'>
-            {`Selected seats: ${
-              selectedSeats.length > 10
-                ? selectedSeats[0] +
-                  "," +
-                  selectedSeats[1] +
-                  "," +
-                  selectedSeats[2] +
-                  ", and 9+ other seats. "
-                : selectedSeats
-            } `}
-          </text>
-
-          <text
-            x='1350'
-            y='720'
-            fontSize='35'
-            fill='#333'
-            textAnchor='end'>
-            {`Number of seats selected: ${selectedSeats.length} `}
-          </text>
-          <text
-            x='1350'
-            y='780'
-            fontSize='35'
-            fill='#333'
-            textAnchor='end'>
-            {`Fare per seat: ${currency} ${busFare.toLocaleString(
-              "en-US"
-            )}`}
-          </text>
-          <text
-            x='1350'
-            y='820'
-            fontSize='35'
-            fill='#333'
-            textAnchor='end'>
-            {`Total Cost: ${currency} ${totalCost.toLocaleString(
-              "en-US"
-            )}`}
-          </text>
-
-          <text x='230' y='860' fontSize='30' fill='#777'>
-            {`TranzBook © ${currentDate.getFullYear()}`}
-          </text>
-
-          <line
-            x1='1425'
-            y1='285'
-            x2='1425'
-            y2='865'
-            stroke='#000'
-            strokeWidth='2'
-            strokeDasharray='15,15'
-          />
-
-          <foreignObject
-            x='1300'
-            y='450'
-            width='600'
-            height='600'
-            className='p-2'
-            transform='rotate(-90 1600 575)'>
-            <div className='min-h-full -my-28 flex flex-row justify-center items-center'>
-              <Barcode
-                value={ticketId.toString()}
-                background='#F1EBEB00'
-                width={1.76}
-                height={300}
-                textAlign='center'
-              />
+    <div className="w-full max-w-md mx-auto">
+      <div id="ticket" className="bg-white rounded-lg shadow-md p-6 relative">
+        {/* Header Section */}
+        <div className="border-b pb-4 mb-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800">{routeString}</h2>
+              <p className="text-sm text-gray-500">{dateString}</p>
             </div>
-          </foreignObject>
-        </svg>
+            {/* <button className="text-rose-500">
+              <Share2 size={20} />
+            </button> */}
+          </div>
+        </div>
+
+        {/* Ticket Details Grid */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <p className="text-xs text-gray-500">Bus Operator</p>
+            <p className="font-medium">{busCompany}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Seat Number(s)</p>
+            <p className="font-medium">{displaySeats}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Ticket ID</p>
+            <p className="font-medium">
+              {reference || (typeof ticketId === "object" ? ticketId[0] : ticketId)}
+            </p>
+          </div>
+          {busNumber && (
+            <div>
+              <p className="text-xs text-gray-500">Bus Number</p>
+              <p className="font-medium">{busNumber}</p>
+            </div>
+          )}
+          <div>
+            <p className="text-xs text-gray-500">Description</p>
+            <p className="font-medium">{busDescription}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Departure</p>
+            <p className="font-medium">{tripDepartureTime}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Arrival</p>
+            <p className="font-medium">{tripArrivalTime}</p>
+          </div>
+        </div>
+
+        {/* Total Cost */}
+        <div className="border-t pt-4 mb-6">
+          <div className="flex justify-between items-center">
+            <span className="font-medium">Total:</span>
+            <span className="text-lg font-semibold text-rose-500">
+              {currency}{" "}
+              {totalCost.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+        </div>
+
+        {/* QR Code */}
+        <div className="flex justify-center mb-4 p-2 bg-white">
+          <QRCode
+            size={128}
+            value={`TICKET:${reference || (typeof ticketId === "object" ? ticketId[0] : ticketId)}|ROUTE:${routeString}|SEATS:${selectedSeats.join(",")}|DATE:${dateString}`}
+            viewBox="0 0 128 128"
+            className="border-4 border-white"
+          />
+        </div>
+
+        {/* Note */}
+        <p className="text-xs text-gray-500 italic mb-4">
+          Note: Just show your QR code while boarding the bus.
+        </p>
+
+        {/* Tranzbook Technologies Branding */}
+        <div className="flex justify-center items-center gap-2 py-2 border-t border-gray-200">
+          <Image
+            src="/pictures/logo.png" // Replace with actual logo URL
+            alt="Tranzbook Technologies Logo"
+            width={35}
+            height={35}
+            className="object-contain"
+          />
+          <p className="text-xs text-gray-600 font-medium">
+            Powered by Tranzbook Technologies
+          </p>
+        </div>
       </div>
 
       <Button
-        className='bg-blue-500 p-2 max-sm:-mt-20 lg:mt-5 rounded-[5px] text-white hover:dark:text-black'
-        variant='outline'
-        onClick={() => {
-          handleDownloadTicket();
-        }}>
+        className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white"
+        onClick={handleDownloadTicket}
+      >
         Download Ticket
       </Button>
     </div>
   );
 };
 
-export default Ticket;
+export default SimplifiedTicket;
