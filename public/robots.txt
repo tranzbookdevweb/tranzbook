@@ -1,0 +1,22 @@
+# robots.txt for tranzbook.co
+# Place this file in your public directory
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and private pages
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+Disallow: /backend/
+Disallow: /user/
+Disallow: /dashboard/
+
+# Disallow temporary or test pages
+Disallow: /test/
+Disallow: /dev/
+Disallow: /staging/
+
+# Sitemaps
+Sitemap: https://www.tranzbook.co/sitemap.xml
