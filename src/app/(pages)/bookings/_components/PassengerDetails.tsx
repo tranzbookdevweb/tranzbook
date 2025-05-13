@@ -1,4 +1,3 @@
-'use client'
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -21,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserIcon, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface PassengerDetail {
   name: string;
@@ -31,6 +31,7 @@ interface PassengerDetail {
 }
 
 interface PassengerDetailsProps {
+  ticketQuantity: number;
   selectedSeats: string[];
   setPassengerDetailsFilled: (filled: boolean) => void;
   passengerDetails: PassengerDetail[];
@@ -38,6 +39,7 @@ interface PassengerDetailsProps {
 }
 
 const PassengerDetails: React.FC<PassengerDetailsProps> = ({
+//   ticketQuantity,
   selectedSeats,
   setPassengerDetailsFilled,
   passengerDetails,
@@ -47,7 +49,7 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
   const [activeTab, setActiveTab] = useState("passenger-1");
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Initialize passenger details array when component mounts or when selectedSeats changes
+  // Initialize passenger details array when component mounts or when ticketQuantity changes
   useEffect(() => {
     if (passengerDetails.length !== selectedSeats.length) {
       const initialDetails: PassengerDetail[] = Array(selectedSeats.length)
@@ -191,10 +193,12 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
               ))}
             </TabsList>
 
-            {selectedSeats.map((seat, index) => (
-              <TabsContent key={index} value={`passenger-${index + 1}`} className="p-4">
-                <div className="h-96 overflow-y-auto text-black w-full">
-                  <Card className="border border-gray-200 shadow-sm">
+           
+              {selectedSeats.map((seat, index) => (
+                <TabsContent key={index} value={`passenger-${index + 1}`} className="p-4">
+                                  <div className="h-96 overflow-y-auto text-black w-full">
+
+                    <Card className="border  border-gray-200 shadow-sm">
                     <CardHeader className="bg-gray-50 border-b border-gray-200">
                       <CardTitle className="text-blue-600">Passenger {index + 1} - Seat {seat}</CardTitle>
                       <CardDescription>
@@ -294,10 +298,10 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
                         </Button>
                       )}
                     </CardFooter>
-                  </Card>
-                </div>
-              </TabsContent>
-            ))}
+                  </Card> </div>
+                </TabsContent>
+              ))}
+           
           </Tabs>
         </DialogContent>
       </Dialog>
