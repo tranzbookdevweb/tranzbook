@@ -14,6 +14,7 @@ import {
   FamilyRestroom,
   FoodBank,
 } from "@mui/icons-material";
+import { useToast } from "@/components/ui/use-toast";
 
 // Interfaces
 interface Bus {
@@ -51,7 +52,13 @@ interface SeatAvailability {
   bookedSeats: number[];
   status: string;
 }
-
+interface PassengerDetail {
+  name: string;
+  age: string;
+  phoneNumber: string;
+  kinName: string;
+  kinContact: string;
+}
 interface Trip {
   id: string;
   date: string | null;
@@ -69,7 +76,10 @@ const PageContainer: React.FC = () => {
   const dateParam = searchParams.get("date");
   const baseApiUrl = `/api/GET/getTripById?id=${tripId}${dateParam ? `&date=${dateParam}` : ''}`;
   const isFetching = useRef(false);
-
+  
+  // Get ticketQuantity parameter and convert to number
+  const ticketQuantity = parseInt(searchParams.get("ticketQuantity") || "1", 10);
+  const { toast } = useToast(); // Updated to destructure toast from useToast
   const [currency] = useState<string>("GHS");
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [isBooked, setBooked] = useState<boolean>(false);
@@ -78,8 +88,11 @@ const PageContainer: React.FC = () => {
   const [bookedSeats, setBookedSeats] = useState<number[]>([]);
   const [remainingSeats, setRemainingSeats] = useState<number>(0);
   const currentDate = dateParam ? new Date(dateParam) : new Date();
-const [bookingReference, setBookingReference] = useState<string>("");
-
+  const [bookingReference, setBookingReference] = useState<string>("");
+  const [ticketLimitReached, setTicketLimitReached] = useState<boolean>(false);
+  const [passengerDetails, setPassengerDetails] = useState<PassengerDetail[]>([]);
+  const [passengerDetailsFilled, setPassengerDetailsFilled] = useState<boolean>(false);
+  
   const fetchTripData = async () => {
     if (isFetching.current) {
       console.log("Fetch already in progress, skipping...");
@@ -119,6 +132,11 @@ const [bookingReference, setBookingReference] = useState<string>("");
       }
     } catch (error) {
       console.error("Error fetching trip data:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load trip data. Please try again.",
+      });
     } finally {
       isFetching.current = false;
     }
@@ -131,6 +149,29 @@ const [bookingReference, setBookingReference] = useState<string>("");
     }
     fetchTripData();
   }, [tripId, dateParam]); // Depend only on tripId and dateParam
+
+  useEffect(() => {
+    // Check if ticket limit has been reached
+    setTicketLimitReached(selectedSeats.length >= ticketQuantity);
+  }, [selectedSeats, ticketQuantity]);
+
+  // Initialize passenger details when ticket quantity changes
+  useEffect(() => {
+    // Create an array of empty passenger details based on ticket quantity
+    if (ticketQuantity > 0 && selectedSeats.length > 0) {
+      const newPassengerDetails = Array(selectedSeats.length).fill({
+        name: "",
+        age: "",
+        phoneNumber: "",
+        kinName: "",
+        kinContact: ""
+      });
+      setPassengerDetails(newPassengerDetails);
+      setPassengerDetailsFilled(false);
+    } else {
+      setPassengerDetails([]);
+    }
+  }, [ticketQuantity, selectedSeats.length]);
 
   if (!tripData) {
     return (
@@ -206,55 +247,145 @@ const [bookingReference, setBookingReference] = useState<string>("");
     },
   ].filter((extra) => extra !== false);
 
-    const handleSeatSelection = (seatId: string) => {
-    setSelectedSeats((prev) =>
-      prev.includes(seatId)
-        ? prev.filter((s) => s !== seatId)
-        : [...prev, seatId]
-    );
+  const handleSeatSelection = (seatId: string) => {
+    // If seat is already selected, allow deselection
+    if (selectedSeats.includes(seatId)) {
+      setSelectedSeats((prev) => prev.filter((s) => s !== seatId));
+      return;
+    }
+    
+    // If we're at the ticket quantity limit and trying to add more, show warning
+    if (selectedSeats.length >= ticketQuantity) {
+      toast({
+        variant: "destructive",
+        title: "Selection limit reached",
+        description: `You can only select up to ${ticketQuantity} seat${ticketQuantity > 1 ? 's' : ''}.`
+      });
+      return;
+    }
+    
+    // Otherwise add the seat
+    setSelectedSeats((prev) => [...prev, seatId]);
   };
 
-const handleBooking = async () => {
-  try {
-    const generateReference = (): string => {
-      return Math.random().toString(36).substr(2, 6).toUpperCase();
-    };
+  const handleClearSeats = () => {
+    setSelectedSeats([]);
+  };
 
-    const reference = generateReference();
-    setBookingReference(reference); // Store the reference in state
+  const handleSelectAllSeats = () => {
+    // If ticketQuantity is less than available seats, only select that many
+    const availableSeats = Array.from(
+      { length: bus.capacity },
+      (_, i) => i + 1
+    )
+      .filter((seat) => !bookedSeats.includes(seat))
+      .map((seat) =>
+        seat.toString().padStart(bus.capacity.toString().length, "0")
+      );
     
-    const seatNumbers = selectedSeats.map((seat) => parseInt(seat, 10));
+    // Take only up to ticketQuantity seats
+    const seatsToSelect = availableSeats.slice(0, ticketQuantity);
+    console.log(`Selecting ${seatsToSelect.length} of ${availableSeats.length} available seats (limit: ${ticketQuantity})`);
+    setSelectedSeats(seatsToSelect);
+  };
 
-    const bookingData = {
-      reference,
-      tripId,
-      seatNumber: seatNumbers,
-    };
-
-    console.log("Sending booking request with data:", bookingData);
-    const response = await fetch(
-      `/api/POST/Booking?currentDate=${currentDate.toISOString()}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingData),
-      }
-    );
-
-    if (response.ok) {
-      alert("Booking successful");
-      setBooked(true);
-      await fetchTripData(); // Re-fetch to update seats
-    } else {
-      const errorData = await response.json();
-      console.error("Booking failed with error:", errorData);
-      alert(`Booking failed: ${errorData.error || "Unknown error"}`);
+  const handleBooking = async () => {
+    // Validate that correct number of seats are selected
+    if (selectedSeats.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No seats selected",
+        description: "Please select at least one seat to book"
+      });
+      return;
     }
-  } catch (error) {
-    console.error("Error during booking:", error);
-    alert("Booking failed due to a network error");
-  }
-};
+    
+    if (selectedSeats.length > ticketQuantity) {
+      toast({
+        variant: "destructive",
+        title: "Too many seats",
+        description: `You can only book up to ${ticketQuantity} seat${ticketQuantity > 1 ? 's' : ''}`
+      });
+      return;
+    }
+    
+    // Validate passenger details
+    if (!passengerDetailsFilled || passengerDetails.length < selectedSeats.length) {
+      toast({
+        variant: "destructive",
+        title: "Passenger details required",
+        description: "Please fill in all passenger details before booking"
+      });
+      return;
+    }
+    
+    // Check if any required fields are missing in passenger details
+    const hasEmptyFields = passengerDetails.some(passenger => 
+      !passenger.name || !passenger.phoneNumber || !passenger.kinName || !passenger.kinContact
+    );
+    
+    if (hasEmptyFields) {
+      toast({
+        variant: "destructive",
+        title: "Incomplete passenger details",
+        description: "Please fill in all required passenger information"
+      });
+      return;
+    }
+    
+    try {
+      const generateReference = (): string => {
+        return Math.random().toString(36).substr(2, 6).toUpperCase();
+      };
+
+      const reference = generateReference();
+      setBookingReference(reference); // Store the reference in state
+      
+      const seatNumbers = selectedSeats.map((seat) => parseInt(seat, 10));
+
+      const bookingData = {
+        reference,
+        tripId,
+        seatNumber: seatNumbers,
+        passengerDetails: passengerDetails.slice(0, selectedSeats.length)
+      };
+
+      console.log("Sending booking request with data:", bookingData);
+      const response = await fetch(
+        `/api/POST/Booking?currentDate=${currentDate.toISOString()}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bookingData),
+        }
+      );
+
+      if (response.ok) {
+        toast({
+          title: "Success!",
+          description: "Your booking was successful",
+          variant: "default"
+        });
+        setBooked(true);
+        await fetchTripData(); // Re-fetch to update seats
+      } else {
+        const errorData = await response.json();
+        console.error("Booking failed with error:", errorData);
+        toast({
+          variant: "destructive",
+          title: "Booking failed",
+          description: errorData.error || "Unknown error occurred"
+        });
+      }
+    } catch (error) {
+      console.error("Error during booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Booking failed due to a network error. Please try again."
+      });
+    }
+  };
 
   return (
     <main className='flex-1 border-t border-b bg-white dark:bg-slate-700 min-h-screen flex flex-col items-center w-full relative overflow-hidden'>
@@ -285,6 +416,10 @@ const handleBooking = async () => {
             isBooked={isBooked}
             id={tripData.id}
             currentDate={currentDate}
+            passengerDetails={passengerDetails}
+            setPassengerDetails={setPassengerDetails}
+            passengerDetailsFilled={passengerDetailsFilled}
+            setPassengerDetailsFilled={setPassengerDetailsFilled}
           />
         </section>
         <section className='flex flex-col items-center p-5 w-full rounded-lg overflow-hidden'>
@@ -306,8 +441,9 @@ const handleBooking = async () => {
               totalCost={busFare * selectedSeats.length}
               currentDate={currentDate}
               selectedSeats={selectedSeats}
-                reference={bookingReference} // Pass the reference
+              reference={bookingReference} // Pass the reference
               isBooked={isBooked}
+              passengerDetails={passengerDetails} // Pass the passenger details to the Ticket component
             />
           ) : (
             <SeatSelection
@@ -317,19 +453,10 @@ const handleBooking = async () => {
               bookedSeats={bookedSeats}
               selectedSeats={selectedSeats}
               handleSeatSelection={handleSeatSelection}
-              handleClearSeats={() => setSelectedSeats([])}
-              handleSelectAllSeats={() => {
-                const availableSeats = Array.from(
-                  { length: bus.capacity },
-                  (_, i) => i + 1
-                )
-                  .filter((seat) => !bookedSeats.includes(seat))
-                  .map((seat) =>
-                    seat.toString().padStart(bus.capacity.toString().length, "0")
-                  );
-                console.log("Selecting all available seats:", availableSeats);
-                setSelectedSeats(availableSeats);
-              }}
+              handleClearSeats={handleClearSeats}
+              handleSelectAllSeats={handleSelectAllSeats}
+              ticketQuantity={ticketQuantity} // Pass ticket quantity
+              ticketLimitReached={ticketLimitReached} // Pass limit status
             />
           )}
         </section>

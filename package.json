@@ -55,6 +55,7 @@
     "jspdf": "^2.5.2",
     "lucide-react": "^0.344.0",
     "next": "^14.2.13",
+    "next-qrcode": "^2.5.1",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
     "react-barcode": "^1.5.3",

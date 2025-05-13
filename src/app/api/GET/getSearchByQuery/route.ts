@@ -18,6 +18,8 @@ export async function GET(request: Request) {
   const sort = url.searchParams.get("sort") as string;
   const company = url.searchParams.get("company") as string;
   const time = url.searchParams.get("time") as string;
+  // Add ticket quantity param
+  const ticketQuantity = parseInt(url.searchParams.get("ticketQuantity") || "1");
 
   try {
     let orderBy: any[] = [];
@@ -225,7 +227,16 @@ export async function GET(request: Request) {
       return response;
     });
 
-    return NextResponse.json(tripsWithAvailability, { status: 200 });
+    // Filter trips based on ticket quantity
+    const filteredTrips = tripsWithAvailability.filter(trip => {
+      // Get the availability for the requested date
+      const availability = trip.seatAvailability[0];
+      
+      // Only include trips that have enough available seats
+      return availability && availability.availableSeats >= ticketQuantity;
+    });
+
+    return NextResponse.json(filteredTrips, { status: 200 });
   } catch (error) {
     console.error("Server error:", error);
     return NextResponse.json(

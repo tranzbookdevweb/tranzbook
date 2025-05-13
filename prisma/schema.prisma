@@ -153,7 +153,41 @@ model Trip {
   updatedAt        DateTime          @updatedAt
 }
 
-// New model to track specific occurrences of a trip
+// Add this new model to your schema.prisma file
+
+model PassengerDetail {
+  id             String   @id @default(uuid())
+  name           String
+  age            String
+  phoneNumber    String
+  kinName        String
+  kinContact     String
+  booking        Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId      String
+  tripOccurrence TripOccurrence @relation(fields: [tripOccurrenceId], references: [id])
+  tripOccurrenceId String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// Update the Booking model to have a relation to PassengerDetail
+model Booking {
+  id           String        @id @default(uuid())
+  reference    String        @unique 
+  date         DateTime      
+  user         User          @relation(fields: [userId], references: [id])
+  userId       String
+  trip         Trip          @relation(fields: [tripId], references: [id])
+  tripId       String
+  seatNumber   Int[]
+  totalAmount  Float
+  status       BookingStatus @default(confirmed)
+  passengerDetails PassengerDetail[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+// Update the TripOccurrence model to have a relation to PassengerDetail
 model TripOccurrence {
   id             String     @id @default(uuid())
   trip           Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
@@ -162,6 +196,7 @@ model TripOccurrence {
   availableSeats Int        // Number of available seats for this specific occurrence
   bookedSeats    Int[]      // Array of seat numbers that are already booked
   status         TripStatus @default(scheduled)
+  passengerDetails PassengerDetail[]
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   
@@ -255,20 +290,7 @@ model Route {
   updatedAt    DateTime @updatedAt
 }
 
-model Booking {
-  id           String        @id @default(uuid())
-  reference    String        @unique 
-  date         DateTime      
-  user         User          @relation(fields: [userId], references: [id])
-  userId       String
-  trip         Trip          @relation(fields: [tripId], references: [id])
-  tripId       String
-  seatNumber   Int[]
-  totalAmount  Float
-  status       BookingStatus @default(confirmed)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-}
+
 
 enum BookingStatus {
   pending

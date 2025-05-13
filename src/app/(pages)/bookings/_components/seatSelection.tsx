@@ -14,6 +14,8 @@ interface SeatSelectionProps {
   handleSeatSelection: (seatId: string) => void;
   handleClearSeats: () => void;
   handleSelectAllSeats: () => void;
+  ticketQuantity?: number; // New prop for ticket quantity
+  ticketLimitReached?: boolean; // New prop for ticket limit status
 }
 
 const SeatSelection: React.FC<SeatSelectionProps> = ({
@@ -25,10 +27,12 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   handleSeatSelection,
   handleClearSeats,
   handleSelectAllSeats,
+  ticketQuantity = 1, // Default to 1 if not provided
+  ticketLimitReached = false,
 }) => {
-  const totalPassengerSeats = busCapacity ;
+  const totalPassengerSeats = busCapacity;
   const numberOfDigits = totalPassengerSeats.toString().length;
- const formatSeatNumber = (seatNumber: number) => {
+  const formatSeatNumber = (seatNumber: number) => {
     return (seatNumber + 1).toString().padStart(numberOfDigits, "0");
   };
 
@@ -172,32 +176,44 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
     return allSeats;
   };
 
-const renderSeat = (seatId: string, seatIndex: number, isSelected: boolean) => {
-  console.log('Rendering seat:', { seatId, seatIndex, isBooked: bookedSeats?.includes(seatIndex + 1) });
-  return (
-    <div className="m-1 max-sm:m-1 dark:text-gray-500 font-semibold" key={seatId}>
-      <button
-        onClick={() => {
-          handleSeatSelection(seatId);
-          console.log('Seat clicked:', seatId);
-        }}
-        className={`flex flex-col items-center justify-center w-12 h-16 min-[340px]:w-14 min-[390px]:w-16 min-[430px]:w-18 sm:w-20 md:w-20 lg:w-20 gap-1 border border-slate-200 rounded-xl p-1 transition-all duration-300 ${
-          isSelected ? "bg-[#FFCC59] text-white" : "bg-white text-gray-500"
-        } ${bookedSeats?.includes(seatIndex + 1) ? "opacity-30" : ""}`}
-        disabled={bookedSeats?.includes(seatIndex + 1)}
-      >
-        <Image
-          src="/seat.png"
-          alt="seat"
-          height={40}
-          width={40}
-          className="object-contain max-sm:w-6 max-sm:h-6 w-6 h-6"
-        />
-        <p className="text-center text-xs md:text-sm">{seatId}</p>
-      </button>
-    </div>
-  );
-};
+  const renderSeat = (seatId: string, seatIndex: number, isSelected: boolean) => {
+    // Determine if the seat is disabled because it's booked or if ticket limit is reached
+    const isBooked = bookedSeats?.includes(seatIndex + 1);
+    const isDisabled = isBooked || (ticketLimitReached && !isSelected);
+    
+    return (
+      <div className="m-1 max-sm:m-1 dark:text-gray-500 font-semibold" key={seatId}>
+        <button
+          onClick={() => {
+            handleSeatSelection(seatId);
+            console.log('Seat clicked:', seatId);
+          }}
+          className={`flex flex-col items-center justify-center w-12 h-16 min-[340px]:w-14 min-[390px]:w-16 min-[430px]:w-18 sm:w-20 md:w-20 lg:w-20 gap-1 border border-slate-200 rounded-xl p-1 transition-all duration-300 
+            ${isSelected ? "bg-[#FFCC59] text-white" : "bg-white text-gray-500"}
+            ${isDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}
+          `}
+          disabled={isDisabled}
+          title={
+            isBooked 
+              ? "This seat is already booked" 
+              : (ticketLimitReached && !isSelected) 
+                ? `Maximum of ${ticketQuantity} tickets allowed` 
+                : ""
+          }
+        >
+          <Image
+            src="/seat.png"
+            alt="seat"
+            height={40}
+            width={40}
+            className="object-contain max-sm:w-6 max-sm:h-6 w-6 h-6"
+          />
+          <p className="text-center text-xs md:text-sm">{seatId}</p>
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-white flex flex-col items-center p-5 md:p-4 border border-slate-200 rounded-xl dark:text-black overflow-hidden w-full max-w-2xl mx-auto">
       {/* Bus outline */}
@@ -207,6 +223,13 @@ const renderSeat = (seatId: string, seatIndex: number, isSelected: boolean) => {
         
         {/* Bus type */}
         <h1 className="text-center text-lg font-semibold mb-3 text-gray-600">{busDescription} Bus</h1>
+        
+        {/* Ticket limit indicator */}
+        <div className="text-center mb-2">
+          <span className="text-sm text-gray-600">
+            You can select up to <span className="font-bold">{ticketQuantity}</span> seat{ticketQuantity !== 1 ? 's' : ''}
+          </span>
+        </div>
         
         {selectedSeats.length > 0 ? (
           <div className="flex flex-col items-center justify-center mb-4">
@@ -219,7 +242,12 @@ const renderSeat = (seatId: string, seatIndex: number, isSelected: boolean) => {
                   } seats`
                 : `${selectedSeats.length} seat`
             } selected`}</h3>
-            <div className="flex flex-row gap-6 justify-center">
+            <p className="text-sm text-gray-500 mt-1">
+              {ticketLimitReached 
+                ? `Maximum limit of ${ticketQuantity} reached` 
+                : `You can select ${ticketQuantity - selectedSeats.length} more seat${ticketQuantity - selectedSeats.length !== 1 ? 's' : ''}`}
+            </p>
+            <div className="flex flex-row gap-6 justify-center mt-2">
               <Button
                 className="p-2 rounded-md text-slate-500 text-center text-sm"
                 variant="ghost"
@@ -229,15 +257,21 @@ const renderSeat = (seatId: string, seatIndex: number, isSelected: boolean) => {
               <Button
                 className="p-2 rounded-md text-[#b38f3cbd] text-center text-sm"
                 variant="ghost"
-                onClick={() => handleSelectAllSeats()}>
-                Select all
+                onClick={() => handleSelectAllSeats()}
+                disabled={ticketQuantity < 1}>
+                {ticketQuantity > 1 ? `Select ${Math.min(ticketQuantity, totalPassengerSeats)} seats` : 'Select all'}
               </Button>
             </div>
           </div>
         ) : (
-          <h2 className="text-xl pb-2 font-semibold text-center mb-4">
-            Select Your Seats
-          </h2>
+          <div className="text-center mb-4">
+            <h2 className="text-xl pb-2 font-semibold">
+              Select Your Seats
+            </h2>
+            <p className="text-sm text-gray-500">
+              Please select up to {ticketQuantity} seat{ticketQuantity !== 1 ? 's' : ''}
+            </p>
+          </div>
         )}
 
         <div

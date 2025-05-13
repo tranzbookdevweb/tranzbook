@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     console.log("Request Body:", body);
 
-    const { reference, tripId, seatNumber } = body;
+    const { reference, tripId, seatNumber, passengerDetails } = body;
 
     // Ensure that all required fields are provided in the request
     if (!reference || !tripId || !seatNumber) {
@@ -119,16 +119,35 @@ export async function POST(req: NextRequest) {
     // Calculate total amount based on number of seats
     const totalAmount = trip.price * requestedSeats.length;
 
-    // Create the booking
+    // Create the booking with passenger details
     const booking = await prisma.booking.create({
       data: {
         reference,
         tripId,
         seatNumber: requestedSeats,
-        status: "pending",
+        status: "confirmed", // Changed from pending to confirmed to match schema default
         date: bookedDate,
         userId: user.id || '',
-        totalAmount
+        totalAmount,
+        passengerDetails: {
+          create: Array.isArray(passengerDetails) ? 
+            passengerDetails.map(passenger => ({
+              name: passenger.name,
+              age: passenger.age,
+              phoneNumber: passenger.phoneNumber,
+              kinName: passenger.kinName,
+              kinContact: passenger.kinContact,
+              tripOccurrenceId: tripOccurrence.id
+            })) : 
+            [{
+              name: passengerDetails.name,
+              age: passengerDetails.age,
+              phoneNumber: passengerDetails.phoneNumber,
+              kinName: passengerDetails.kinName,
+              kinContact: passengerDetails.kinContact,
+              tripOccurrenceId: tripOccurrence.id
+            }]
+        }
       }
     });
 

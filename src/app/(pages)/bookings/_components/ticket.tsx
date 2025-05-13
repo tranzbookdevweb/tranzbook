@@ -1,33 +1,40 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Share2 } from "lucide-react";
 import generatePDF from "react-to-pdf";
 import QRCode from "react-qr-code";
 import Image from "next/image";
 
-// Interface to match the props from your existing code
+// Interfaces
+interface PassengerDetail {
+  name: string;
+  age: string;
+  phoneNumber: string;
+  kinName: string;
+  kinContact: string;
+}
+
 interface TicketProps {
-  ticketId: string | string[];
-  busNumber: string | number;
+  ticketId: string;
+  busNumber: string;
   busCompany: string;
-  busDescription: string;
+  tripDepartureTime: string | number;
+  tripArrivalTime: string | number;
   busRoute: { origin: string; destination: string };
-  tripDuration: string | number;
-  tripDepartureTime: number | string;
-  tripArrivalTime: number | string;
+  tripDuration: number;
   busFare: number;
-  currency: string;
-  totalCost: number;
+  busDescription: string | number;
   currentDate: Date;
   selectedSeats: string[];
+  currency: string;
+  reference: string;
+  totalCost: number;
   isBooked: boolean;
-  reference?: string;
+  passengerDetails: PassengerDetail[];
 }
 
 const SimplifiedTicket: React.FC<TicketProps> = ({
   ticketId,
-  busNumber,
   busCompany,
   busDescription,
   busRoute,
@@ -37,137 +44,140 @@ const SimplifiedTicket: React.FC<TicketProps> = ({
   totalCost,
   currentDate,
   selectedSeats,
-  isBooked,
   reference,
+  passengerDetails,
 }) => {
   const handleDownloadTicket = () => {
     generatePDF(() => document.getElementById("ticket"), {
       method: "open",
-      page: {
-        format: "a4",
-        orientation: "p",
-      },
+      page: { format: "letter", orientation: "portrait" },
     });
   };
 
-  // Format the route string
   const routeString = `${busRoute.origin} - ${busRoute.destination}`;
-
-  // Format the date string
   const dateString = currentDate.toLocaleDateString("en-US", {
     day: "numeric",
-    month: "short",
+    month: "long",
     year: "numeric",
     weekday: "long",
   });
 
-  // Format seat numbers for display (handle case with many seats)
-  const displaySeats =
-    selectedSeats.length > 4
-      ? `${selectedSeats.slice(0, 2).join(", ")} +${selectedSeats.length - 2} more`
-      : selectedSeats.join(", ");
-
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div id="ticket" className="bg-white rounded-lg shadow-md p-6 relative">
-        {/* Header Section */}
-        <div className="border-b pb-4 mb-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">{routeString}</h2>
-              <p className="text-sm text-gray-500">{dateString}</p>
-            </div>
-            {/* <button className="text-rose-500">
-              <Share2 size={20} />
-            </button> */}
+    <div className="w-full max-w-4xl mx-auto p-4">
+      <div
+        id="ticket"
+        className="bg-white shadow-2xl rounded-xl overflow-hidden border border-gray-100 text-sm font-sans transition-all duration-300 hover:shadow-xl"
+      >
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-900 to-blue-700 text-white px-8 py-6 flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">{busCompany}</h2>
+            <p className="text-xs font-medium opacity-80">E-Ticket Confirmation</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-medium">{dateString}</p>
+            <p className="text-xs font-light opacity-80">Ticket #{reference}</p>
           </div>
         </div>
 
-        {/* Ticket Details Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        {/* Route & Time Info */}
+        <div className="grid grid-cols-3 gap-6 px-8 py-6 bg-gray-50 border-b border-gray-200 text-center">
           <div>
-            <p className="text-xs text-gray-500">Bus Operator</p>
-            <p className="font-medium">{busCompany}</p>
+            <p className="text-lg font-semibold text-gray-800">{busRoute.origin}</p>
+            <p className="text-sm text-gray-500 mt-1">{tripDepartureTime}</p>
+          </div>
+          <div className="flex items-center justify-center">
+            <div className="h-1 w-12 bg-blue-300 rounded-full mx-2"></div>
+            <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+            <div className="h-1 w-12 bg-blue-300 rounded-full mx-2"></div>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Seat Number(s)</p>
-            <p className="font-medium">{displaySeats}</p>
+            <p className="text-lg font-semibold text-gray-800">{busRoute.destination}</p>
+            <p className="text-sm text-gray-500 mt-1">{tripArrivalTime}</p>
+          </div>
+        </div>
+
+        {/* Passenger Details */}
+        <div className="px-8 py-6 border-b border-gray-200">
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Passenger(s) & Seat(s)</p>
+          <div>
+            <div className="space-y-3 rounded-md p-4 shadow-sm">
+  {passengerDetails.map((passenger, index) => (
+    <div
+      key={index}
+      className="flex items-center justify-between pb-2 last:border-b-0 last:pb-0"
+    >
+      <span className="text-sm font-medium text-gray-900">
+        {passenger.name}
+      </span>
+      <span className="text-sm text-gray-600">Seat {selectedSeats[index]}</span>
+    </div>
+  ))}
+</div>
+
+          </div>
+        </div>
+
+        {/* Ticket Info Grid */}
+        <div className="px-8 py-6 grid grid-cols-2 gap-8 border-b border-gray-200">
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Bus Type</p>
+            <p className="text-base font-semibold text-gray-800">{busDescription}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Ticket ID</p>
-            <p className="font-medium">
-              {reference || (typeof ticketId === "object" ? ticketId[0] : ticketId)}
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Price</p>
+            <p className="text-base font-semibold text-gray-800">
+              {currency} {totalCost.toFixed(2)}
             </p>
           </div>
-          {busNumber && (
-            <div>
-              <p className="text-xs text-gray-500">Bus Number</p>
-              <p className="font-medium">{busNumber}</p>
+        </div>
+
+        {/* QR Code & Notes */}
+        <div className="px-8 py-6 flex justify-between items-center border-b border-gray-200">
+          <div>
+            <p className="text-sm font-semibold text-gray-700 mb-3">Important Information</p>
+            <ul className="list-disc list-inside text-xs text-gray-600 space-y-2">
+              <li>Arrive 30 minutes prior to departure for smooth boarding</li>
+              <li>Present this e-ticket or QR code at the boarding point</li>
+              <li>Valid government-issued ID required during verification</li>
+            </ul>
+          </div>
+          <div className="text-center">
+            <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
+              <QRCode
+                size={100}
+                value={`TICKET:${reference}|ROUTE:${routeString}|SEATS:${selectedSeats.join(",")}| swallowingDATE:${dateString}`}
+                viewBox="0 0 100 100"
+                className="bg-white p-2 rounded"
+              />
             </div>
-          )}
-          <div>
-            <p className="text-xs text-gray-500">Description</p>
-            <p className="font-medium">{busDescription}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Departure</p>
-            <p className="font-medium">{tripDepartureTime}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Arrival</p>
-            <p className="font-medium">{tripArrivalTime}</p>
+            <p className="text-xs text-gray-500 mt-2">Scan for Verification</p>
           </div>
         </div>
 
-        {/* Total Cost */}
-        <div className="border-t pt-4 mb-6">
-          <div className="flex justify-between items-center">
-            <span className="font-medium">Total:</span>
-            <span className="text-lg font-semibold text-rose-500">
-              {currency}{" "}
-              {totalCost.toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </span>
+        {/* Footer */}
+        <div className="px-8 py-4 bg-gray-100 flex justify-between items-center border-t border-gray-200 text-xs text-gray-600">
+          <div className="flex items-center space-x-3">
+            <Image
+              src="/pictures/logo.png"
+              alt="Tranzbook Logo"
+              width={24}
+              height={24}
+              className="object-contain"
+            />
+            <span className="font-medium">Powered by Tranzbook Technologies</span>
           </div>
-        </div>
-
-        {/* QR Code */}
-        <div className="flex justify-center mb-4 p-2 bg-white">
-          <QRCode
-            size={128}
-            value={`TICKET:${reference || (typeof ticketId === "object" ? ticketId[0] : ticketId)}|ROUTE:${routeString}|SEATS:${selectedSeats.join(",")}|DATE:${dateString}`}
-            viewBox="0 0 128 128"
-            className="border-4 border-white"
-          />
-        </div>
-
-        {/* Note */}
-        <p className="text-xs text-gray-500 italic mb-4">
-          Note: Just show your QR code while boarding the bus.
-        </p>
-
-        {/* Tranzbook Technologies Branding */}
-        <div className="flex justify-center items-center gap-2 py-2 border-t border-gray-200">
-          <Image
-            src="/pictures/logo.png" // Replace with actual logo URL
-            alt="Tranzbook Technologies Logo"
-            width={35}
-            height={35}
-            className="object-contain"
-          />
-          <p className="text-xs text-gray-600 font-medium">
-            Powered by Tranzbook Technologies
-          </p>
+          <span className="font-medium">Booking Ref: {reference}</span>
         </div>
       </div>
 
       <Button
-        className="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white"
+        className="w-full mt-6 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-semibold py-3 rounded-lg shadow-md transition-all duration-300"
         onClick={handleDownloadTicket}
       >
-        Download Ticket
+        Download Your Ticket
       </Button>
     </div>
   );

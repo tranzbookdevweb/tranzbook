@@ -116,6 +116,7 @@ const SearchResults = () => {
   const fromLocation = searchParams.get("fromLocation") || "";
   const toLocation = searchParams.get("toLocation") || "";
   const date = searchParams.get("date") || "";
+   const ticketQuantity = searchParams.get("ticketQuantity") || "";
 
   // Format duration to hours and minutes
   const formatDuration = (minutes: number) => {
@@ -152,7 +153,7 @@ const SearchResults = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/GET/getSearchByQuery?fromLocation=${fromLocation}&toLocation=${toLocation}&date=${date}&sort=${sort}`
+        `/api/GET/getSearchByQuery?fromLocation=${fromLocation}&toLocation=${toLocation}&date=${date}&sort=${sort}&ticketQuantity=${ticketQuantity}`
       );
       if (!response.ok) throw new Error('Error fetching trips');
       const data: Trip[] = await response.json();
@@ -437,7 +438,7 @@ const SearchResults = () => {
                       <Link
                         href={{
                           pathname: "/bookings/seatPicker",
-                          query: { tripId: trip.id, date: date },
+                          query: { tripId: trip.id, date: date, ticketQuantity: ticketQuantity },
                         }}
                         className="bg-blue-500 hover:bg-blue-600 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-white text-sm sm:text-base font-medium transition-colors inline-block text-center min-w-20 sm:min-w-24"
                       >

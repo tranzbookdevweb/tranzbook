@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   FiMapPin,
   FiClock,
@@ -12,6 +12,7 @@ import { TbTemperatureSnow } from "react-icons/tb";
 import { ImSwitch } from "react-icons/im";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import PassengerDetails from "./PassengerDetails";
 
 const PaymentButton = dynamic(
   () => import("../_buttons/paymentButton"),
@@ -20,6 +21,15 @@ const PaymentButton = dynamic(
   }
 );
 
+interface PassengerDetail {
+  name: string;
+  age: string;
+  phoneNumber: string;
+  kinName: string;
+  kinContact: string;
+}
+
+// Update the BusDetailsProps interface to include the new passenger details props
 interface BusDetailsProps {
   busCompanyLogo: string | undefined;
   busImage: string | undefined;
@@ -27,7 +37,7 @@ interface BusDetailsProps {
   busCompany: string | number;
   busDescription: string | number;
   busCapacity: number;
-  remainingSeats: number; // New prop for remaining seats
+  remainingSeats: number;
   busRoute: { origin: string; destination: string };
   tripDuration: string | number;
   tripDepartureTime: string | number;
@@ -42,6 +52,10 @@ interface BusDetailsProps {
   id: string | string[];
   handleBooking: () => void;
   isBooked: boolean;
+  passengerDetails: PassengerDetail[];
+  setPassengerDetails: React.Dispatch<React.SetStateAction<PassengerDetail[]>>;
+  passengerDetailsFilled: boolean;
+  setPassengerDetailsFilled: (filled: boolean) => void;
 }
 
 const BusDetails: React.FC<BusDetailsProps> = ({
@@ -66,9 +80,12 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   distance,
   handleBooking,
   isBooked,
+    passengerDetails,
+  setPassengerDetails,
+  passengerDetailsFilled,
+  setPassengerDetailsFilled,
 }) => {
   const totalCost: number = busFare * selectedSeats.length;
-
   return (
     <aside className='bg-white dark:text-black md:space-y-3 -w-72 max-sm:w-full sm:max-md:w-full min-h-full max-sm:min-h-fit p-5 flex flex-col items-center max-sm:justify-between sm:max-md:justify-between rounded-lg overflow-y-scroll custom-scrollbar'>
       <div className='flex items-center w-full mb-5 flex-wrap max-lg:justify-center'>
@@ -190,16 +207,30 @@ const BusDetails: React.FC<BusDetailsProps> = ({
         </div>
       </div>
 
+      {/* Passenger Details Form - Only show when seats are selected and not yet booked */}
+      {selectedSeats.length > 0 && !isBooked && (
+        <div className="w-full mb-4 mt-4">
+                 <PassengerDetails
+            ticketQuantity={selectedSeats.length}
+            selectedSeats={selectedSeats}
+            setPassengerDetailsFilled={setPassengerDetailsFilled}
+            passengerDetails={passengerDetails}
+            setPassengerDetails={setPassengerDetails}
+          />
+        </div>
+      )}
+
       <PaymentButton
         busFare={busFare}
         selectedSeats={selectedSeats}
         handleBooking={handleBooking}
         className={`w-full mt-5 lg:mt-5 py-2 text-white text-sm font-semibold rounded-[5px] ${
-          selectedSeats.length !== 0 && !isBooked
+          selectedSeats.length !== 0 && !isBooked && passengerDetailsFilled
             ? "bg-[#fc9a1a] hover:bg-[#F79009] hover:scale-105"
             : "bg-[#ffcd5993]"
         } transition-transform transform`}
-        disabled={selectedSeats.length !== 0 && isBooked}
+        disabled={selectedSeats.length === 0 || isBooked}
+        passengerDetailsFilled={passengerDetailsFilled}
       />
 
       <style jsx>{`

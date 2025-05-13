@@ -2,21 +2,32 @@
 import React, { useEffect, useState } from "react";
 import { usePaystackPayment } from "react-paystack";
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+
+interface PassengerDetail {
+  name: string;
+  age: string;
+  phoneNumber: string;
+  kinName: string;
+  kinContact: string;
+}
 
 interface PaymentButtonProps {
   busFare: number;
   selectedSeats: string[];
-  className: string;
   handleBooking: () => void;
-  disabled: boolean;
+  className?: string;
+  disabled?: boolean;
+  passengerDetailsFilled: boolean;
 }
 
 const PaymentButton: React.FC<PaymentButtonProps> = ({
   busFare,
   selectedSeats,
-  className,
   handleBooking,
+  className,
   disabled,
+  passengerDetailsFilled
 }) => {
   const [email, setEmail] = useState<string | null>(null);
   const { toast } = useToast();
@@ -56,16 +67,41 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   };
 
   const onClose = () => {
-    alert("Payment Not Successful");
+    toast({
+      title: "Payment cancelled",
+      description: "Your payment was not completed.",
+      variant: "destructive"
+    });
+  };
+
+  const handleButtonClick = () => {
+    if (email && passengerDetailsFilled && selectedSeats.length > 0) {
+      handlePayments({ onSuccess, onClose });
+    }
+  };
+
+  // Determine button text based on conditions
+  const getButtonText = () => {
+    if (selectedSeats.length === 0) {
+      return "Select Seats First";
+    } else if (!passengerDetailsFilled) {
+      return "Please Fill Passenger Details";
+    } else if (!email) {
+      return "Loading...";
+    } else {
+      return `Pay GHS ${(selectedSeats.length * busFare).toLocaleString("en-US")}`;
+    }
   };
 
   return (
-    <button
+    <Button
+      onClick={handleButtonClick}
       className={className}
-      onClick={() => handlePayments({ onSuccess, onClose })}
-      disabled={disabled || !email}>
-      {email ? "Book Now" : "Loading..."}
-    </button>
+      disabled={disabled || !passengerDetailsFilled || selectedSeats.length === 0 || !email}
+      variant="default"
+    >
+      {getButtonText()}
+    </Button>
   );
 };
 
