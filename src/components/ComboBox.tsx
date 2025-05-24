@@ -1,6 +1,5 @@
 'use client';
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -22,49 +21,61 @@ interface Location {
 
 interface ComboboxFormProps {
   onLocationSelect: (location: string) => void;
-  disabledOptions?: string[]; // Array of options to disable
-  locationType: 'FROM' | 'TO'; // New prop to indicate the type of location
+  disabledOptions?: string[];
+  locationType: 'FROM' | 'TO';
 }
 
-export function ComboboxForm({ onLocationSelect, disabledOptions = [], locationType }: ComboboxFormProps) {
+export function ComboboxForm({
+  onLocationSelect,
+  disabledOptions = [],
+  locationType,
+}: ComboboxFormProps) {
   const [open, setOpen] = React.useState(false);
-  const [locations, setLocations] = React.useState<Location[]>([]); // Ensure initial value is an empty array
+  const [locations, setLocations] = React.useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = React.useState<Location | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  // Fetch locations from API
+  // Fetch locations from API only once on mount
   React.useEffect(() => {
     const fetchLocations = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/GET/getLocation');
+        setError(null);
+        const response = await fetch('/api/GET/getLocation', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
         if (!response.ok) {
-          throw new Error('Failed to fetch locations');
+          throw new Error(`Failed to fetch locations: ${response.statusText}`);
         }
+
         const data = await response.json();
-        if (Array.isArray(data)) {
-          setLocations(data);
-        } else {
-          console.error('Unexpected API response structure:', data);
-          setLocations([]); // Fallback to an empty array if data is not as expected
-        }      } catch (error) {
+        if (!Array.isArray(data)) {
+          throw new Error('Unexpected API response: Data is not an array');
+        }
+
+        setLocations(data);
+      } catch (error) {
         console.error('Error fetching locations:', error);
+        setError('Failed to load locations. Please try again.');
+        setLocations([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchLocations();
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once
 
-  const handleLocationSelect = (location: string) => {
-    const foundLocation = locations.find((loc) => loc.name === location) || null;
+  const handleLocationSelect = (locationName: string) => {
+    const foundLocation = locations.find((loc) => loc.name === locationName) || null;
     setSelectedLocation(foundLocation);
     setOpen(false);
-    onLocationSelect(location); // Call the callback function with the name of the selected location
+    onLocationSelect(locationName);
   };
 
-  // Set custom placeholders based on the location type
   const placeholder =
     locationType === 'FROM'
       ? selectedLocation?.name || 'Markola Accra'
@@ -76,38 +87,40 @@ export function ComboboxForm({ onLocationSelect, disabledOptions = [], locationT
         <PopoverTrigger asChild>
           <div className="w-full cursor-pointer">
             {selectedLocation ? (
-              <>{selectedLocation.name}</>
+              <span>{selectedLocation.name}</span>
             ) : (
               <span className="text-gray-500">{placeholder}</span>
             )}
           </div>
         </PopoverTrigger>
-        <PopoverContent className="p-0 z-[99] bg-white text-[#fdb022] font-semibold" side="top" align="start">
+        <PopoverContent
+          className="p-0 z-[99] bg-white text-[#fdb022] font-semibold"
+          side="top"
+          align="start"
+        >
           <Command>
             <CommandInput placeholder="Choose Location" />
             <CommandList>
               {loading ? (
                 <CommandEmpty>Loading...</CommandEmpty>
+              ) : error ? (
+                <CommandEmpty>{error}</CommandEmpty>
+              ) : locations.length === 0 ? (
+                <CommandEmpty>No locations found.</CommandEmpty>
               ) : (
-                <>
-                  {locations.length === 0 ? (
-                    <CommandEmpty>No locations found.</CommandEmpty>
-                  ) : (
-                    <CommandGroup>
-                      {locations
-                        .filter((location) => !disabledOptions.includes(location.name))
-                        .map((location) => (
-                          <CommandItem
-                            key={location.id}
-                            value={location.name}
-                            onSelect={() => handleLocationSelect(location.name)}
-                          >
-                            {location.name}
-                          </CommandItem>
-                        ))}
-                    </CommandGroup>
-                  )}
-                </>
+                <CommandGroup>
+                  {locations
+                    .filter((location) => !disabledOptions.includes(location.name))
+                    .map((location) => (
+                      <CommandItem
+                        key={location.id}
+                        value={location.name}
+                        onSelect={() => handleLocationSelect(location.name)}
+                      >
+                        {location.name}
+                      </CommandItem>
+                    ))}
+                </CommandGroup>
               )}
             </CommandList>
           </Command>

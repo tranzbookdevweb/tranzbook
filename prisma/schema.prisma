@@ -345,6 +345,20 @@ model CargoForm {
   cargoWeight          Float
   productDescription   String
   locationDescription  String?
+    // Sender Details
+  senderName           String
+  senderPhone          String
+  senderEmail          String?
+  senderAddress        String
+  senderCity           String
+  
+  // Receiver Details
+  receiverName         String
+  receiverPhone        String
+  receiverEmail        String?
+  receiverAddress      String
+  receiverCity         String
+  
   user                 User      @relation(fields: [userId], references: [id])
   userId               String
   status               CargoFormStatus @default(pending)
@@ -359,4 +373,48 @@ enum CargoFormStatus {
   shipped
   delivered
   cancelled
+}
+
+model CargoCompany {
+  id                String   @id @default(uuid())
+  name              String
+  email             String   @unique
+  phoneNumber       String
+  address           String
+  city              String
+  country           String
+  registrationNumber String? @unique
+  logo              String?
+  website           String?
+  description       String?
+  
+  // Service capabilities
+  maxWeightCapacity Float?   // Maximum weight they can handle in kg
+  serviceAreas      String[] // Areas/regions they serve
+  specializations   String[] // Types of cargo they specialize in
+  
+  // Contact person details
+  contactPersonName  String?
+  contactPersonPhone String?
+  contactPersonEmail String?
+  
+  // Business verification
+  isVerified        Boolean  @default(false)
+  licenseNumber     String?
+  insuranceDetails  String?
+  
+  // Operational details
+  operatingHours    String?  // e.g., "Mon-Fri: 8AM-6PM"
+  emergencyContact  String?
+  
+  status            CargoCompanyStatus @default(active)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum CargoCompanyStatus {
+  active
+  inactive
+  suspended
+  pending_verification
 }
