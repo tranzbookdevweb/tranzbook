@@ -108,7 +108,6 @@ const createAdminNotificationEmail = (cargoForm: any, reference: string) => {
 
           <h3 style="color: #1f2937; margin-top: 20px;">👨‍💼 User Information</h3>
           <ul style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
-            <li><strong>User ID:</strong> ${cargoForm.userId}</li>
             <li><strong>Name:</strong> ${cargoForm.user?.firstName} ${cargoForm.user?.lastName}</li>
             <li><strong>Email:</strong> ${cargoForm.user?.email}</li>
           </ul>
@@ -241,7 +240,7 @@ const sendEmailNotifications = async (cargoForm: any, reference: string): Promis
   }
 
   try {
-    const userEmail = cargoForm.user?.email;
+  const userEmail = cargoForm.senderEmail || cargoForm.user?.email;
     if (userEmail) {
       const confirmationEmail = createUserConfirmationEmail(cargoForm, reference, userEmail);
       const userResult = await transporter.sendMail(confirmationEmail);
