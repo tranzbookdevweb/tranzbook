@@ -110,7 +110,7 @@ const SearchResults = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [availableCompanies, setAvailableCompanies] = useState<CompanyData[]>([]);
-  const resultsPerPage = 5;
+  const resultsPerPage = 15;
   
   const searchParams = useSearchParams();
   const fromLocation = searchParams.get("fromLocation") || "";

@@ -94,7 +94,7 @@ export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChang
                       
                       // Get tomorrow's date
                       const tomorrow = new Date(today);
-                      tomorrow.setDate(tomorrow.getDate() + 1);
+                      tomorrow.setDate(tomorrow.getDate() );
                       
                       // Disable today and all dates before today
                       if (date < tomorrow) {
@@ -105,7 +105,7 @@ export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChang
                       // and all dates before them
                       if (disabledDates.length > 0) {
                         return disabledDates.some(disabledDate => 
-                          date.getTime() <= disabledDate.getTime()
+                          date.getTime() < disabledDate.getTime()
                         );
                       }
                       
