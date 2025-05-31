@@ -78,8 +78,8 @@ export function ComboboxForm({
 
   const placeholder =
     locationType === 'FROM'
-      ? selectedLocation?.name || 'Markola Accra'
-      : selectedLocation?.name || 'Kejetia Market';
+      ? selectedLocation?.name || 'FROM'
+      : selectedLocation?.name || 'TO';
 
   return (
     <div className="flex items-center w-full space-x-4">
