@@ -18,18 +18,25 @@ export async function GET(request: Request) {
   const sort = url.searchParams.get("sort") as string;
   const company = url.searchParams.get("company") as string;
   const time = url.searchParams.get("time") as string;
-  // Add ticket quantity param
   const ticketQuantity = parseInt(url.searchParams.get("ticketQuantity") || "1");
 
   try {
+    // Get current date and time
+    const currentDateTime = new Date();
+    const currentDate = currentDateTime.toISOString().split("T")[0];
+    const currentTime = currentDateTime.toISOString().split("T")[1].split(".")[0];
+
+    // Validate requested date
+    const requestedDate = new Date(date);
+    const requestedDateStr = requestedDate.toISOString().split("T")[0];
+
+    // Return empty array if date is in the past
+    if (requestedDateStr < currentDate) {
+      return NextResponse.json([], { status: 200 });
+    }
+
     let orderBy: any[] = [];
     let timeFilter: any = {};
-
-    // Get the current date and time
-    const currentDateTime = new Date();
-    const currentDateTimeISOString = currentDateTime.toISOString();
-    const currentDate = currentDateTimeISOString.split("T")[0];
-    const currentTime = currentDateTimeISOString.split("T")[1].split(".")[0];
 
     // Set sorting logic
     if (sort === "cheapest") {
@@ -71,24 +78,15 @@ export async function GET(request: Request) {
       };
     }
 
-    // Compare the trip date with the current date and time
-    const tripDateTime = new Date(date);
-    const tripDate = tripDateTime.toISOString().split("T")[0];
-
-    // Create a filter for trips happening now or in the future
-    let departureTimeFilter: any = {
-      gte: currentDate + "T" + currentTime,
-    };
-
-    if (tripDate > currentDate) {
-      departureTimeFilter = {};
-    } else if (tripDate === currentDate) {
+    // Set departure time filter for current date
+    let departureTimeFilter: any = {};
+    if (requestedDateStr === currentDate) {
       departureTimeFilter = {
-        gte: currentDate + "T" + currentTime,
+        gte: currentTime,
       };
     }
 
-    // Construct the query filters for both specific-date and recurring trips
+    // Construct query filters for both specific-date and recurring trips
     const specificDateFilter: any = {
       route: {
         startCity: {
@@ -104,12 +102,12 @@ export async function GET(request: Request) {
           },
         },
       },
-      date: new Date(date),
+      date: requestedDate,
       departureTime: departureTimeFilter,
       ...timeFilter,
       tripOccurrences: {
         some: {
-          occurrenceDate: new Date(date),
+          occurrenceDate: requestedDate,
         },
       },
     };
@@ -175,7 +173,7 @@ export async function GET(request: Request) {
         driver: true,
         tripOccurrences: {
           where: {
-            occurrenceDate: new Date(date),
+            occurrenceDate: requestedDate,
           },
         },
       },
@@ -195,14 +193,10 @@ export async function GET(request: Request) {
           bookedSeats: occurrenceForDate.bookedSeats,
           status: occurrenceForDate.status,
         }];
-      } else if (trip.bus) {
-        // If no occurrence exists, check if the date is valid for the trip
-        const requestedDate = new Date(date);
+      } else if (trip.bus && trip.recurring) {
+        // For recurring trips, check if the requested date is valid
         const dayOfWeek = requestedDate.getDay() === 0 ? 7 : requestedDate.getDay();
-        const isValidDate =
-          !trip.recurring ||
-          (trip.recurring && trip.daysOfWeek?.includes(dayOfWeek)) ||
-          (trip.date && new Date(trip.date).toDateString() === requestedDate.toDateString());
+        const isValidDate = trip.daysOfWeek?.includes(dayOfWeek);
 
         if (isValidDate) {
           seatAvailability = [{
@@ -212,6 +206,14 @@ export async function GET(request: Request) {
             status: "scheduled" as TripStatus,
           }];
         }
+      } else if (trip.bus && trip.date && new Date(trip.date).toDateString() === requestedDate.toDateString()) {
+        // For one-time trips on the specific date
+        seatAvailability = [{
+          date: requestedDate,
+          availableSeats: trip.bus.capacity,
+          bookedSeats: [],
+          status: "scheduled" as TripStatus,
+        }];
       }
 
       // Create response object with seat availability
@@ -227,12 +229,9 @@ export async function GET(request: Request) {
       return response;
     });
 
-    // Filter trips based on ticket quantity
+    // Filter trips based on ticket quantity and valid availability
     const filteredTrips = tripsWithAvailability.filter(trip => {
-      // Get the availability for the requested date
       const availability = trip.seatAvailability[0];
-      
-      // Only include trips that have enough available seats
       return availability && availability.availableSeats >= ticketQuantity;
     });
 
