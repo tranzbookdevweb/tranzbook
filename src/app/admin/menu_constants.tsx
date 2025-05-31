@@ -76,6 +76,11 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                 path: '/admin/Admin',
                 icon: <BsPersonFillCheck size={20} />,
             },
+                  {
+                title: 'Bookings',
+                path: '/admin/bookings',
+                icon: <BsPersonFillCheck size={20} />,
+            },
             {
                 title: 'Trip Requests',
                 path: '/admin/TripRequests',
