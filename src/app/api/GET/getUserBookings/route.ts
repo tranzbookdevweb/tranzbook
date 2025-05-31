@@ -48,6 +48,15 @@ export async function GET() {
                 restRoom: true,
                 seatBelts: true,
                 onboardFood: true,
+                // Include bus company details
+                company: {
+                  select: {
+                    id: true,
+                    name: true,
+                    logo: true,
+                    email: true,
+                  },
+                },
               },
             },
             driver: {
@@ -130,6 +139,12 @@ export async function GET() {
           plateNumber: booking.trip.bus.plateNumber,
           capacity: booking.trip.bus.capacity,
           description: booking.trip.bus.busDescription,
+          company: {
+            id: booking.trip.bus.company.id,
+            name: booking.trip.bus.company.name,
+            logo: booking.trip.bus.company.logo,
+            email: booking.trip.bus.company.email,
+          },
           amenities: {
             airConditioning: booking.trip.bus.airConditioning,
             chargingOutlets: booking.trip.bus.chargingOutlets,
