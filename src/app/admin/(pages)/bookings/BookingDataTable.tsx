@@ -300,7 +300,7 @@ export function BookingDataTable() {
                     {row.original.trip.bus.company.name}
                   </div>
                   <div className="text-xs text-slate-500">
-                    {row.original.trip.bus.plateNumber || "Plate N/A"}
+                    {row.original.trip.bus.description || "Plate N/A"}
                   </div>
                 </div>
               </div>
