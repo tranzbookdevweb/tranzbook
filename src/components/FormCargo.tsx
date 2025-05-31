@@ -68,7 +68,6 @@ export default function EnhancedCargoForm() {
     senderEmail: '',
     senderAddress: '',
     senderCity: '',
-    senderIdNumber: '',
     
     // Receiver Details
     receiverName: '',
@@ -76,7 +75,6 @@ export default function EnhancedCargoForm() {
     receiverEmail: '',
     receiverAddress: '',
     receiverCity: '',
-    receiverIdNumber: ''
   });
 
   const steps = [
@@ -227,14 +225,12 @@ export default function EnhancedCargoForm() {
       senderEmail: '',
       senderAddress: '',
       senderCity: '',
-      senderIdNumber: '',
-      receiverName: '',
+        receiverName: '',
       receiverPhone: '',
       receiverEmail: '',
       receiverAddress: '',
       receiverCity: '',
-      receiverIdNumber: ''
-    });
+      });
     setCurrentStep(1);
     setErrors([]);
   };
@@ -404,20 +400,7 @@ export default function EnhancedCargoForm() {
                 </div>
               </div>
 
-              <div className="flex flex-col md:col-span-2">
-                <Label className="text-blue-600 dark:text-blue-400 font-semibold mb-2">
-                  ID Number (Optional)
-                </Label>
-                <div className="flex items-center border-2 border-orange-400 dark:border-orange-600 rounded p-2 bg-white dark:bg-gray-800">
-                  <CreditCard className="text-black dark:text-white text-xl mr-2" />
-                  <Input
-                    placeholder="National ID or Passport number"
-                    value={formData.senderIdNumber}
-                    onChange={(e) => updateFormData('senderIdNumber', e.target.value)}
-                    className="border-none outline-none bg-transparent text-black dark:text-white"
-                  />
-                </div>
-              </div>
+             
             </div>
 
             <div className="flex flex-col">
@@ -500,20 +483,7 @@ export default function EnhancedCargoForm() {
                 </div>
               </div>
 
-              <div className="flex flex-col md:col-span-2">
-                <Label className="text-blue-600 dark:text-blue-400 font-semibold mb-2">
-                  ID Number (Optional)
-                </Label>
-                <div className="flex items-center border-2 border-orange-400 dark:border-orange-600 rounded p-2 bg-white dark:bg-gray-800">
-                  <CreditCard className="text-black dark:text-white text-xl mr-2" />
-                  <Input
-                    placeholder="National ID or Passport number"
-                    value={formData.receiverIdNumber}
-                    onChange={(e) => updateFormData('receiverIdNumber', e.target.value)}
-                    className="border-none outline-none bg-transparent text-black dark:text-white"
-                  />
-                </div>
-              </div>
+              
             </div>
 
             <div className="flex flex-col">
@@ -677,7 +647,7 @@ export default function EnhancedCargoForm() {
 
         {/* Success Dialog */}
         <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <AlertDialogContent>
+          <AlertDialogContent className='bg-white'>
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-green-500" />

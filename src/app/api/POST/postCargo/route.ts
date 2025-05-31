@@ -1,12 +1,17 @@
+/**
+ * API Route Handler for submitting cargo booking or agro-prefinancing applications for TRANZBOOK INC.
+ * This endpoint processes form submissions, validates data, stores it in the database, and sends email notifications.
+ * 
+ * @module api/cargo-form
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import prisma from '@/app/lib/db';
-import nodemailer from 'nodemailer';
-
-// Import the CargoFormStatus enum from Prisma client
+import nodemailer, { Transporter } from 'nodemailer';
 import { CargoFormStatus } from '@prisma/client';
 
-// Types for better type safety
+// Interface for cargo form data to ensure type safety
 interface CargoFormData {
   // Shipping Details
   fromLocation: string;
@@ -32,130 +37,142 @@ interface CargoFormData {
   receiverCity: string;
   receiverIdNumber?: string;
   
-  // Additional options
+  // Additional Options
   agroPrefinancing?: boolean;
 }
 
-// Email configuration
-const createEmailTransporter = () => {
+/**
+ * Configures and returns a Nodemailer transporter for sending emails.
+ * @returns {Transporter} Configured Nodemailer transporter
+ */
+const createEmailTransporter = (): Transporter => {
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.GMAIL_USER, // Your Gmail address
-      pass: process.env.GMAIL_APP_PASSWORD, // Your Gmail App Password
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
     },
   });
 };
 
-// Email templates
+/**
+ * Generates an email template for notifying TRANZBOOK INC administrators of a new submission.
+ * @param cargoForm - The cargo form data
+ * @param reference - Unique reference number for the submission
+ * @returns {object} Email configuration object
+ */
 const createAdminNotificationEmail = (cargoForm: any, reference: string) => {
   const isAgroPrefinancing = cargoForm.agroPrefinancing;
-  
+
   return {
-    from: process.env.GMAIL_USER,
-    to: process.env.ADMIN_EMAIL || process.env.GMAIL_USER, // Admin email
-    subject: `New ${isAgroPrefinancing ? 'Agro-Prefinancing' : 'Cargo'} Request - ${reference}`,
+    from: `"TRANZBOOK INC" <${process.env.GMAIL_USER}>`,
+    to: process.env.ADMIN_EMAIL || process.env.GMAIL_USER,
+    subject: `New ${isAgroPrefinancing ? 'Agro-Prefinancing' : 'Cargo Booking'} Request - ${reference}`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">
-          New ${isAgroPrefinancing ? 'Agro-Prefinancing Application' : 'Cargo Booking Request'}
-        </h2>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="margin: 0; font-size: 24px;">TRANZBOOK INC</h1>
+          <h2 style="margin: 10px 0 0;">New ${isAgroPrefinancing ? 'Agro-Prefinancing Application' : 'Cargo Booking Request'}</h2>
+        </div>
         
-        <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="color: #1f2937; margin-top: 0;">Reference: ${reference}</h3>
+        <div style="background-color: #f8fafc; padding: 20px; border-radius: 0 0 8px 8px;">
+          <h3 style="color: #1f2937;">Reference: ${reference}</h3>
           <p><strong>Status:</strong> ${cargoForm.status}</p>
           <p><strong>Submitted:</strong> ${new Date(cargoForm.createdAt).toLocaleString()}</p>
-        </div>
 
-        <div style="margin: 20px 0;">
-          <h3 style="color: #1f2937;">📦 Shipping Details</h3>
-          <ul style="background-color: #f9fafb; padding: 15px; border-radius: 6px;">
-            <li><strong>From:</strong> ${cargoForm.fromLocation}</li>
-            <li><strong>To:</strong> ${cargoForm.toLocation}</li>
+          <h3 style="color: #1f2937; margin-top: 20px;">📦 Shipping Details</h3>
+          <ul style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
+            <li><strong>Origin:</strong> ${cargoForm.fromLocation}</li>
+            <li><strong>Destination:</strong> ${cargoForm.toLocation}</li>
             <li><strong>Product:</strong> ${cargoForm.productDescription}</li>
             <li><strong>Weight:</strong> ${cargoForm.cargoWeight || 'Not specified'} kg</li>
             ${cargoForm.date ? `<li><strong>Date:</strong> ${new Date(cargoForm.date).toLocaleDateString()}</li>` : ''}
             ${cargoForm.locationDescription ? `<li><strong>Location Notes:</strong> ${cargoForm.locationDescription}</li>` : ''}
           </ul>
-        </div>
 
-        <div style="margin: 20px 0;">
-          <h3 style="color: #1f2937;">👤 Sender Information</h3>
-          <ul style="background-color: #f9fafb; padding: 15px; border-radius: 6px;">
+          <h3 style="color: #1f2937; margin-top: 20px;">👤 Sender Information</h3>
+          <ul style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
             <li><strong>Name:</strong> ${cargoForm.senderName}</li>
             <li><strong>Phone:</strong> ${cargoForm.senderPhone}</li>
             ${cargoForm.senderEmail ? `<li><strong>Email:</strong> ${cargoForm.senderEmail}</li>` : ''}
             <li><strong>Address:</strong> ${cargoForm.senderAddress}, ${cargoForm.senderCity}</li>
           </ul>
-        </div>
 
-        <div style="margin: 20px 0;">
-          <h3 style="color: #1f2937;">📋 Receiver Information</h3>
-          <ul style="background-color: #f9fafb; padding: 15px; border-radius: 6px;">
+          <h3 style="color: #1f2937; margin-top: 20px;">📋 Receiver Information</h3>
+          <ul style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
             <li><strong>Name:</strong> ${cargoForm.receiverName}</li>
             <li><strong>Phone:</strong> ${cargoForm.receiverPhone}</li>
             ${cargoForm.receiverEmail ? `<li><strong>Email:</strong> ${cargoForm.receiverEmail}</li>` : ''}
             <li><strong>Address:</strong> ${cargoForm.receiverAddress}, ${cargoForm.receiverCity}</li>
           </ul>
-        </div>
 
-        <div style="margin: 20px 0;">
-          <h3 style="color: #1f2937;">👨‍💼 User Information</h3>
-          <ul style="background-color: #f9fafb; padding: 15px; border-radius: 6px;">
+          <h3 style="color: #1f2937; margin-top: 20px;">👨‍💼 User Information</h3>
+          <ul style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
             <li><strong>User ID:</strong> ${cargoForm.userId}</li>
             <li><strong>Name:</strong> ${cargoForm.user?.firstName} ${cargoForm.user?.lastName}</li>
             <li><strong>Email:</strong> ${cargoForm.user?.email}</li>
           </ul>
-        </div>
 
-        ${isAgroPrefinancing ? `
-          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-            <h4 style="color: #92400e; margin-top: 0;">⚠️ Agro-Prefinancing Application</h4>
-            <p style="color: #92400e; margin-bottom: 0;">This is an agro-prefinancing application that requires special attention and processing within 3-5 business days.</p>
+          ${isAgroPrefinancing ? `
+            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+              <h4 style="color: #92400e; margin-top: 0;">⚠️ Agro-Prefinancing Application</h4>
+              <p style="color: #92400e;">This submission requires expedited processing. Please review within 3-5 business days.</p>
+            </div>
+          ` : ''}
+
+          <div style="text-align: center; margin-top: 30px;">
+            <p style="color: #6b7280;">Please review and process this request promptly.</p>
+            <p style="color: #6b7280; font-size: 14px;">TRANZBOOK INC - Logistics & Financing Solutions</p>
           </div>
-        ` : ''}
-
-        <div style="text-align: center; margin: 30px 0;">
-          <p style="color: #6b7280;">Please review and process this request accordingly.</p>
         </div>
       </div>
     `,
   };
 };
 
+/**
+ * Generates an email template for confirming submission to the user.
+ * @param cargoForm - The cargo form data
+ * @param reference - Unique reference number for the submission
+ * @param userEmail - User's email address
+ * @returns {object} Email configuration object
+ */
 const createUserConfirmationEmail = (cargoForm: any, reference: string, userEmail: string) => {
   const isAgroPrefinancing = cargoForm.agroPrefinancing;
-  
+
   return {
-    from: process.env.GMAIL_USER,
+    from: `"TRANZBOOK INC" <${process.env.GMAIL_USER}>`,
     to: userEmail,
-    subject: `${isAgroPrefinancing ? 'Agro-Prefinancing Application' : 'Cargo Booking'} Confirmed - ${reference}`,
+    subject: `Your ${isAgroPrefinancing ? 'Agro-Prefinancing Application' : 'Cargo Booking'} Confirmation - ${reference}`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-          <h1 style="margin: 0; font-size: 24px;">
-            ${isAgroPrefinancing ? '🌾 Agro-Prefinancing Application Received' : '📦 Cargo Booking Confirmed'}
-          </h1>
+          <h1 style="margin: 0; font-size: 24px;">TRANZBOOK INC</h1>
+          <h2 style="margin: 10px 0 0;">
+            ${isAgroPrefinancing ? 'Agro-Prefinancing Application Received' : 'Cargo Booking Confirmed'}
+          </h2>
         </div>
         
         <div style="background-color: #f8fafc; padding: 20px; border-radius: 0 0 8px 8px;">
           <p style="font-size: 16px; color: #1f2937;">
-            Thank you for your ${isAgroPrefinancing ? 'agro-prefinancing application' : 'cargo booking request'}! 
-            We have received your submission and it's being processed.
+            Dear ${cargoForm.senderName},<br><br>
+            Thank you for choosing TRANZBOOK INC for your 
+            ${isAgroPrefinancing ? 'agro-prefinancing application' : 'cargo booking needs'}. 
+            Your submission has been successfully received and is under review.
           </p>
           
           <div style="background-color: #dbeafe; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
-            <h3 style="color: #1e40af; margin-top: 0;">📋 Your Reference Number</h3>
+            <h3 style="color: #1e40af; margin-top: 0;">Your Reference Number</h3>
             <p style="font-size: 18px; font-weight: bold; color: #1e40af; margin: 0;">${reference}</p>
           </div>
 
-          <h3 style="color: #1f2937;">📦 Booking Summary</h3>
+          <h3 style="color: #1f2937;">📦 Submission Summary</h3>
           <div style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
-            <p><strong>From:</strong> ${cargoForm.fromLocation}</p>
-            <p><strong>To:</strong> ${cargoForm.toLocation}</p>
+            <p><strong>Origin:</strong> ${cargoForm.fromLocation}</p>
+            <p><strong>Destination:</strong> ${cargoForm.toLocation}</p>
             <p><strong>Product:</strong> ${cargoForm.productDescription}</p>
             <p><strong>Status:</strong> <span style="color: #059669; font-weight: bold;">${cargoForm.status.toUpperCase()}</span></p>
-            <p><strong>Estimated Processing:</strong> ${isAgroPrefinancing ? '3-5 business days' : '24-48 hours'}</p>
+            <p><strong>Estimated Processing Time:</strong> ${isAgroPrefinancing ? '3-5 business days' : '24-48 hours'}</p>
           </div>
 
           <h3 style="color: #1f2937;">📞 Contact Information</h3>
@@ -166,27 +183,35 @@ const createUserConfirmationEmail = (cargoForm: any, reference: string, userEmai
 
           ${isAgroPrefinancing ? `
             <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
-              <h4 style="color: #92400e; margin-top: 0;">🌾 Agro-Prefinancing Information</h4>
-              <p style="color: #92400e;">Your agro-prefinancing application is under review. Our team will contact you within 3-5 business days with further details about financing options and requirements.</p>
+              <h4 style="color: #92400e; margin-top: 0;">🌾 Agro-Prefinancing Details</h4>
+              <p style="color: #92400e;">
+                Your application is being reviewed by our financing team. You will be contacted within 3-5 business days with further details regarding financing options and required documentation.
+              </p>
             </div>
           ` : ''}
 
           <div style="background-color: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 15px; margin: 20px 0;">
-            <h4 style="color: #0c4a6e; margin-top: 0;">📧 What's Next?</h4>
+            <h4 style="color: #0c4a6e; margin-top: 0;">📧 Next Steps</h4>
             <ul style="color: #0c4a6e; margin: 10px 0;">
-              <li>You'll receive email updates about your ${isAgroPrefinancing ? 'application' : 'booking'} status</li>
-              <li>Our team will contact you if additional information is needed</li>
-              <li>Keep your reference number handy for any inquiries</li>
-              ${isAgroPrefinancing ? '<li>Prepare necessary documents for the financing process</li>' : '<li>Prepare your cargo for pickup as scheduled</li>'}
+              <li>You will receive email updates on your ${isAgroPrefinancing ? 'application' : 'booking'} status.</li>
+              <li>Our team may contact you for additional information if needed.</li>
+              <li>Please keep your reference number for any inquiries.</li>
+              ${isAgroPrefinancing ? '<li>Prepare necessary documentation for the financing process.</li>' : '<li>Ensure your cargo is ready for pickup as scheduled.</li>'}
             </ul>
           </div>
 
-          <div style="text-align: center; margin: 30px 0;">
+          <div style="text-align: center; margin-top: 30px;">
             <p style="color: #6b7280;">
-              Need help? Contact us at <strong>${process.env.ADMIN_EMAIL || process.env.GMAIL_USER}</strong>
+              For assistance, please contact our support team at 
+              <a href="mailto:${process.env.ADMIN_EMAIL || process.env.GMAIL_USER}" style="color: #2563eb; text-decoration: none;">
+                ${process.env.ADMIN_EMAIL || process.env.GMAIL_USER}
+              </a>
             </p>
             <p style="color: #6b7280; font-size: 14px;">
               Reference: ${reference} | Submitted: ${new Date(cargoForm.createdAt).toLocaleString()}
+            </p>
+            <p style="color: #6b7280; font-size: 14px;">
+              TRANZBOOK INC - Logistics & Financing Solutions
             </p>
           </div>
         </div>
@@ -195,17 +220,20 @@ const createUserConfirmationEmail = (cargoForm: any, reference: string, userEmai
   };
 };
 
-// Send email notifications
-const sendEmailNotifications = async (cargoForm: any, reference: string) => {
+/**
+ * Sends email notifications to both the admin and the user.
+ * @param cargoForm - The cargo form data
+ * @param reference - Unique reference number
+ * @returns {Promise<Array>} Array of notification results
+ */
+const sendEmailNotifications = async (cargoForm: any, reference: string): Promise<Array<{ type: string; success: boolean; messageId?: string; error?: string }>> => {
   const transporter = createEmailTransporter();
-  const notifications = [];
+  const notifications: Array<{ type: string; success: boolean; messageId?: string; error?: string }> = [];
 
   try {
-    // Send admin notification
     const adminEmail = createAdminNotificationEmail(cargoForm, reference);
     const adminResult = await transporter.sendMail(adminEmail);
     notifications.push({ type: 'admin', success: true, messageId: adminResult.messageId });
-    
     console.log('Admin notification sent:', adminResult.messageId);
   } catch (error) {
     console.error('Failed to send admin notification:', error);
@@ -213,16 +241,14 @@ const sendEmailNotifications = async (cargoForm: any, reference: string) => {
   }
 
   try {
-    // Send user confirmation email
     const userEmail = cargoForm.user?.email;
     if (userEmail) {
       const confirmationEmail = createUserConfirmationEmail(cargoForm, reference, userEmail);
       const userResult = await transporter.sendMail(confirmationEmail);
       notifications.push({ type: 'user', success: true, messageId: userResult.messageId });
-      
       console.log('User confirmation sent:', userResult.messageId);
     } else {
-      notifications.push({ type: 'user', success: false, error: 'User email not available' });
+      notifications.push({ type: 'user', success: false, error: 'User email not provided' });
     }
   } catch (error) {
     console.error('Failed to send user confirmation:', error);
@@ -232,165 +258,127 @@ const sendEmailNotifications = async (cargoForm: any, reference: string) => {
   return notifications;
 };
 
-// Validation helper functions
+/**
+ * Validates an email address.
+ * @param email - Email address to validate
+ * @returns {boolean} True if valid or empty (optional field)
+ */
 const validateEmail = (email: string): boolean => {
   if (!email) return true; // Email is optional
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
+/**
+ * Validates a phone number.
+ * @param phone - Phone number to validate
+ * @returns {boolean} True if valid
+ */
 const validatePhone = (phone: string): boolean => {
   if (!phone) return false; // Phone is required
   const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
   return phoneRegex.test(phone);
 };
 
+/**
+ * Sanitizes input strings by trimming and normalizing spaces.
+ * @param str - String to sanitize
+ * @returns {string} Sanitized string
+ */
 const sanitizeString = (str: string): string => {
   return str.trim().replace(/\s+/g, ' ');
 };
 
+/**
+ * Validates required fields in the cargo form data.
+ * @param data - Cargo form data to validate
+ * @returns {string[]} Array of validation error messages
+ */
 const validateRequiredFields = (data: CargoFormData): string[] => {
   const errors: string[] = [];
-  
-  // Shipping details validation
-  if (!data.fromLocation?.trim()) {
-    errors.push("Origin location is required");
-  }
-  if (!data.toLocation?.trim()) {
-    errors.push("Destination location is required");
-  }
-  if (!data.productDescription?.trim()) {
-    errors.push("Product description is required");
-  }
-  if (data.fromLocation?.trim() === data.toLocation?.trim()) {
-    errors.push("Origin and destination must be different");
-  }
-  
-  // Sender details validation
-  if (!data.senderName?.trim()) {
-    errors.push("Sender name is required");
-  }
-  if (!data.senderPhone?.trim()) {
-    errors.push("Sender phone number is required");
-  } else if (!validatePhone(data.senderPhone)) {
-    errors.push("Please enter a valid sender phone number");
-  }
-  if (!data.senderAddress?.trim()) {
-    errors.push("Sender address is required");
-  }
-  if (!data.senderCity?.trim()) {
-    errors.push("Sender city is required");
-  }
-  if (data.senderEmail && !validateEmail(data.senderEmail)) {
-    errors.push("Please enter a valid sender email address");
-  }
-  
-  // Receiver details validation
-  if (!data.receiverName?.trim()) {
-    errors.push("Receiver name is required");
-  }
-  if (!data.receiverPhone?.trim()) {
-    errors.push("Receiver phone number is required");
-  } else if (!validatePhone(data.receiverPhone)) {
-    errors.push("Please enter a valid receiver phone number");
-  }
-  if (!data.receiverAddress?.trim()) {
-    errors.push("Receiver address is required");
-  }
-  if (!data.receiverCity?.trim()) {
-    errors.push("Receiver city is required");
-  }
-  if (data.receiverEmail && !validateEmail(data.receiverEmail)) {
-    errors.push("Please enter a valid receiver email address");
-  }
-  
+
+  // Shipping Details Validation
+  if (!data.fromLocation?.trim()) errors.push('Origin location is required');
+  if (!data.toLocation?.trim()) errors.push('Destination location is required');
+  if (!data.productDescription?.trim()) errors.push('Product description is required');
+  if (data.fromLocation?.trim() === data.toLocation?.trim()) errors.push('Origin and destination must be different');
+
+  // Sender Details Validation
+  if (!data.senderName?.trim()) errors.push('Sender name is required');
+  if (!data.senderPhone?.trim()) errors.push('Sender phone number is required');
+  else if (!validatePhone(data.senderPhone)) errors.push('Invalid sender phone number format');
+  if (!data.senderAddress?.trim()) errors.push('Sender address is required');
+  if (!data.senderCity?.trim()) errors.push('Sender city is required');
+  if (data.senderEmail && !validateEmail(data.senderEmail)) errors.push('Invalid sender email address');
+
+  // Receiver Details Validation
+  if (!data.receiverName?.trim()) errors.push('Receiver name is required');
+  if (!data.receiverPhone?.trim()) errors.push('Receiver phone number is required');
+  else if (!validatePhone(data.receiverPhone)) errors.push('Invalid receiver phone number format');
+  if (!data.receiverAddress?.trim()) errors.push('Receiver address is required');
+  if (!data.receiverCity?.trim()) errors.push('Receiver city is required');
+  if (data.receiverEmail && !validateEmail(data.receiverEmail)) errors.push('Invalid receiver email address');
+
   return errors;
 };
 
-export async function POST(req: NextRequest) {
+/**
+ * POST handler for submitting cargo booking or agro-prefinancing applications.
+ * @param req - Next.js request object
+ * @returns {Promise<NextResponse>} Response with submission details or error
+ */
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // Get authenticated user
+    // Authenticate user
     const { getUser } = getKindeServerSession();
     const user = await getUser();
 
-    // Check if user is authenticated
     if (!user) {
       return NextResponse.json(
-        { error: 'Authentication required' }, 
+        { error: 'Authentication required. Please log in to submit a request.' },
         { status: 401 }
       );
     }
 
-    // Parse request body
+    // Parse and validate request body
     const body: CargoFormData = await req.json();
-
-    // Validate required fields
     const validationErrors = validateRequiredFields(body);
     if (validationErrors.length > 0) {
       return NextResponse.json(
-        { 
-          error: 'Validation failed', 
-          details: validationErrors
-        }, 
+        { error: 'Validation failed', details: validationErrors },
         { status: 400 }
       );
     }
 
-    // Sanitize and prepare data for database
+    // Prepare sanitized data for database
     const cargoData = {
-      // Shipping Details
       fromLocation: sanitizeString(body.fromLocation),
       toLocation: sanitizeString(body.toLocation),
       date: body.date ? new Date(body.date) : null,
       cargoWeight: body.cargoWeight ? parseFloat(body.cargoWeight) : 0,
       productDescription: sanitizeString(body.productDescription),
       locationDescription: body.locationDescription ? sanitizeString(body.locationDescription) : null,
-      
-      // Sender Details
       senderName: sanitizeString(body.senderName),
       senderPhone: sanitizeString(body.senderPhone),
       senderEmail: body.senderEmail ? sanitizeString(body.senderEmail) : null,
       senderAddress: sanitizeString(body.senderAddress),
       senderCity: sanitizeString(body.senderCity),
-      
-      // Receiver Details
       receiverName: sanitizeString(body.receiverName),
       receiverPhone: sanitizeString(body.receiverPhone),
       receiverEmail: body.receiverEmail ? sanitizeString(body.receiverEmail) : null,
       receiverAddress: sanitizeString(body.receiverAddress),
       receiverCity: sanitizeString(body.receiverCity),
-      
-      // User and system fields
       userId: user.id,
       agroPrefinancing: body.agroPrefinancing || false,
-      // Use the proper enum values instead of strings
-      status: body.agroPrefinancing ? CargoFormStatus.processing : CargoFormStatus.pending
+      status: body.agroPrefinancing ? CargoFormStatus.processing : CargoFormStatus.pending,
     };
 
-    // Additional business logic validation
+    // Validate cargo weight
     if (cargoData.cargoWeight < 0) {
       return NextResponse.json(
         { error: 'Cargo weight cannot be negative' },
         { status: 400 }
       );
-    }
-
-    // Check if user exists in our database, create if not
-    const existingUser = await prisma.user.findUnique({
-      where: { id: user.id }
-    });
-
-    if (!existingUser) {
-      // Create user record if it doesn't exist
-      await prisma.user.create({
-        data: {
-          id: user.id,
-          email: user.email || '',
-          firstName: user.given_name || '',
-          lastName: user.family_name || '',
-          profileImage: user.picture || null,
-        }
-      });
     }
 
     // Create cargo form in database
@@ -402,20 +390,20 @@ export async function POST(req: NextRequest) {
             id: true,
             email: true,
             firstName: true,
-            lastName: true
-          }
-        }
-      }
+            lastName: true,
+          },
+        },
+      },
     });
 
-    // Generate a unique reference number for tracking
+    // Generate unique reference number
     const reference = `CRG-${cargoForm.id.slice(-8).toUpperCase()}-${new Date().getFullYear()}`;
 
     // Send email notifications
     const emailNotifications = await sendEmailNotifications(cargoForm, reference);
 
-    // Log the submission for tracking and analytics
-    console.log("Cargo Form Submitted:", {
+    // Log submission details
+    console.log('Cargo Form Submitted:', {
       cargoFormId: cargoForm.id,
       reference,
       userId: user.id,
@@ -424,13 +412,13 @@ export async function POST(req: NextRequest) {
       toLocation: cargoData.toLocation,
       agroPrefinancing: cargoData.agroPrefinancing,
       submittedAt: new Date().toISOString(),
-      emailNotifications
+      emailNotifications,
     });
 
-    // Prepare response data
+    // Prepare response
     const responseData = {
-      message: cargoData.agroPrefinancing 
-        ? 'Agro-prefinancing application submitted successfully' 
+      message: cargoData.agroPrefinancing
+        ? 'Agro-prefinancing application submitted successfully'
         : 'Cargo booking submitted successfully',
       reference,
       cargoForm: {
@@ -442,47 +430,42 @@ export async function POST(req: NextRequest) {
         toLocation: cargoForm.toLocation,
         productDescription: cargoForm.productDescription,
         createdAt: cargoForm.createdAt,
-        estimatedProcessingTime: cargoData.agroPrefinancing ? '3-5 business days' : '24-48 hours'
+        estimatedProcessingTime: cargoData.agroPrefinancing ? '3-5 business days' : '24-48 hours',
       },
       notifications: {
         email: emailNotifications,
-        message: 'Email notifications have been sent'
-      }
+        message: 'Email notifications have been dispatched',
+      },
     };
 
     return NextResponse.json(responseData, { status: 201 });
 
   } catch (error) {
-    // Log the full error for debugging
+    // Log error details for debugging
     console.error('Cargo Form Submission Error:', {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString(),
-      userId: (await getKindeServerSession().getUser())?.id
+      userId: (await getKindeServerSession().getUser())?.id,
     });
 
     // Handle specific Prisma errors
     if (error instanceof Error) {
-      // Database constraint violations
       if (error.message.includes('Unique constraint')) {
         return NextResponse.json(
-          { error: 'A similar request already exists' },
+          { error: 'A similar request already exists. Please review your submission.' },
           { status: 409 }
         );
       }
-      
-      // Foreign key constraint violations
       if (error.message.includes('Foreign key constraint')) {
         return NextResponse.json(
-          { error: 'Invalid user reference' },
+          { error: 'Invalid user reference. Please contact support.' },
           { status: 400 }
         );
       }
-      
-      // Database connection errors
       if (error.message.includes('database') || error.message.includes('connection')) {
         return NextResponse.json(
-          { error: 'Database temporarily unavailable. Please try again.' },
+          { error: 'Database temporarily unavailable. Please try again later.' },
           { status: 503 }
         );
       }
@@ -490,10 +473,10 @@ export async function POST(req: NextRequest) {
 
     // Generic error response
     return NextResponse.json(
-      { 
-        error: 'Failed to submit cargo form. Please try again.',
-        code: 'SUBMISSION_FAILED'
-      }, 
+      {
+        error: 'An error occurred while processing your request. Please try again or contact TRANZBOOK INC support.',
+        code: 'SUBMISSION_FAILED',
+      },
       { status: 500 }
     );
   }
