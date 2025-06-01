@@ -159,6 +159,20 @@ function BusSheet({ onAddSuccess }: Props) {
             <SheetDescription>Click save when you are done.</SheetDescription>
           </SheetHeader>
           <form onSubmit={handleSubmit}>
+               <div className="space-x-4">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={onArrival}
+                    onChange={() => setOnArrival((prev) => !prev)}
+                    className="mr-2"
+                  />
+                  <Label htmlFor="onArrival" className="text-left">
+                    On Arrival (Set as available)
+                  </Label>
+                </div>
+              </div>
+
             <div className="grid gap-4 py-4">
             {!onArrival && (
                 <>
@@ -226,20 +240,7 @@ function BusSheet({ onAddSuccess }: Props) {
               </div>
 
 
-              <div className="space-x-4">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={onArrival}
-                    onChange={() => setOnArrival((prev) => !prev)}
-                    className="mr-2"
-                  />
-                  <Label htmlFor="onArrival" className="text-left">
-                    On Arrival (Set as available)
-                  </Label>
-                </div>
-              </div>
-
+           
               <div className="grid grid-cols-1 items-center gap-4">
                 <Label className="text-left">Bus Features</Label>
                 <div className="space-x-4">

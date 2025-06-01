@@ -135,7 +135,7 @@ export function BookingDataTable() {
     getBookings();
   }, [getBookings]);
 
-  const columns: ColumnDef<BookingData>[] = [
+ const columns: ColumnDef<BookingData>[] = [
     {
       accessorKey: "Sno",
       header: "Sr No",
@@ -254,23 +254,79 @@ export function BookingDataTable() {
     },
     {
       accessorKey: "passengers",
-      header: "Passengers",
+      header: "Passenger Information",
       cell: ({ row }) => (
-        <div className="min-w-[200px] max-w-[250px]">
-          <div className="space-y-1">
-            {row.original.passengers.slice(0, 2).map((passenger, index) => (
-              <div key={passenger.id} className="flex items-center justify-between text-sm">
-                <span className="font-medium text-slate-900">{passenger.name}</span>
-                <span className="text-slate-500 text-xs bg-slate-100 px-2 py-0.5 rounded">
-                  {passenger.age}y
-                </span>
+        <div className="min-w-[350px] max-w-[450px] space-y-3">
+          {row.original.passengers.map((passenger, index) => (
+            <div 
+              key={passenger.id} 
+              className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg p-3 border border-slate-200 hover:shadow-sm transition-shadow"
+            >
+              {/* Passenger Header */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                    {passenger.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-900 text-sm">{passenger.name}</div>
+                    <div className="text-xs text-slate-500">Passenger #{index + 1}</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                    Age: {passenger.age}
+                  </span>
+                </div>
               </div>
-            ))}
-            {row.original.passengers.length > 2 && (
-              <div className="text-xs text-slate-500 font-medium">
-                +{row.original.passengers.length - 2} more
+              
+              {/* Contact Information */}
+              <div className="grid grid-cols-1 gap-2 text-xs">
+                <div className="flex items-center space-x-2">
+                  <svg className="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <span className="text-slate-600 font-medium">Contact:</span>
+                  <span className="font-mono text-slate-800">{passenger.phoneNumber}</span>
+                </div>
+                
+                {/* Emergency Contact Section */}
+                <div className="mt-2 pt-2 border-t border-slate-200">
+                  <div className="flex items-center space-x-1 mb-1">
+                    <svg className="w-3 h-3 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span className="text-slate-500 font-medium text-xs">Emergency Contact</span>
+                  </div>
+                  <div className="ml-4 space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span className="text-slate-600">{passenger.kinName}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-3 h-3 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <span className="font-mono text-slate-700">{passenger.kinContact}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+          ))}
+          
+          {/* Summary Footer */}
+          <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-center space-x-2 text-blue-700">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <span className="text-sm font-semibold">
+                Total Passengers: {row.original.passengers.length}
+              </span>
+            </div>
           </div>
         </div>
       ),
@@ -417,6 +473,7 @@ export function BookingDataTable() {
       },
     },
   ];
+
 
   const table = useReactTable({
     data,

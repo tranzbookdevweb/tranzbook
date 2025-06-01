@@ -48,11 +48,16 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                 ],
             },
             {
-                title: 'Service Locations',
+                title: 'Routes',
                 path: '/admin/serviceLocations',
                 icon: <LocateFixed size={20} />,
             },
-            {
+            
+                  {
+                title: 'Trips',
+                path: '/admin/Trips',
+                icon: <Bus size={20} />,
+            },{
                 title: 'Manage Drivers',
                 path: '/admin/manageDrivers',
                 icon: <BsPeople size={20} />,
@@ -61,11 +66,7 @@ export const   SIDENAV_ITEMS: SideNavItemGroup[] = [
                     {title: ' Drivers', path: '/admin/manageDrivers/ApprovedDrivers' },
                     ],
             },
-            {
-                title: 'Trips',
-                path: '/admin/Trips',
-                icon: <Bus size={20} />,
-            },
+      
             {
                 title: 'Roles',
                 path: '/admin/Roles',
