@@ -40,7 +40,7 @@ function BusSheet({ onAddSuccess }: Props) {
   const [plateNumber, setPlateNumber] = useState('');
   const [capacity, setCapacity] = useState(0);
   const [busDescription, setBusDescription] = useState('');
-  const [image, setImage] = useState<File | null>(null);
+  // const [image, setImage] = useState<File | null>(null);
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [busCompanies, setBusCompanies] = useState<BusCompany[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -210,7 +210,7 @@ function BusSheet({ onAddSuccess }: Props) {
                 />
               </div>
           
-              <div className="grid grid-cols-1 items-center gap-4">
+              {/* <div className="grid grid-cols-1 items-center gap-4">
                 <Label htmlFor="image" className="text-left">
                   Image
                 </Label>
@@ -220,7 +220,7 @@ function BusSheet({ onAddSuccess }: Props) {
                   onChange={(e) => setImage(e.target.files?.[0] ?? null)}
                   className="col-span-3"
                 />
-              </div>
+              </div> */}
               <div className="grid grid-cols-1 items-center gap-4">
                 <Label htmlFor="company" className="text-left">
                   Company

@@ -32,7 +32,6 @@ export async function GET() {
           _count: 'desc'
         }
       },
-      take: 50, // Fetch more to have enough unique options
     });
 
     // Process the routes to get trip counts
@@ -73,7 +72,7 @@ export async function GET() {
       usedEndCityIds.add(route.endCityId);
 
       // Stop once we have enough routes
-      if (selectedRoutes.length >= 6) {
+      if (selectedRoutes.length >= 27) {
         break;
       }
     }
