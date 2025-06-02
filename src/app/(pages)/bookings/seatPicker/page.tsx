@@ -54,10 +54,11 @@ interface SeatAvailability {
 }
 interface PassengerDetail {
   name: string;
-  age: string;
   phoneNumber: string;
+  email?: string;
   kinName: string;
   kinContact: string;
+  kinEmail?: string;
 }
 interface Trip {
   id: string;
@@ -155,23 +156,23 @@ const PageContainer: React.FC = () => {
     setTicketLimitReached(selectedSeats.length >= ticketQuantity);
   }, [selectedSeats, ticketQuantity]);
 
-  // Initialize passenger details when ticket quantity changes
-  useEffect(() => {
-    // Create an array of empty passenger details based on ticket quantity
-    if (ticketQuantity > 0 && selectedSeats.length > 0) {
+useEffect(() => {
+    // Create an array of empty passenger details based on selected seats
+    if (selectedSeats.length > 0) {
       const newPassengerDetails = Array(selectedSeats.length).fill({
         name: "",
-        age: "",
         phoneNumber: "",
+        email: "",
         kinName: "",
-        kinContact: ""
+        kinContact: "",
+        kinEmail: "",
       });
-      setPassengerDetails(newPassengerDetails);
+      setPassengerDetails(newPassengerDetails as PassengerDetail[]);
       setPassengerDetailsFilled(false);
     } else {
       setPassengerDetails([]);
     }
-  }, [ticketQuantity, selectedSeats.length]);
+  }, [selectedSeats.length]);
 
   if (!tripData) {
     return (

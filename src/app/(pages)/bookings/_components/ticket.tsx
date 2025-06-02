@@ -8,10 +8,11 @@ import Image from "next/image";
 // Interfaces
 interface PassengerDetail {
   name: string;
-  age: string;
   phoneNumber: string;
+  email?: string;
   kinName: string;
   kinContact: string;
+  kinEmail?: string;
 }
 
 interface TicketProps {
@@ -33,7 +34,7 @@ interface TicketProps {
   passengerDetails: PassengerDetail[];
 }
 
-const SimplifiedTicket: React.FC<TicketProps> = ({
+const Ticket: React.FC<TicketProps> = ({
   ticketId,
   busCompany,
   busDescription,
@@ -101,22 +102,28 @@ const SimplifiedTicket: React.FC<TicketProps> = ({
 
         {/* Passenger Details */}
         <div className="px-8 py-6 border-b border-gray-200">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Passenger(s) & Seat(s)</p>
-          <div>
-            <div className="space-y-3 rounded-md p-4 shadow-sm">
-  {passengerDetails.map((passenger, index) => (
-    <div
-      key={index}
-      className="flex items-center justify-between pb-2 last:border-b-0 last:pb-0"
-    >
-      <span className="text-sm font-medium text-gray-900">
-        {passenger.name}
-      </span>
-      <span className="text-sm text-gray-600">Seat {selectedSeats[index]}</span>
-    </div>
-  ))}
-</div>
-
+          <p className="text-xs text-gray-500 uppercase tracking-wide mb-4">Passenger(s) & Seat(s)</p>
+          <div className="space-y-4 rounded-md p-4 bg-gray-50 shadow-sm">
+            {passengerDetails.map((passenger, index) => (
+              <div
+                key={index}
+                className="pb-4 last:border-b-0 last:pb-0"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-900">
+                    {passenger.name} (Seat {selectedSeats[index]})
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 space-y-1">
+                  <p><strong>Phone:</strong> {passenger.phoneNumber}</p>
+                  {passenger.email && <p><strong>Email:</strong> {passenger.email}</p>}
+                  <p>
+                    <strong>Emergency Contact:</strong> {passenger.kinName} - {passenger.kinContact}
+                    {passenger.kinEmail && ` (${passenger.kinEmail})`}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -148,7 +155,7 @@ const SimplifiedTicket: React.FC<TicketProps> = ({
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 shadow-sm">
               <QRCode
                 size={100}
-                value={`TICKET:${reference}|ROUTE:${routeString}|SEATS:${selectedSeats.join(",")}| swallowingDATE:${dateString}`}
+                value={`TICKET:${reference}|ROUTE:${routeString}|SEATS:${selectedSeats.join(",")}|DATE:${dateString}`}
                 viewBox="0 0 100 100"
                 className="bg-white p-2 rounded"
               />
@@ -183,4 +190,4 @@ const SimplifiedTicket: React.FC<TicketProps> = ({
   );
 };
 
-export default SimplifiedTicket;
+export default Ticket;
