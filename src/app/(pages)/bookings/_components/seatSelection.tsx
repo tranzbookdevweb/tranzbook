@@ -52,6 +52,14 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
         hasBackRow: true,
         backRowSeats: 3 // 3 seats in the back row for Executive bus
       };
+    }
+     else if (busDescription === "Standard") {
+      return { 
+        leftSeats: 2, 
+        rightSeats: 1,
+        hasBackRow: true,
+        backRowSeats: 5 // 3 seats in the back row for Executive bus
+      };
     } else {
       return { 
         leftSeats: 1, 
