@@ -10,7 +10,7 @@ datasource db {
 
 model User {
   id                 String            @id @default(uuid())
-  email              String            @unique
+  email              String?            @unique
   firstName          String
   lastName           String
   profileImage       String?
@@ -158,10 +158,11 @@ model Trip {
 model PassengerDetail {
   id             String   @id @default(uuid())
   name           String
-  age            String
   phoneNumber    String
+  email          String?
   kinName        String
   kinContact     String
+  kinEmail        String?
   booking        Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   bookingId      String
   tripOccurrence TripOccurrence @relation(fields: [tripOccurrenceId], references: [id])

@@ -557,58 +557,59 @@ export async function POST(req: NextRequest) {
     const totalAmount = trip.price * requestedSeats.length;
 
     // Create the booking with passenger details and include user relationship
-    const booking = await prisma.booking.create({
-      data: {
-        reference,
-        tripId,
-        seatNumber: requestedSeats,
-        status: "confirmed",
-        date: bookedDate,
-        userId: user.id,
-        totalAmount,
-        passengerDetails: {
-          create: Array.isArray(passengerDetails) ? 
-            passengerDetails.map(passenger => ({
-              name: passenger.name,
-              age: String(passenger.age),
-              phoneNumber: passenger.phoneNumber,
-              kinName: passenger.kinName,
-              kinContact: passenger.kinContact,
-              tripOccurrenceId: tripOccurrence.id
-            })) : 
-            [{
-              name: passengerDetails.name,
-              age: String(passengerDetails.age),
-              phoneNumber: passengerDetails.phoneNumber,
-              kinName: passengerDetails.kinName,
-              kinContact: passengerDetails.kinContact,
-              tripOccurrenceId: tripOccurrence.id
-            }]
-        }
+  const booking = await prisma.booking.create({
+  data: {
+    reference,
+    tripId,
+    seatNumber: requestedSeats,
+    status: "confirmed",
+    date: bookedDate,
+    userId: user.id,
+    totalAmount,
+    passengerDetails: {
+      create: Array.isArray(passengerDetails) ? 
+        passengerDetails.map(passenger => ({
+          name: passenger.name,
+          phoneNumber: passenger.phoneNumber,
+          email: passenger.email, // New field
+          kinName: passenger.kinName,
+          kinContact: passenger.kinContact,
+          kinEmail: passenger.kinEmail, // New field
+          tripOccurrenceId: tripOccurrence.id
+        })) : 
+        [{
+          name: passengerDetails.name,
+          phoneNumber: passengerDetails.phoneNumber,
+          email: passengerDetails.email, // New field
+          kinName: passengerDetails.kinName,
+          kinContact: passengerDetails.kinContact,
+          kinEmail: passengerDetails.kinEmail, // New field
+          tripOccurrenceId: tripOccurrence.id
+        }]
+    }
+  },
+  include: {
+    user: {
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
       },
+    },
+    passengerDetails: true,
+    trip: {
       include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-        passengerDetails: true,
-        trip: {
+        route: {
           include: {
-            route: {
-              include: {
-                startCity: true,
-                endCity: true
-              }
-            }
+            startCity: true,
+            endCity: true
           }
         }
       }
-    });
-
+    }
+  }
+});
     // Send email notifications with PDF attachment
     const emailNotifications = await sendEmailNotifications(booking, reference, {
       bus: trip.bus,

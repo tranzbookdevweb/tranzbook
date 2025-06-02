@@ -23,13 +23,13 @@ const PaymentButton = dynamic(
 
 interface PassengerDetail {
   name: string;
-  age: string;
   phoneNumber: string;
+  email?: string;
   kinName: string;
   kinContact: string;
+  kinEmail?: string;
 }
 
-// Update the BusDetailsProps interface to include the new passenger details props
 interface BusDetailsProps {
   busCompanyLogo: string | undefined;
   busImage: string | undefined;
@@ -80,7 +80,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
   distance,
   handleBooking,
   isBooked,
-    passengerDetails,
+  passengerDetails,
   setPassengerDetails,
   passengerDetailsFilled,
   setPassengerDetailsFilled,
@@ -129,7 +129,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
             <PiLineVerticalLight />
             <RiMapPin2Fill />
           </div>
-          <div className='text-sm mx-2 font-semibold text-blue-600 flex flex-col justify-between min-h-full space-y-5'>
+          <div className='text-sm mx-2 font-semibold text-blue-600 flex flex-col justify-between min-h-[4em] space-y-5'>
             <p>{busRoute.origin}</p>
             <p>{busRoute.destination}</p>
           </div>
@@ -144,7 +144,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
 
         <div className='flex items-center'>
           <FiCalendar className='text-blue-600 mr-2' />
-          <p className='text-sm font-semibold text-gray-700'>{`${currentDate.toDateString()}`}</p>
+          <p className='text-sm font-semibold text-gray-600'>{`${currentDate.toDateString()}`}</p>
         </div>
 
         <div>
@@ -210,8 +210,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
       {/* Passenger Details Form - Only show when seats are selected and not yet booked */}
       {selectedSeats.length > 0 && !isBooked && (
         <div className="w-full mb-4 mt-4">
-                 <PassengerDetails
-            ticketQuantity={selectedSeats.length}
+          <PassengerDetails
             selectedSeats={selectedSeats}
             setPassengerDetailsFilled={setPassengerDetailsFilled}
             passengerDetails={passengerDetails}
@@ -229,7 +228,7 @@ const BusDetails: React.FC<BusDetailsProps> = ({
             ? "bg-[#fc9a1a] hover:bg-[#F79009] hover:scale-105"
             : "bg-[#ffcd5993]"
         } transition-transform transform`}
-        disabled={selectedSeats.length === 0 || isBooked}
+        disabled={selectedSeats.length === 0 || isBooked || !passengerDetailsFilled}
         passengerDetailsFilled={passengerDetailsFilled}
       />
 
