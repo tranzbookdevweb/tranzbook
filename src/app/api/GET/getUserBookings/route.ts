@@ -82,20 +82,21 @@ export async function GET() {
           select: {
             id: true,
             name: true,
-            age: true,
             phoneNumber: true,
+            email: true,
             kinName: true,
             kinContact: true,
+            kinEmail: true,
           },
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     // Transform the data to make it more readable
-    const formattedBookings = bookings.map(booking => ({
+    const formattedBookings = bookings.map((booking) => ({
       bookingId: booking.id,
       reference: booking.reference,
       bookingDate: booking.date,
@@ -135,31 +136,35 @@ export async function GET() {
         },
         
         // Bus information
-        bus: booking.trip.bus ? {
-          plateNumber: booking.trip.bus.plateNumber,
-          capacity: booking.trip.bus.capacity,
-          description: booking.trip.bus.busDescription,
-          company: {
-            id: booking.trip.bus.company.id,
-            name: booking.trip.bus.company.name,
-            logo: booking.trip.bus.company.logo,
-            email: booking.trip.bus.company.email,
-          },
-          amenities: {
-            airConditioning: booking.trip.bus.airConditioning,
-            chargingOutlets: booking.trip.bus.chargingOutlets,
-            wifi: booking.trip.bus.wifi,
-            restRoom: booking.trip.bus.restRoom,
-            seatBelts: booking.trip.bus.seatBelts,
-            onboardFood: booking.trip.bus.onboardFood,
-          },
-        } : null,
+        bus: booking.trip.bus
+          ? {
+              plateNumber: booking.trip.bus.plateNumber,
+              capacity: booking.trip.bus.capacity,
+              description: booking.trip.bus.busDescription,
+              company: {
+                id: booking.trip.bus.company.id,
+                name: booking.trip.bus.company.name,
+                logo: booking.trip.bus.company.logo,
+                email: booking.trip.bus.company.email,
+              },
+              amenities: {
+                airConditioning: booking.trip.bus.airConditioning,
+                chargingOutlets: booking.trip.bus.chargingOutlets,
+                wifi: booking.trip.bus.wifi,
+                restRoom: booking.trip.bus.restRoom,
+                seatBelts: booking.trip.bus.seatBelts,
+                onboardFood: booking.trip.bus.onboardFood,
+              },
+            }
+          : null,
         
         // Driver information
-        driver: booking.trip.driver ? {
-          name: `${booking.trip.driver.firstName} ${booking.trip.driver.lastName}`,
-          mobile: booking.trip.driver.mobile,
-        } : null,
+        driver: booking.trip.driver
+          ? {
+              name: `${booking.trip.driver.firstName} ${booking.trip.driver.lastName}`,
+              mobile: booking.trip.driver.mobile,
+            }
+          : null,
         
         // Trip occurrences
         occurrences: booking.trip.tripOccurrences,
@@ -173,19 +178,21 @@ export async function GET() {
       updatedAt: booking.updatedAt,
     }));
 
-    return NextResponse.json({
-      success: true,
-      count: formattedBookings.length,
-      data: formattedBookings,
-    }, { status: 200 });
-
-  } catch (error) {
-    console.error('Error fetching bookings:', error);
     return NextResponse.json(
-      { 
+      {
+        success: true,
+        count: formattedBookings.length,
+        data: formattedBookings,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    return NextResponse.json(
+      {
         success: false,
-        error: 'Failed to fetch bookings',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        error: "Failed to fetch bookings",
+        message: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
