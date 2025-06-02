@@ -118,7 +118,7 @@ export function PopularPlace() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[300px] bg-gray-50">
+      <div className="flex justify-center items-center min-h-[300px] bg-white">
         <div className="animate-pulse text-gray-600">Loading popular destinations...</div>
       </div>
     );
