@@ -225,70 +225,77 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl bg-white border-0 shadow-xl p-0 w-11/12 sm:w-4/5 md:w-3/4 lg:w-2/3 max-h-[90vh] overflow-hidden">
-          <DialogHeader className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-            <DialogTitle className="text-2xl font-bold flex items-center">
-              <Users className="mr-3 h-6 w-6" />
-              Passenger Information
-            </DialogTitle>
-            <DialogDescription className="text-blue-100 mt-2">
-              Complete details for all {selectedSeats.length} passengers
-            </DialogDescription>
-            <div className="mt-4">
-              <div className="flex justify-between text-sm text-blue-100 mb-2">
-                <span>Progress</span>
-                <span>{getCompletionCount()}/{selectedSeats.length}</span>
+        <DialogContent className="w-[95vw] max-w-2xl max-h-[85vh] bg-white border-0 shadow-xl p-0 flex flex-col">
+          {/* Sticky Header */}
+          <div className="sticky top-0 z-10 bg-white">
+            <DialogHeader className="p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+              <DialogTitle className="text-xl sm:text-2xl font-bold flex items-center">
+                <Users className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
+                Passenger Information
+              </DialogTitle>
+              <DialogDescription className="text-blue-100 mt-2 text-sm sm:text-base">
+                Complete details for all {selectedSeats.length} passengers
+              </DialogDescription>
+              <div className="mt-3 sm:mt-4">
+                <div className="flex justify-between text-xs sm:text-sm text-blue-100 mb-2">
+                  <span>Progress</span>
+                  <span>{getCompletionCount()}/{selectedSeats.length}</span>
+                </div>
+                <Progress 
+                  value={getProgressPercentage()} 
+                  className="h-2 bg-blue-800"
+                />
               </div>
-              <Progress 
-                value={getProgressPercentage()} 
-                className="h-2 bg-blue-800"
-              />
-            </div>
-          </DialogHeader>
+            </DialogHeader>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col h-full">
-            <TabsList className="grid grid-flow-col auto-cols-fr px-6 pt-4 bg-white border-b">
-              {selectedSeats.map((seat, index) => (
-                <TabsTrigger
-                  key={index}
-                  value={`passenger-${index + 1}`}
-                  className="relative data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all duration-200"
-                >
-                  <span className="flex items-center">
-                    {isPassengerComplete(index) && (
-                      <Check className="h-3 w-3 mr-1 text-green-500" />
-                    )}
-                    Seat {seat}
-                  </span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            {/* Sticky Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid grid-flow-col auto-cols-fr px-4 sm:px-6 pt-3 sm:pt-4 pb-3 bg-white border-b">
+                {selectedSeats.map((seat, index) => (
+                  <TabsTrigger
+                    key={index}
+                    value={`passenger-${index + 1}`}
+                    className="relative data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all duration-200 text-xs sm:text-sm"
+                  >
+                    <span className="flex items-center">
+                      {isPassengerComplete(index) && (
+                        <Check className="h-3 w-3 mr-1 text-green-500" />
+                      )}
+                      <span className="hidden sm:inline">Seat </span>{seat}
+                    </span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
 
-            <div className="flex-1 overflow-y-auto">
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
               {selectedSeats.map((seat, index) => (
-                <TabsContent key={index} value={`passenger-${index + 1}`} className="p-6 m-0">
+                <TabsContent key={index} value={`passenger-${index + 1}`} className="p-4 sm:p-6 m-0 h-full">
                   <Card className="border-2 border-gray-200 shadow-sm">
-                    <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-                      <CardTitle className="text-blue-600 flex items-center">
-                        <User className="mr-2 h-5 w-5" />
+                    <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 p-4 sm:p-6">
+                      <CardTitle className="text-blue-600 flex items-center text-lg sm:text-xl">
+                        <User className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                         Passenger {index + 1} - Seat {seat}
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-sm sm:text-base">
                         Please provide accurate information for this passenger
                       </CardDescription>
                     </CardHeader>
                     
-                    <CardContent className="space-y-6 pt-6">
+                    <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                       {/* Personal Information Section */}
-                      <div className="space-y-4">
-                        <h4 className="font-semibold text-gray-800 flex items-center border-b pb-2">
+                      <div className="space-y-3 sm:space-y-4">
+                        <h4 className="font-semibold text-gray-800 flex items-center border-b pb-2 text-sm sm:text-base">
                           <User className="h-4 w-4 mr-2" />
                           Personal Information
                         </h4>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-3 sm:gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor={`name-${index}`} className="text-gray-700 font-medium">
+                            <Label htmlFor={`name-${index}`} className="text-gray-700 font-medium text-sm">
                               Full Name *
                             </Label>
                             <Input
@@ -297,12 +304,12 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
                               onChange={(e) => handleInputChange(index, "name", e.target.value)}
                               onBlur={() => handleFieldBlur(index, "name")}
                               placeholder="Enter full name as on ID"
-                              className={`border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all ${
+                              className={`border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-sm sm:text-base ${
                                 touchedFields.has(`${index}-name`) && errors[`${index}-name`] ? 'border-red-500' : ''
                               }`}
                             />
                             {touchedFields.has(`${index}-name`) && errors[`${index}-name`] && (
-                              <p className="text-red-600 text-sm flex items-center">
+                              <p className="text-red-600 text-xs sm:text-sm flex items-center">
                                 <AlertCircle className="h-3 w-3 mr-1" />
                                 {errors[`${index}-name`]}
                               </p>
@@ -310,7 +317,7 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
                           </div>
                           
                           <div className="space-y-2">
-                            <Label htmlFor={`phone-${index}`} className="text-gray-700 font-medium">
+                            <Label htmlFor={`phone-${index}`} className="text-gray-700 font-medium text-sm">
                               Phone Number *
                             </Label>
                             <div className="relative">
@@ -322,57 +329,57 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
                                 onBlur={() => handleFieldBlur(index, "phoneNumber")}
                                 placeholder="+233 XX XXX XXXX"
                                 type="tel"
-                                className={`pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all ${
+                                className={`pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-sm sm:text-base ${
                                   touchedFields.has(`${index}-phoneNumber`) && errors[`${index}-phoneNumber`] ? 'border-red-500' : ''
                                 }`}
                               />
                             </div>
                             {touchedFields.has(`${index}-phoneNumber`) && errors[`${index}-phoneNumber`] && (
-                              <p className="text-red-600 text-sm flex items-center">
+                              <p className="text-red-600 text-xs sm:text-sm flex items-center">
                                 <AlertCircle className="h-3 w-3 mr-1" />
                                 {errors[`${index}-phoneNumber`]}
                               </p>
                             )}
                           </div>
-                        </div>
                         
-                        <div className="space-y-2">
-                          <Label htmlFor={`email-${index}`} className="text-gray-700 font-medium">
-                            Email Address (Optional)
-                          </Label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              id={`email-${index}`}
-                              value={passengerDetails[index]?.email || ""}
-                              onChange={(e) => handleInputChange(index, "email", e.target.value)}
-                              onBlur={() => handleFieldBlur(index, "email")}
-                              placeholder="email@example.com"
-                              type="email"
-                              className={`pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all ${
-                                touchedFields.has(`${index}-email`) && errors[`${index}-email`] ? 'border-red-500' : ''
-                              }`}
-                            />
+                          <div className="space-y-2">
+                            <Label htmlFor={`email-${index}`} className="text-gray-700 font-medium text-sm">
+                              Email Address (Optional)
+                            </Label>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Input
+                                id={`email-${index}`}
+                                value={passengerDetails[index]?.email || ""}
+                                onChange={(e) => handleInputChange(index, "email", e.target.value)}
+                                onBlur={() => handleFieldBlur(index, "email")}
+                                placeholder="email@example.com"
+                                type="email"
+                                className={`pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-sm sm:text-base ${
+                                  touchedFields.has(`${index}-email`) && errors[`${index}-email`] ? 'border-red-500' : ''
+                                }`}
+                              />
+                            </div>
+                            {touchedFields.has(`${index}-email`) && errors[`${index}-email`] && (
+                              <p className="text-red-600 text-xs sm:text-sm flex items-center">
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                                {errors[`${index}-email`]}
+                              </p>
+                            )}
                           </div>
-                          {touchedFields.has(`${index}-email`) && errors[`${index}-email`] && (
-                            <p className="text-red-600 text-sm flex items-center">
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                              {errors[`${index}-email`]}
-                            </p>
-                          )}
                         </div>
                       </div>
 
                       {/* Emergency Contact Section */}
-                      <div className="space-y-4">
-                        <h4 className="font-semibold text-gray-800 flex items-center border-b pb-2">
+                      <div className="space-y-3 sm:space-y-4">
+                        <h4 className="font-semibold text-gray-800 flex items-center border-b pb-2 text-sm sm:text-base">
                           <AlertCircle className="h-4 w-4 mr-2" />
                           Emergency Contact
                         </h4>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-3 sm:gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor={`kin-name-${index}`} className="text-gray-700 font-medium">
+                            <Label htmlFor={`kin-name-${index}`} className="text-gray-700 font-medium text-sm">
                               Contact Name *
                             </Label>
                             <Input
@@ -381,12 +388,12 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
                               onChange={(e) => handleInputChange(index, "kinName", e.target.value)}
                               onBlur={() => handleFieldBlur(index, "kinName")}
                               placeholder="Emergency contact full name"
-                              className={`border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all ${
+                              className={`border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-sm sm:text-base ${
                                 touchedFields.has(`${index}-kinName`) && errors[`${index}-kinName`] ? 'border-red-500' : ''
                               }`}
                             />
                             {touchedFields.has(`${index}-kinName`) && errors[`${index}-kinName`] && (
-                              <p className="text-red-600 text-sm flex items-center">
+                              <p className="text-red-600 text-xs sm:text-sm flex items-center">
                                 <AlertCircle className="h-3 w-3 mr-1" />
                                 {errors[`${index}-kinName`]}
                               </p>
@@ -394,10 +401,9 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
                           </div>
                           
                           <div className="space-y-2">
-                            <Label htmlFor={`kin-contact-${index}`} className="text-gray-700 font-medium">
+                            <Label htmlFor={`kin-contact-${index}`} className="text-gray-700 font-medium text-sm">
                               Contact Number *
-                            </Label
-                            >
+                            </Label>
                             <div className="relative">
                               <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                               <Input
@@ -407,65 +413,67 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
                                 onBlur={() => handleFieldBlur(index, "kinContact")}
                                 placeholder="+233 XX XXX XXXX"
                                 type="tel"
-                                className={`pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all ${
+                                className={`pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-sm sm:text-base ${
                                   touchedFields.has(`${index}-kinContact`) && errors[`${index}-kinContact`] ? 'border-red-500' : ''
                                 }`}
                               />
                             </div>
                             {touchedFields.has(`${index}-kinContact`) && errors[`${index}-kinContact`] && (
-                              <p className="text-red-600 text-sm flex items-center">
+                              <p className="text-red-600 text-xs sm:text-sm flex items-center">
                                 <AlertCircle className="h-3 w-3 mr-1" />
                                 {errors[`${index}-kinContact`]}
                               </p>
                             )}
                           </div>
-                        </div>
                         
-                        <div className="space-y-2">
-                          <Label htmlFor={`kin-email-${index}`} className="text-gray-700 font-medium">
-                            Contact Email (Optional)
-                          </Label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
-                              id={`kin-email-${index}`}
-                              value={passengerDetails[index]?.kinEmail || ""}
-                              onChange={(e) => handleInputChange(index, "kinEmail", e.target.value)}
-                              onBlur={() => handleFieldBlur(index, "kinEmail")}
-                              placeholder="contact@example.com"
-                              type="email"
-                              className={`pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all ${
-                                touchedFields.has(`${index}-kinEmail`) && errors[`${index}-kinEmail`] ? 'border-red-500' : ''
-                              }`}
-                            />
+                          <div className="space-y-2">
+                            <Label htmlFor={`kin-email-${index}`} className="text-gray-700 font-medium text-sm">
+                              Contact Email (Optional)
+                            </Label>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Input
+                                id={`kin-email-${index}`}
+                                value={passengerDetails[index]?.kinEmail || ""}
+                                onChange={(e) => handleInputChange(index, "kinEmail", e.target.value)}
+                                onBlur={() => handleFieldBlur(index, "kinEmail")}
+                                placeholder="contact@example.com"
+                                type="email"
+                                className={`pl-10 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all text-sm sm:text-base ${
+                                  touchedFields.has(`${index}-kinEmail`) && errors[`${index}-kinEmail`] ? 'border-red-500' : ''
+                                }`}
+                              />
+                            </div>
+                            {touchedFields.has(`${index}-kinEmail`) && errors[`${index}-kinEmail`] && (
+                              <p className="text-red-600 text-xs sm:text-sm flex items-center">
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                                {errors[`${index}-kinEmail`]}
+                              </p>
+                            )}
                           </div>
-                          {touchedFields.has(`${index}-kinEmail`) && errors[`${index}-kinEmail`] && (
-                            <p className="text-red-600 text-sm flex items-center">
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                              {errors[`${index}-kinEmail`]}
-                            </p>
-                          )}
                         </div>
                       </div>
                     </CardContent>
                     
-                    <CardFooter className="flex justify-between bg-gray-50 border-t border-gray-200 p-6">
+                    <CardFooter className="flex justify-between bg-gray-50 border-t border-gray-200 p-4 sm:p-6">
                       <Button
                         variant="outline"
                         onClick={() => setActiveTab(`passenger-${index}`)}
                         disabled={index === 0}
-                        className="border-blue-500 text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+                        className="border-blue-500 text-blue-600 hover:bg-blue-50 disabled:opacity-50 text-sm"
                       >
                         <ChevronLeft className="h-4 w-4 mr-1" />
-                        Previous
+                        <span className="hidden sm:inline">Previous</span>
+                        <span className="sm:hidden">Prev</span>
                       </Button>
                       
                       {index < selectedSeats.length - 1 ? (
                         <Button
                           onClick={() => moveToNextPassenger(index)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
                         >
-                          Next
+                          <span className="hidden sm:inline">Next</span>
+                          <span className="sm:hidden">Next</span>
                           <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
                       ) : (
@@ -485,7 +493,7 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
                               setOpen(false);
                             }
                           }}
-                          className="bg-green-600 hover:bg-green-700 text-white"
+                          className="bg-green-600 hover:bg-green-700 text-white text-sm"
                         >
                           <Check className="h-4 w-4 mr-1" />
                           Complete
@@ -495,12 +503,13 @@ const PassengerDetails: React.FC<PassengerDetailsProps> = ({
                   </Card>
                 </TabsContent>
               ))}
-            </div>
-          </Tabs>
+            </Tabs>
+          </div>
         </DialogContent>
       </Dialog>
     </>
   );
 };
+
 
 export default PassengerDetails;

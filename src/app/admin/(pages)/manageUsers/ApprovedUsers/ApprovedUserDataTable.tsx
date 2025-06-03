@@ -40,33 +40,32 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-
-
-type ApprovedData = {
+// Updated type definition to match the new API response
+type UserData = {
+  userId: string;
+  email: string;
+  name: string;
   firstName: string;
   lastName: string;
-  phone: string;
-  userType: number;
-  email: string;
-  createdAt: {
-    _seconds: number;
-    _nanoseconds: number;
-  };
-  updatedAt: {
-    _seconds: number;
-    _nanoseconds: number;
-  };
-  deactivated: number;
-  suspended: number;
-  status: string;
+  profileImage: string | null;
+  phoneNumber: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
-// Define table columns
-const columns: ColumnDef<ApprovedData>[] = [
+// Updated API response type
+type ApiResponse = {
+  success: boolean;
+  count: number;
+  data: UserData[];
+};
+
+// Updated table columns to match new data structure
+const columns: ColumnDef<UserData>[] = [
   {
     accessorKey: "Sno",
     header: "Sno",
-    cell: ({ row }) => <div>{row.index + 1}</div>, // Use row index as Sno value
+    cell: ({ row }) => <div>{row.index + 1}</div>,
   },
   {
     accessorKey: "firstName",
@@ -96,27 +95,48 @@ const columns: ColumnDef<ApprovedData>[] = [
     cell: ({ row }) => <div>{row.getValue("email")}</div>,
   },
   {
-    accessorKey: "phone",
+    accessorKey: "phoneNumber",
     header: "Mobile",
-    cell: ({ row }) => <div>{row.getValue("phone")}</div>,
-  },
-  {
-    accessorKey: "Rating",
-    header: "Rating",
-    // cell: ({ row }) => <div>{row.getValue("Rating")}</div>,
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
     cell: ({ row }) => (
-      <div className={`${row.getValue("status") === 1 ? 'text-green-500' : 'text-red-500 file'} font-semibold`}>
-        {row.getValue("status") === 1 ? 'Active' : 'Inactive'}</div>
+      <div>{row.getValue("phoneNumber") || "N/A"}</div>
     ),
+  },
+  {
+    accessorKey: "profileImage",
+    header: "Profile",
+    cell: ({ row }) => {
+      const profileImage = row.getValue("profileImage") as string | null;
+      return (
+        <div>
+          {profileImage ? (
+            <img 
+              src={`${profileImage}`} 
+              alt="Profile" 
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+              {(row.getValue("firstName") as string)?.charAt(0)?.toUpperCase() || "U"}
+            </div>
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => {
+      const date = new Date(row.getValue("createdAt"));
+      return <div>{date.toLocaleDateString()}</div>;
+    },
   },
 ];
 
 export function ApproveUsersDataTable() {
-  const [data, setData] = React.useState<ApprovedData[]>([]);
+  const [data, setData] = React.useState<UserData[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -125,18 +145,28 @@ export function ApproveUsersDataTable() {
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/lib/GET/User/getallApprovedUsers');
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('/api/GET/getUsers');
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch data');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        if (Array.isArray(data.product)) {
-          setData(data.product);
+        
+        const result: ApiResponse = await response.json();
+        
+        if (result.success && Array.isArray(result.data)) {
+          setData(result.data);
         } else {
-          setData([]); 
+          throw new Error('Invalid response format');
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching users:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch users');
+        setData([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -162,17 +192,48 @@ export function ApproveUsersDataTable() {
     },
   });
 
+  if (loading) {
+    return (
+      <div className="w-full flex items-center justify-center py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+          <p>Loading users...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full flex items-center justify-center py-8">
+        <div className="text-center text-red-500">
+          <p>Error: {error}</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="mt-2"
+            variant="outline"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter Name..."
+          placeholder="Filter by first name..."
           value={(table.getColumn("firstName")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("firstName")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
+        <div className="ml-4 text-sm text-muted-foreground">
+          Total users: {data.length}
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -243,7 +304,7 @@ export function ApproveUsersDataTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No users found.
                 </TableCell>
               </TableRow>
             )}

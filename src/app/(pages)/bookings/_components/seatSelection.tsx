@@ -223,9 +223,7 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
   };
 
   return (
-    <div className="bg-white flex flex-col items-center p-5 md:p-4 border border-slate-200 rounded-xl dark:text-black overflow-hidden w-full max-w-2xl mx-auto">
-      {/* Bus outline */}
-      <div className="relative w-full bg-gray-50 rounded-xl border border-gray-200 p-4 mb-4">
+    <div className="bg-white flex flex-col items-center h-full p-2 overflow-hidden md:p-4 border border-slate-200 rounded-xl dark:text-black overflow-hidden w-full max-w-2xl mx-auto">
         {/* Bus roof */}
         <div className="absolute top-0 left-0 right-0 h-2 bg-gray-300 rounded-t-xl"></div>
         
@@ -288,7 +286,6 @@ const SeatSelection: React.FC<SeatSelectionProps> = ({
             {renderSeats()}
           </div>
         </div>
-      </div>
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
