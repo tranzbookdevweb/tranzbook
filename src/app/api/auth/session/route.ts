@@ -44,21 +44,27 @@ export async function POST(request: NextRequest) {
       message: 'Session created successfully',
       userId: decodedToken.uid,
     });
-  } catch (error) {
-    console.error('Session creation error:', error);
-
-    let errorMessage = 'Failed to create session';
-    if (error instanceof Error) {
-      if (error.message.includes('expired')) {
-        errorMessage = 'Token has expired';
-      } else if (error.message.includes('invalid')) {
-        errorMessage = 'Invalid token';
-      }
-    }
-
-    return NextResponse.json({ error: errorMessage }, { status: 401 });
+ } catch (error) {
+      if (error instanceof Error) {
+     
+  console.error('Full error object:', error);
+  console.error('Error code:', error.message);
+  console.error('Error message:', error.message);
+  
+  let errorMessage = 'Failed to create session';
+  let statusCode = 401;
+  
+  if (error.message === 'auth/id-token-expired') {
+    errorMessage = 'Token has expired';
+  } else if (error.message === 'auth/invalid-id-token') {
+    errorMessage = 'Invalid token format';
+  } else if (error.message === 'auth/project-not-found') {
+    errorMessage = 'Firebase project configuration error';
+    statusCode = 500;
   }
-}
+  
+  return NextResponse.json({ error: errorMessage }, { status: statusCode });
+}} }
 
 export async function DELETE() {
   try {
