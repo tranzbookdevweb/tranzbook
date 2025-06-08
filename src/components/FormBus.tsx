@@ -18,7 +18,8 @@ export default function FormBus() {
   const [toLocation, setToLocation] = useState('');
   const [date, setDate] = useState<Date | null>(null);
   const [returnDate, setReturnDate] = useState<Date | null>(null);
-  const [ticketQuantity, setTicketQuantity] = useState(0);
+  const [ticketQuantity, setTicketQuantity] = useState(1); // Default to 1 instead of 0
+  const [isLoading, setIsLoading] = useState(false);
   
   const { toast } = useToast();
   const router = useRouter();
@@ -93,12 +94,14 @@ export default function FormBus() {
     return true;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
     }
+    
+    setIsLoading(true);
     
     const query = {
       fromLocation,
@@ -119,48 +122,63 @@ export default function FormBus() {
       description: `Searching for trips from ${fromLocation} to ${toLocation}`,
     });
 
-    router.push(`/search?${queryString}`);
+    // Simulate loading time for better UX
+    setTimeout(() => {
+      router.push(`/search?${queryString}`);
+      setIsLoading(false);
+    }, 500);
   };
 
+  const handleTicketQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 1;
+    if (value >= 1 && value <= 10) { // Add reasonable limit
+      setTicketQuantity(value);
+    }
+  };
+
+  // Check if form is valid for button state
+  const isFormValid = fromLocation && toLocation && date && ticketQuantity > 0;
+
   return (
-    <div className="grid max-lg:grid-cols-1 border-[#fdb022] my-5 w-full max-lg:rounded-t-[1pc] max-lg:rounded-b-none rounded-[1pc] border-2 grid-cols-[1fr_auto] justify-items-center justify-center items-center">
+    <div className="grid max-lg:grid-cols-1 border-[#fdb022] my-5 w-full max-lg:rounded-t-[1pc] max-lg:rounded-b-none rounded-[1pc] border-2 grid-cols-[1fr_auto] justify-items-center justify-center items-center shadow-lg hover:shadow-xl transition-shadow duration-300">
       <form onSubmit={handleSubmit} className="grid grid-cols-5 w-full max-lg:grid-cols-2">
-        <div className="flex items-center lg:rounded-l-[1pc] max-lg:rounded-tl-[1pc] bg-white border-r-2 max-lg:border-none border-[#48A0ff] p-1">
-          <PanoramaFishEyeRounded className="text-blue-500 text-xl mr-2" />
-          <div className="flex text-gray-400 flex-col">
-            <label className="text-[#48A0ff] font-semibold text-xs">FROM</label>
+        <div className="flex items-center lg:rounded-l-[1pc] max-lg:rounded-tl-[1pc] bg-white border-r-2 max-lg:border-none border-[#48A0ff] p-3 hover:bg-gray-50 transition-colors duration-200">
+          <PanoramaFishEyeRounded className="text-blue-500 text-xl mr-2 flex-shrink-0" />
+          <div className="flex text-gray-600 flex-col w-full">
+            <label className="text-[#48A0ff] font-semibold text-xs mb-1">FROM</label>
             <ComboboxForm
               onLocationSelect={handleFromLocationSelect}
               disabledOptions={[toLocation]}
-              locationType="FROM"
+              locationType="Select Origin"
             />
           </div>
         </div>
 
-        <div className="flex max-lg:rounded-tr-[1pc] items-center bg-white border-r-2 max-lg:border-none border-[#48A0ff] p-1">
-          <LocationOnIcon className="text-blue-500 text-xl mr-2" />
-          <div className="flex text-gray-400 flex-col">
-            <label className="text-[#74afef] font-semibold text-xs">TO</label>
+        <div className="flex max-lg:rounded-tr-[1pc] items-center bg-white border-r-2 max-lg:border-none border-[#48A0ff] p-3 hover:bg-gray-50 transition-colors duration-200">
+          <LocationOnIcon className="text-blue-500 text-xl mr-2 flex-shrink-0" />
+          <div className="flex text-gray-600 flex-col w-full">
+            <label className="text-[#74afef] font-semibold text-xs mb-1">TO</label>
             <ComboboxForm
               onLocationSelect={handleToLocationSelect}
               disabledOptions={[fromLocation]}
-              locationType="TO"
+              locationType="Select Destination"
             />
           </div>
         </div>
 
-        <div className="flex items-center bg-white border-r-2 max-lg:border-none border-[#48A0ff] p-1">
-          <CalendarMonthIcon className="text-blue-500 text-xl mr-2" />
-          <div className="flex text-gray-400 flex-col">
-            <label className="text-[#48A0ff] font-semibold text-xs">DATE</label>
+        <div className="flex items-center bg-white border-r-2 max-lg:border-none border-[#48A0ff] p-3 hover:bg-gray-50 transition-colors duration-200">
+          <CalendarMonthIcon className="text-blue-500 text-xl mr-2 flex-shrink-0" />
+          <div className="flex text-gray-600 flex-col w-full">
+            <label className="text-[#48A0ff] font-semibold text-xs mb-1">DATE</label>
             <CalendarForm onDateChange={handleDateChange} />
           </div>
         </div>
 
-        <div className="flex items-center bg-white border-r-2 max-lg:border-none border-[#48A0ff] p-1">
-          <CalendarTodayIcon className="text-blue-500 text-xl mr-2" />
-          <div className="flex text-gray-400 flex-col">
-            <label className="text-[#48A0ff] font-semibold text-xs">RETURN DATE (Optional)</label>
+        <div className="flex items-center bg-white border-r-2 max-lg:border-none border-[#48A0ff] p-3 hover:bg-gray-50 transition-colors duration-200">
+          <CalendarTodayIcon className="text-blue-500 text-xl mr-2 flex-shrink-0" />
+          <div className="flex text-gray-600 flex-col w-full">
+            <label className="text-[#48A0ff] font-semibold text-xs ">RETURN DATE<span className="text-[10px] ml-2 text-gray-600 mb-1">(Optional)</span></label>
+            
             <CalendarForm
               onDateChange={handleReturnDateChange}
               disabledDates={date ? [date] : []}
@@ -168,28 +186,48 @@ export default function FormBus() {
           </div>
         </div>
 
-        <div className="flex items-center max-lg:col-span-2 bg-white max-lg:border-none p-1">
-          <ConfirmationNumberIcon className="text-blue-500 text-xl mr-2" />
-          <div className="flex text-gray-400 flex-col">
-            <label className="text-[#48A0ff] font-semibold text-xs">TICKET QUANTITY</label>
-            <input
-              type="number"
-              min="1"
-              value={ticketQuantity}
-              onChange={(e) => setTicketQuantity(parseInt(e.target.value) || 0)}
-              placeholder="1"
-              className="border-none outline-none bg-transparent w-full"
-            />
+        <div className="flex items-center max-lg:col-span-2 bg-white max-lg:border-none p-3 hover:bg-gray-50 transition-colors duration-200">
+          <ConfirmationNumberIcon className="text-blue-500 text-xl mr-2 flex-shrink-0" />
+          <div className="flex text-gray-600 flex-col w-full">
+            <label className="text-[#48A0ff] font-semibold text-xs mb-1">PASSENGERS</label>
+            <div className="flex items-center">
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={ticketQuantity}
+                onChange={handleTicketQuantityChange}
+                placeholder="1"
+                className="border-none outline-none bg-transparent w-full text-gray-700 font-medium"
+              />
+              <span className="text-xs text-gray-600 whitespace-nowrap ml-2">
+                {ticketQuantity === 1 ? 'passenger' : 'passengers'}
+              </span>
+            </div>
           </div>
         </div>
       </form>
       <button
         type="submit"
-        className="flex items-center w-full h-full rounded-r-[1pc] max-lg:rounded-none justify-center hover:bg-[#48a0ff81] bg-[#48A0ff] text-white border-none p-1 cursor-pointer"
+        disabled={!isFormValid || isLoading}
+        className={`flex items-center w-full h-full rounded-r-[1pc] max-lg:rounded-none justify-center text-white border-none p-4 cursor-pointer font-semibold text-lg transition-all duration-200 ${
+          isFormValid && !isLoading
+            ? 'bg-[#48A0ff] hover:bg-[#3d8ae6] shadow-md hover:shadow-lg'
+            : 'bg-gray-600 cursor-not-allowed opacity-60'
+        }`}
         onClick={handleSubmit}
       >
-        <SearchIcon className="mr-2" />
-        Search
+        {isLoading ? (
+          <>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+            Searching...
+          </>
+        ) : (
+          <>
+            <SearchIcon className="mr-2" />
+            Search Trips
+          </>
+        )}
       </button>
     </div>
   );

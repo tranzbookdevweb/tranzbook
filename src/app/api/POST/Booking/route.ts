@@ -1,8 +1,67 @@
 import prisma from "@/app/lib/db";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { adminAuth } from "@/lib/firebase-admin";
 import nodemailer, { Transporter } from 'nodemailer';
 import puppeteer from 'puppeteer';
+
+// Define interfaces for type safety (unchanged)
+interface TripResponse {
+  id: string;
+  tripId: string;
+  company: string;
+  route: string;
+  date: string;
+  totalAmount: number;
+  currency: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+  seatNumbers: number[];
+  tripDetails: {
+    departureTime: string;
+    basePrice: number;
+    commission: number;
+    commissionType: string;
+    recurring: boolean;
+    daysOfWeek: number[] | null;
+    bus: {
+      plateNumber: string;
+      capacity: number;
+      description: string | null;
+      status: string;
+      image: string | null;
+      amenities: {
+        airConditioning: boolean;
+        chargingOutlets: boolean;
+        wifi: boolean;
+        restRoom: boolean;
+        seatBelts: boolean;
+        onboardFood: boolean;
+      };
+    } | null;
+    route: {
+      duration: number;
+      distance: number;
+    };
+    driver: {
+      name: string;
+      mobile: string | null;
+      status: string;
+    } | null;
+    occurrence: {
+      occurrenceDate: string;
+      status: string;
+      availableSeats: number;
+      bookedSeats: number[];
+    } | null;
+}}
+
+interface TripOccurrence {
+  id: string;
+  occurrenceDate: Date;
+  status: string;
+  availableSeats: number;
+  bookedSeats: number[];
+}
 
 /**
  * Configures and returns a Nodemailer transporter for sending emails.
@@ -425,18 +484,47 @@ export async function POST(req: NextRequest) {
     const currentDate = searchParams.get("currentDate");
     const bookedDate = currentDate ? new Date(currentDate) : new Date();
 
-    // Get the current user using Kinde authentication
-    const { getUser } = getKindeServerSession();
-    const user = await getUser();
+    // Get session cookie
+    const cookieStore = cookies();
+    const sessionCookie = cookieStore.get('__session')?.value;
 
-    console.log("Authenticated User:", user);
-
-    // If no user is found, return an error
-    if (!user) {
+    if (!sessionCookie) {
       return NextResponse.json(
         { message: "User not authenticated" },
         { status: 401 }
       );
+    }
+
+    // Verify session cookie
+    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+
+    // Fetch user data
+    const userRecord = await adminAuth.getUser(decodedClaims.uid);
+
+    if (!userRecord) {
+      return NextResponse.json(
+        { message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    // Find or create user in Prisma database
+    let dbUser = await prisma.user.findUnique({
+      where: { email: userRecord.email! },
+      select: { id: true },
+    });
+
+    if (!dbUser) {
+      // Create user in Prisma if not exists
+      dbUser = await prisma.user.create({
+        data: {
+          id: userRecord.uid, // Use Firebase UID as Prisma user ID
+          email: userRecord.email!,
+          firstName: userRecord.displayName?.split(' ')[0] || '',
+          lastName: userRecord.displayName?.split(' ').slice(1).join(' ') || '',
+        },
+        select: { id: true },
+      });
     }
 
     // Parse the request body to get the booking data
@@ -557,59 +645,60 @@ export async function POST(req: NextRequest) {
     const totalAmount = trip.price * requestedSeats.length;
 
     // Create the booking with passenger details and include user relationship
-  const booking = await prisma.booking.create({
-  data: {
-    reference,
-    tripId,
-    seatNumber: requestedSeats,
-    status: "confirmed",
-    date: bookedDate,
-    userId: user.id,
-    totalAmount,
-    passengerDetails: {
-      create: Array.isArray(passengerDetails) ? 
-        passengerDetails.map(passenger => ({
-          name: passenger.name,
-          phoneNumber: passenger.phoneNumber,
-          email: passenger.email, // New field
-          kinName: passenger.kinName,
-          kinContact: passenger.kinContact,
-          kinEmail: passenger.kinEmail, // New field
-          tripOccurrenceId: tripOccurrence.id
-        })) : 
-        [{
-          name: passengerDetails.name,
-          phoneNumber: passengerDetails.phoneNumber,
-          email: passengerDetails.email, // New field
-          kinName: passengerDetails.kinName,
-          kinContact: passengerDetails.kinContact,
-          kinEmail: passengerDetails.kinEmail, // New field
-          tripOccurrenceId: tripOccurrence.id
-        }]
-    }
-  },
-  include: {
-    user: {
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
+    const booking = await prisma.booking.create({
+      data: {
+        reference,
+        tripId,
+        seatNumber: requestedSeats,
+        status: "confirmed",
+        date: bookedDate,
+        userId: dbUser.id,
+        totalAmount,
+        passengerDetails: {
+          create: Array.isArray(passengerDetails) ? 
+            passengerDetails.map(passenger => ({
+              name: passenger.name,
+              phoneNumber: passenger.phoneNumber,
+              email: passenger.email,
+              kinName: passenger.kinName,
+              kinContact: passenger.kinContact,
+              kinEmail: passenger.kinEmail,
+              tripOccurrenceId: tripOccurrence.id
+            })) : 
+            [{
+              name: passengerDetails.name,
+              phoneNumber: passengerDetails.phoneNumber,
+              email: passengerDetails.email,
+              kinName: passengerDetails.kinName,
+              kinContact: passengerDetails.kinContact,
+              kinEmail: passengerDetails.kinEmail,
+              tripOccurrenceId: tripOccurrence.id
+            }]
+        }
       },
-    },
-    passengerDetails: true,
-    trip: {
       include: {
-        route: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        passengerDetails: true,
+        trip: {
           include: {
-            startCity: true,
-            endCity: true
+            route: {
+              include: {
+                startCity: true,
+                endCity: true
+              }
+            }
           }
         }
       }
-    }
-  }
-});
+    });
+
     // Send email notifications with PDF attachment
     const emailNotifications = await sendEmailNotifications(booking, reference, {
       bus: trip.bus,

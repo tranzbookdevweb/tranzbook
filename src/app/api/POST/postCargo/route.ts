@@ -1,12 +1,6 @@
-/**
- * API Route Handler for submitting cargo booking or agro-prefinancing applications for TRANZBOOK INC.
- * This endpoint processes form submissions, validates data, stores it in the database, and sends email notifications.
- * 
- * @module api/cargo-form
- */
-
 import { NextRequest, NextResponse } from 'next/server';
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+import { cookies } from 'next/headers';
+import { adminAuth } from '@/lib/firebase-admin';
 import prisma from '@/app/lib/db';
 import nodemailer, { Transporter } from 'nodemailer';
 import { CargoFormStatus } from '@prisma/client';
@@ -240,7 +234,7 @@ const sendEmailNotifications = async (cargoForm: any, reference: string): Promis
   }
 
   try {
-  const userEmail = cargoForm.senderEmail || cargoForm.user?.email;
+    const userEmail = cargoForm.senderEmail || cargoForm.user?.email;
     if (userEmail) {
       const confirmationEmail = createUserConfirmationEmail(cargoForm, reference, userEmail);
       const userResult = await transporter.sendMail(confirmationEmail);
@@ -325,18 +319,48 @@ const validateRequiredFields = (data: CargoFormData): string[] => {
  * POST handler for submitting cargo booking or agro-prefinancing applications.
  * @param req - Next.js request object
  * @returns {Promise<NextResponse>} Response with submission details or error
- */
-export async function POST(req: NextRequest): Promise<NextResponse> {
+ */export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // Authenticate user
-    const { getUser } = getKindeServerSession();
-    const user = await getUser();
+    // Get session cookie
+    const cookieStore = cookies(); // Fix: Ensure correct cookies() usage
+    const sessionCookie = cookieStore.get('__session')?.value;
 
-    if (!user) {
+    if (!sessionCookie) {
       return NextResponse.json(
         { error: 'Authentication required. Please log in to submit a request.' },
         { status: 401 }
       );
+    }
+
+    // Verify session cookie
+    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+
+    // Fetch user data
+    const userRecord = await adminAuth.getUser(decodedClaims.uid);
+
+    if (!userRecord) {
+      return NextResponse.json(
+        { error: 'Authentication required. Please log in to submit a request.' },
+        { status: 401 }
+      );
+    }
+
+    // Find or create user in Prisma database
+    let dbUser = await prisma.user.findUnique({
+      where: { email: userRecord.email! },
+      select: { id: true, email: true, firstName: true, lastName: true },
+    });
+
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
+        data: {
+          id: userRecord.uid,
+          email: userRecord.email!,
+          firstName: userRecord.displayName?.split(' ')[0] || '',
+          lastName: userRecord.displayName?.split(' ').slice(1).join(' ') || '',
+        },
+        select: { id: true, email: true, firstName: true, lastName: true },
+      });
     }
 
     // Parse and validate request body
@@ -367,7 +391,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       receiverEmail: body.receiverEmail ? sanitizeString(body.receiverEmail) : null,
       receiverAddress: sanitizeString(body.receiverAddress),
       receiverCity: sanitizeString(body.receiverCity),
-      userId: user.id,
+      userId: dbUser.id,
       agroPrefinancing: body.agroPrefinancing || false,
       status: body.agroPrefinancing ? CargoFormStatus.processing : CargoFormStatus.pending,
     };
@@ -405,8 +429,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     console.log('Cargo Form Submitted:', {
       cargoFormId: cargoForm.id,
       reference,
-      userId: user.id,
-      userEmail: user.email,
+      userId: dbUser.id,
+      userEmail: userRecord.email,
       fromLocation: cargoData.fromLocation,
       toLocation: cargoData.toLocation,
       agroPrefinancing: cargoData.agroPrefinancing,
@@ -439,14 +463,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(responseData, { status: 201 });
 
-  } catch (error) {
+  } catch (error: unknown) {
     // Log error details for debugging
     console.error('Cargo Form Submission Error:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       timestamp: new Date().toISOString(),
-      userId: (await getKindeServerSession().getUser())?.id,
+      userId: (await adminAuth.verifySessionCookie(cookies().get('__session')?.value || '', true).catch(() => null))?.uid,
     });
+
+    // Handle specific Firebase errors
+    if (error instanceof Error && 'code' in error && error.code === 'auth/invalid-session-cookie') {
+      return NextResponse.json(
+        { error: 'Invalid session cookie. Please log in again.' },
+        { status: 401 }
+      );
+    }
 
     // Handle specific Prisma errors
     if (error instanceof Error) {

@@ -1,26 +1,39 @@
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { adminAuth } from "@/lib/firebase-admin";
 
 export async function GET() {
-  // Disable caching for this route
   const noStoreHeaders = new Headers({
     "Cache-Control": "no-store",
   });
 
   try {
-    // Retrieve the user's session and email
-    const { getUser } = getKindeServerSession();
-    const user = await getUser();
+    // Get session cookie
+    const cookieStore = cookies();
+    const sessionCookie = cookieStore.get("__session")?.value;
 
-    if (!user || !user.email) {
+    if (!sessionCookie) {
       return NextResponse.json(
-        { error: "User not authenticated or email not found" },
+        { error: "User not authenticated" },
+        { status: 401, headers: noStoreHeaders }
+      );
+    }
+
+    // Verify session cookie
+    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+
+    // Fetch user data
+    const userRecord = await adminAuth.getUser(decodedClaims.uid);
+
+    if (!userRecord.email) {
+      return NextResponse.json(
+        { error: "Email not found" },
         { status: 401, headers: noStoreHeaders }
       );
     }
 
     return NextResponse.json(
-      { email: user.email },
+      { email: userRecord.email },
       { status: 200, headers: noStoreHeaders }
     );
   } catch (error) {

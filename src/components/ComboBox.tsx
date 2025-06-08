@@ -22,7 +22,7 @@ interface Location {
 interface ComboboxFormProps {
   onLocationSelect: (location: string) => void;
   disabledOptions?: string[];
-  locationType: 'FROM' | 'TO';
+  locationType: 'Select Origin' | 'Select Destination';
 }
 
 export function ComboboxForm({
@@ -77,9 +77,9 @@ export function ComboboxForm({
   };
 
   const placeholder =
-    locationType === 'FROM'
-      ? selectedLocation?.name || 'FROM'
-      : selectedLocation?.name || 'TO';
+    locationType === 'Select Origin'
+      ? selectedLocation?.name || 'Select Origin'
+      : selectedLocation?.name || 'Select Destination';
 
   return (
     <div className="flex items-center w-full space-x-4">

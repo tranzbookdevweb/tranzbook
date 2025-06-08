@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
+import { cookies } from 'next/headers';
+import { adminAuth } from '@/lib/firebase-admin';
 import prisma from '@/app/lib/db';
 
 // Define interfaces for type safety
@@ -67,18 +68,33 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   });
 
   try {
-    const { getUser } = getKindeServerSession();
-    const user = await getUser();
+    // Get session cookie
+    const cookieStore = cookies();
+    const sessionCookie = cookieStore.get('__session')?.value;
 
-    if (!user || !user.email) {
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { error: 'User not authenticated' },
+        { status: 401, headers: noStoreHeaders }
+      );
+    }
+
+    // Verify session cookie
+    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+
+    // Fetch user data
+    const userRecord = await adminAuth.getUser(decodedClaims.uid);
+
+    if (!userRecord || !userRecord.email) {
       return NextResponse.json(
         { error: 'User not authenticated or email not found' },
         { status: 401, headers: noStoreHeaders }
       );
     }
 
+    // Find user in Prisma database
     const dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
+      where: { email: userRecord.email },
       select: { id: true },
     });
 
@@ -89,6 +105,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
+    // Fetch bookings
     const bookings = await prisma.booking.findMany({
       where: { userId: dbUser.id },
       select: {
@@ -254,7 +271,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         },
       };
     });
-    console.log('data',trips)
+
+    console.log('data', trips);
     return NextResponse.json({ trips }, { status: 200, headers: noStoreHeaders });
   } catch (error) {
     console.error('Error fetching trips:', error);

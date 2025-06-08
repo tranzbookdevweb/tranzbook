@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
 import Footer from "@/components/Footer";
+import { ServerNavbar } from "@/components/NavbarServer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -69,7 +69,7 @@ export default function RootLayout({
           inter.className
         )}
       >
-        <Navbar />
+        <ServerNavbar />
         <Toaster />
         {children}
         <Footer />

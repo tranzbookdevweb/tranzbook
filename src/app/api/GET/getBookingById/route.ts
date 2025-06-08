@@ -1,13 +1,28 @@
 import prisma from "@/app/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { cookies } from "next/headers";
+import { adminAuth } from "@/lib/firebase-admin";
 
 export async function GET(req: NextRequest) {
   try {
-    const { getUser } = getKindeServerSession();
-    const user = await getUser();
+    // Get session cookie
+    const cookieStore = cookies();
+    const sessionCookie = cookieStore.get("__session")?.value;
 
-    if (!user) {
+    if (!sessionCookie) {
+      return NextResponse.json(
+        { message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    // Verify session cookie
+    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+
+    // Fetch user data
+    const userRecord = await adminAuth.getUser(decodedClaims.uid);
+
+    if (!userRecord) {
       return NextResponse.json(
         { message: "User not authenticated" },
         { status: 401 }
@@ -19,22 +34,19 @@ export async function GET(req: NextRequest) {
     const status = url.searchParams.get("status"); // e.g., "Upcoming", "Past", "Cancelled"
 
     // Define the base filter conditions
-    const filter: any = { userId: user.id };
+    const filter: any = { userId: userRecord.uid }; // Use Firebase UID
 
     // Get current date and time
     const now = new Date();
 
     // Apply specific filters based on the status
     if (status === "Upcoming") {
-      // Upcoming trips: trips with a date greater than or equal to today
       filter.trip = { date: { gte: now } };
-      filter.status = "pending"; // Optional: Ensure only pending trips are shown
+      filter.status = "pending";
     } else if (status === "Past") {
-      // Past trips: trips with a date less than today (already taken)
       filter.trip = { date: { lt: now } };
-      filter.status = "Completed"; // Optional: Ensure only completed trips are shown
+      filter.status = "Completed";
     } else if (status === "Cancelled") {
-      // Cancelled trips
       filter.status = "Cancelled";
     }
 
