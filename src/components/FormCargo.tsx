@@ -254,7 +254,7 @@ export default function EnhancedCargoForm() {
                     <ComboboxForm
                       onLocationSelect={handleFromLocationSelect}
                       disabledOptions={[formData.toLocation]}
-                      locationType="FROM"
+                      locationType="Select Origin"
                     />
                   </div>
                 </div>
@@ -271,7 +271,7 @@ export default function EnhancedCargoForm() {
                     <ComboboxForm
                       onLocationSelect={handleToLocationSelect}
                       disabledOptions={[formData.fromLocation]}
-                      locationType="TO"
+                      locationType="Select Destination"
                     />
                   </div>
                 </div>
