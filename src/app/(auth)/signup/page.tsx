@@ -122,7 +122,7 @@ function SignUp() {
       };
       const result = await registerWithEmail(formData.email, formData.password, userData);
       if (result.success) {
-        router.push('/my-journeys');
+        router.push('/');
       }
     } catch (error: any) {
       setErrors({ general: getFirebaseErrorMessage(error) });
@@ -141,7 +141,7 @@ function SignUp() {
       };
       const result = await loginWithGoogle(userData);
       if (result.success) {
-        router.push('/my-journeys');
+        router.push('/');
       }
     } catch (error: any) {
       setErrors({ general: getFirebaseErrorMessage(error) });
@@ -254,7 +254,7 @@ const handleResendPhoneCode = async () => {
       };
       const result = await verifyPhoneCodeAndSignIn(confirmationResult, verificationCode, userData);
       if (result.success) {
-        router.push('/my-journeys');
+        router.push('/');
       }
     } catch (error: any) {
       setErrors({ verificationCode: getFirebaseErrorMessage(error) });
@@ -394,7 +394,7 @@ const handleResendPhoneCode = async () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phoneNumberEmail">Phone Number <span className="text-gray-500 text-xs">(Optional)</span></Label>
+                  <Label htmlFor="phoneNumberEmail">Phone Number*</Label>
                   <Input
                     id="phoneNumberEmail"
                     type="tel"
