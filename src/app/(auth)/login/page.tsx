@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Phone, Loader2 } from 'lucide-react';
 import { ConfirmationResult } from 'firebase/auth';
-import { checkUserExists } from '@/app/api/auth/login-callback/route';
+import { checkUserExists } from '@/app/api/auth/login-callback/actions';
 
 declare global {
   interface Window {

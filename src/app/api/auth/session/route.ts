@@ -1,7 +1,7 @@
 import { adminAuth } from '@/lib/firebase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { checkUserExists, createOrUpdateUser } from '../login-callback/route';
+import { checkUserExists, createOrUpdateUser } from '../login-callback/actions';
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkUserExists } from "../login-callback/route";
+import { checkUserExists } from "../login-callback/actions";
 
 export async function POST(request: NextRequest) {
   try {

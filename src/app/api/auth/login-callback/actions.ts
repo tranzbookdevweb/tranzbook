@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from "@/app/lib/db";
 
 export async function checkUserExists(email?: string, phoneNumber?: string) {
   try {
