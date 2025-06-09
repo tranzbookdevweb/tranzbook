@@ -1,31 +1,35 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { auth } from '@/lib/firebase';
-import {
-  createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  GithubAuthProvider,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  PhoneAuthProvider,
-  signInWithCredential,
-  updateProfile,
-} from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { registerWithEmail, loginWithGoogle, sendPhoneVerificationCode, verifyPhoneCodeAndSignIn, cleanupRecaptcha, isValidPhoneNumber } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Mail, Phone, Github, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Phone, Loader2 } from 'lucide-react';
+import { ConfirmationResult } from 'firebase/auth';
 
 declare global {
   interface Window {
-    recaptchaVerifier: RecaptchaVerifier | null;
+    recaptchaVerifier: any | null;
+    recaptchaWidgetId?: number;
+    grecaptcha?: {
+      reset: (widgetId?: number) => void;
+      render: (container: string | HTMLElement, parameters: any) => number;
+      getResponse: (widgetId?: number) => string;
+    };
   }
+}
+
+interface UserData {
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  profileImage?: string;
 }
 
 function SignUp() {
@@ -43,8 +47,17 @@ function SignUp() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [phoneStep, setPhoneStep] = useState<'input' | 'verify'>('input');
   const [verificationCode, setVerificationCode] = useState('');
-  const [verificationId, setVerificationId] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
+  const router = useRouter();
+
+  useEffect(() => {
+    setErrors({});
+    setVerificationCode('');
+    setConfirmationResult(null);
+    cleanupRecaptcha();
+    return () => cleanupRecaptcha();
+  }, [formData.phoneNumber, authMethod]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -65,9 +78,8 @@ function SignUp() {
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Passwords do not match';
       }
-      // Phone number is optional for email signup, but validate if provided
       if (formData.phoneNumber.trim() && !isValidPhoneNumber(formData.phoneNumber)) {
-        newErrors.phoneNumber = 'Please enter a valid phone number with country code (e.g., +1234567890)';
+        newErrors.phoneNumber = 'Please enter a valid phone number with country code';
       }
     }
 
@@ -75,7 +87,10 @@ function SignUp() {
       if (!formData.phoneNumber.trim()) {
         newErrors.phoneNumber = 'Phone number is required';
       } else if (!isValidPhoneNumber(formData.phoneNumber)) {
-        newErrors.phoneNumber = 'Please enter a valid phone number with country code (e.g., +1234567890)';
+        newErrors.phoneNumber = 'Please enter a valid phone number with country code';
+      }
+      if (phoneStep === 'verify' && (!verificationCode || verificationCode.length !== 6)) {
+        newErrors.verificationCode = 'Please enter a valid 6-digit code';
       }
     }
 
@@ -83,34 +98,14 @@ function SignUp() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const isValidPhoneNumber = (phone: string) => {
-    // Basic validation for international phone numbers
-    const phoneRegex = /^\+[1-9]\d{1,14}$/;
-    return phoneRegex.test(phone);
-  };
-
-  const createSession = async (user: any) => {
-    try {
-      const idToken = await user.getIdToken();
-      const response = await fetch('/api/auth/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken, phoneNumber: formData.phoneNumber }), // Include phoneNumber
+  const resetRecaptcha = () => {
+    if (window.recaptchaVerifier && window.recaptchaWidgetId !== undefined && window.grecaptcha) {
+      window.grecaptcha.reset(window.recaptchaWidgetId);
+    } else if (window.recaptchaVerifier && window.grecaptcha) {
+      window.recaptchaVerifier.render().then((widgetId: number) => {
+        window.recaptchaWidgetId = widgetId;
+        window.grecaptcha?.reset(widgetId);
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to create session');
-      }
-
-      const callbackResponse = await fetch('/api/auth/callback');
-      if (!callbackResponse.ok) {
-        throw new Error('Failed to process authentication callback');
-      }
-
-      window.location.href = '/login?auth=success';
-    } catch (error: any) {
-      setErrors({ general: error.message || 'Failed to complete sign-up' });
-      throw error;
     }
   };
 
@@ -120,17 +115,16 @@ function SignUp() {
 
     try {
       setLoading(true);
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      await updateProfile(userCredential.user, {
-        displayName: `${formData.firstName} ${formData.lastName}`,
-      });
-
-      // If phone number is provided, you can store it in your database during the callback
-      // The phone number will be available in formData.phoneNumber for the backend to process
-      
-      await createSession(userCredential.user);
+      const userData: UserData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phoneNumber || undefined,
+      };
+      const result = await registerWithEmail(formData.email, formData.password, userData);
+      if (result.success) {
+        router.push('/my-journeys');
+      }
     } catch (error: any) {
-      console.error('Email signup error:', error);
       setErrors({ general: getFirebaseErrorMessage(error) });
     } finally {
       setLoading(false);
@@ -140,97 +134,137 @@ function SignUp() {
   const handleGoogleSignUp = async () => {
     try {
       setLoading(true);
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      await createSession(result.user);
+      const userData: UserData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phoneNumber || undefined,
+      };
+      const result = await loginWithGoogle(userData);
+      if (result.success) {
+        router.push('/my-journeys');
+      }
     } catch (error: any) {
-      console.error('Google signup error:', error);
       setErrors({ general: getFirebaseErrorMessage(error) });
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleGithubSignUp = async () => {
-    try {
-      setLoading(true);
-      const provider = new GithubAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      await createSession(result.user);
-    } catch (error: any) {
-      console.error('GitHub signup error:', error);
-      setErrors({ general: getFirebaseErrorMessage(error) });
-      setLoading(false);
-    }
-  };
+// Updated phone sign-up handling in your SignUp component
 
-  const setupRecaptcha = useCallback(() => {
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
-      window.recaptchaVerifier = null;
-    }
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      size: 'invisible',
-      callback: () => console.log('reCAPTCHA solved'),
-      'expired-callback': () => setErrors({ general: 'reCAPTCHA expired, please try again' }),
+const handlePhoneSignUp = async () => {
+  if (!validateForm()) return;
+
+  try {
+    setLoading(true);
+    setErrors({}); // Clear any existing errors
+    
+    // Check if user already exists
+    const response = await fetch('/api/auth/check-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phoneNumber: formData.phoneNumber }),
     });
-  }, []);
-
-  const sendPhoneVerification = async () => {
-    if (!validateForm()) return;
-
-    try {
-      setLoading(true);
-      setupRecaptcha();
-      const confirmation = await signInWithPhoneNumber(auth, formData.phoneNumber, window.recaptchaVerifier!);
-      setVerificationId(confirmation.verificationId);
-      setPhoneStep('verify');
-      setErrors({});
-    } catch (error: any) {
-      console.error('Phone verification error:', error);
-      setErrors({ general: getFirebaseErrorMessage(error) });
-    } finally {
-      setLoading(false);
+    
+    if (!response.ok) {
+      throw new Error('Failed to check user existence');
     }
-  };
-
-  const resendPhoneVerification = async () => {
-    if (!validateForm()) return;
-
-    try {
-      setLoading(true);
-      setupRecaptcha();
-      const confirmation = await signInWithPhoneNumber(auth, formData.phoneNumber, window.recaptchaVerifier!);
-      setVerificationId(confirmation.verificationId);
-      setErrors({ general: 'Verification code resent successfully' });
-    } catch (error: any) {
-      console.error('Phone verification resend error:', error);
-      setErrors({ general: getFirebaseErrorMessage(error) });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const verifyPhoneCode = async () => {
-    if (!verificationCode || verificationCode.length !== 6) {
-      setErrors({ verificationCode: 'Please enter a valid 6-digit code' });
+    
+    const { exists } = await response.json();
+    if (exists) {
+      setErrors({ phoneNumber: 'This phone number is already registered' });
       return;
     }
 
+    // Clean and validate phone number
+    const cleanPhoneNumber = formData.phoneNumber.replace(/\s+/g, '');
+    if (!isValidPhoneNumber(cleanPhoneNumber)) {
+      setErrors({ phoneNumber: 'Please enter a valid phone number with country code (e.g., +1234567890)' });
+      return;
+    }
+
+    console.log('Sending verification code to:', cleanPhoneNumber);
+    
+    // Send verification code
+    const confirmation = await sendPhoneVerificationCode(cleanPhoneNumber);
+    setConfirmationResult(confirmation);
+    setPhoneStep('verify');
+    setErrors({});
+    
+    console.log('Verification code sent successfully');
+    
+  } catch (error: any) {
+    console.error('Phone sign-up error:', error);
+    
+    let errorMessage = error.message || 'Failed to send verification code';
+    
+    // Handle specific Firebase errors
+    if (error.code === 'auth/invalid-app-credential') {
+      errorMessage = 'Authentication service unavailable. Please try again later or contact support.';
+    } else if (error.code === 'auth/too-many-requests') {
+      errorMessage = 'Too many attempts. Please wait before trying again.';
+    } else if (error.code === 'auth/quota-exceeded') {
+      errorMessage = 'SMS service temporarily unavailable. Please try again later.';
+    }
+    
+    setErrors({ general: errorMessage });
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Also update the resend code function
+const handleResendPhoneCode = async () => {
+  if (!formData.phoneNumber) {
+    setErrors({ phoneNumber: 'Phone number is required to resend code' });
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setErrors({});
+    
+    const cleanPhoneNumber = formData.phoneNumber.replace(/\s+/g, '');
+    console.log('Resending verification code to:', cleanPhoneNumber);
+    
+    const confirmation = await sendPhoneVerificationCode(cleanPhoneNumber);
+    setConfirmationResult(confirmation);
+    
+    // Show success message briefly
+    setErrors({ general: 'Verification code resent successfully' });
+    setTimeout(() => setErrors({}), 3000);
+    
+  } catch (error: any) {
+    console.error('Resend code error:', error);
+    setErrors({ general: error.message || 'Failed to resend verification code' });
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const handleVerifyPhoneCode = async () => {
+    if (!validateForm() || !confirmationResult || !formData.phoneNumber) return;
+
     try {
       setLoading(true);
-      const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
-      const userCredential = await signInWithCredential(auth, credential);
-      await updateProfile(userCredential.user, {
-        displayName: `${formData.firstName} ${formData.lastName}`,
-      });
-      await createSession(userCredential.user);
+      const userData: UserData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phoneNumber,
+      };
+      const result = await verifyPhoneCodeAndSignIn(confirmationResult, verificationCode, userData);
+      if (result.success) {
+        router.push('/my-journeys');
+      }
     } catch (error: any) {
-      console.error('Phone verification error:', error);
       setErrors({ verificationCode: getFirebaseErrorMessage(error) });
+      resetRecaptcha();
     } finally {
       setLoading(false);
     }
   };
+
+
 
   const getFirebaseErrorMessage = (error: any) => {
     switch (error.code) {
@@ -241,13 +275,17 @@ function SignUp() {
       case 'auth/weak-password':
         return 'Password is too weak';
       case 'auth/invalid-phone-number':
-        return 'Invalid phone number';
+        return 'Invalid phone number. Please include country code';
       case 'auth/invalid-verification-code':
         return 'Invalid verification code';
       case 'auth/code-expired':
         return 'Verification code has expired';
       case 'auth/too-many-requests':
         return 'Too many attempts, please try again later';
+      case 'auth/network-request-failed':
+        return 'Network error. Please check your connection';
+      case 'auth/quota-exceeded':
+        return 'SMS quota exceeded. Please try again later';
       default:
         return error.message || 'Failed to process request';
     }
@@ -265,11 +303,8 @@ function SignUp() {
     setPhoneStep('input');
     setErrors({});
     setVerificationCode('');
-    setVerificationId('');
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
-      window.recaptchaVerifier = null;
-    }
+    setConfirmationResult(null);
+    cleanupRecaptcha();
   };
 
   return (
@@ -277,13 +312,15 @@ function SignUp() {
       <Card className="w-full max-w-md bg-white shadow-lg">
         <CardHeader>
           <div className="flex justify-center mb-4">
-            <Image src="/pictures/logoNav.png" width={100} height={100} alt="Logo" />
+            <Image src="/pictures/logo.png" width={100} height={100} alt="Logo" />
           </div>
           <CardTitle className="text-2xl text-center text-blue-600">Create Account</CardTitle>
-          <CardDescription className="text-center">Join us to start your journey</CardDescription>
+          <CardDescription className="text-center">
+            Join us to start your journey. For phone sign-up, you’ll receive an SMS with a verification code (standard rates may apply).
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex mb-4 bg-gray-100 rounded-lg p-1 hidden">
+          <div className="flex mb-4 bg-gray-100 rounded-lg p-1">
             <Button
               variant={authMethod === 'email' ? 'default' : 'ghost'}
               onClick={() => handleAuthMethodSwitch('email')}
@@ -311,7 +348,6 @@ function SignUp() {
           )}
 
           <form onSubmit={handleEmailSignUp} className="space-y-4">
-            {/* Name Fields */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
@@ -357,7 +393,7 @@ function SignUp() {
                   {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
                 </div>
 
-                <div className="space-y-2 hidden">
+                <div className="space-y-2">
                   <Label htmlFor="phoneNumberEmail">Phone Number <span className="text-gray-500 text-xs">(Optional)</span></Label>
                   <Input
                     id="phoneNumberEmail"
@@ -441,104 +477,99 @@ function SignUp() {
               </>
             )}
 
-            <div className="hidden">
-              {authMethod === 'phone' && (
-                <>
-                  {phoneStep === 'input' && (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="phoneNumber">Phone Number</Label>
-                        <Input
-                          id="phoneNumber"
-                          type="tel"
-                          placeholder="+1234567890"
-                          value={formData.phoneNumber}
-                          onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                          className="border-blue-300 focus:border-blue-500"
-                          disabled={loading}
-                        />
-                        {errors.phoneNumber && <p className="text-xs text-red-600">{errors.phoneNumber}</p>}
-                        <p className="text-xs text-gray-500">Include country code (e.g., +1 for US)</p>
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={sendPhoneVerification}
+            {authMethod === 'phone' && (
+              <>
+                {phoneStep === 'input' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phoneNumber">Phone Number</Label>
+                      <Input
+                        id="phoneNumber"
+                        type="tel"
+                        placeholder="+1234567890"
+                        value={formData.phoneNumber}
+                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                        className="border-blue-300 focus:border-blue-500"
                         disabled={loading}
-                        className="w-full bg-[#48A0ff] hover:bg-[#48a0ff60] text-white"
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Sending Code...
-                          </>
-                        ) : (
-                          'Send Verification Code'
-                        )}
-                      </Button>
+                      />
+                      {errors.phoneNumber && <p className="text-xs text-red-600">{errors.phoneNumber}</p>}
+                      <p className="text-xs text-gray-500">Include country code (e.g., +1 for US). You’ll receive an SMS with a verification code.</p>
                     </div>
-                  )}
+                    <Button
+                      type="button"
+                      onClick={handlePhoneSignUp}
+                      disabled={loading}
+                      className="w-full bg-[#48A0ff] hover:bg-[#48a0ff60] text-white"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Sending Code...
+                        </>
+                      ) : (
+                        'Send Verification Code'
+                      )}
+                    </Button>
+                  </div>
+                )}
 
-                  {phoneStep === 'verify' && (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="verificationCode">Verification Code</Label>
-                        <Input
-                          id="verificationCode"
-                          type="text"
-                          placeholder="000000"
-                          value={verificationCode}
-                          onChange={(e) => setVerificationCode(e.target.value)}
-                          className="border-blue-300 focus:border-blue-500 text-center text-lg tracking-widest"
-                          maxLength={6}
-                          disabled={loading}
-                        />
-                        {errors.verificationCode && <p className="text-xs text-red-600">{errors.verificationCode}</p>}
-                        <p className="text-xs text-gray-500">Enter the 6-digit code sent to {formData.phoneNumber}</p>
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={verifyPhoneCode}
+                {phoneStep === 'verify' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="verificationCode">Verification Code</Label>
+                      <Input
+                        id="verificationCode"
+                        type="text"
+                        placeholder="123456"
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        className="border-blue-300 focus:border-blue-500 text-center text-lg tracking-widest"
+                        maxLength={6}
                         disabled={loading}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Verifying...
-                          </>
-                        ) : (
-                          'Verify & Create Account'
-                        )}
-                      </Button>
-                      <Button
-                        variant="link"
-                        onClick={resendPhoneVerification}
-                        disabled={loading}
-                        className="w-full text-blue-600 hover:underline"
-                      >
-                        Resend Verification Code
-                      </Button>
-                      <Button
-                        variant="link"
-                        onClick={() => {
-                          setPhoneStep('input');
-                          setVerificationCode('');
-                          setVerificationId('');
-                          if (window.recaptchaVerifier) {
-                            window.recaptchaVerifier.clear();
-                            window.recaptchaVerifier = null;
-                          }
-                        }}
-                        disabled={loading}
-                        className="w-full text-blue-600 hover:underline"
-                      >
-                        Use different phone number
-                      </Button>
+                      />
+                      {errors.verificationCode && <p className="text-xs text-red-600">{errors.verificationCode}</p>}
+                      <p className="text-xs text-gray-500">Enter the 6-digit code sent to {formData.phoneNumber}</p>
                     </div>
-                  )}
-                </>
-              )}
-            </div>
+                    <Button
+                      type="button"
+                      onClick={handleVerifyPhoneCode}
+                      disabled={loading}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        'Verify & Create Account'
+                      )}
+                    </Button>
+                    <Button
+                      variant="link"
+                      onClick={handleResendPhoneCode}
+                      disabled={loading}
+                      className="w-full text-blue-600 hover:text-blue-800"
+                    >
+                      Resend Verification Code
+                    </Button>
+                    <Button
+                      variant="link"
+                      onClick={() => {
+                        setPhoneStep('input');
+                        setVerificationCode('');
+                        setConfirmationResult(null);
+                        cleanupRecaptcha();
+                      }}
+                      disabled={loading}
+                      className="w-full text-blue-600 hover:text-blue-800"
+                    >
+                      Use different phone number
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
           </form>
 
           <div className="relative my-4">
@@ -550,29 +581,20 @@ function SignUp() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             <Button
-                type="button"
-                onClick={handleGoogleSignUp}
-                disabled={loading}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-                <span className="ml-2">Google</span>
-              </Button>
-            <Button
-              variant="outline"
-              onClick={handleGithubSignUp}
+              type="button"
+              onClick={handleGoogleSignUp}
               disabled={loading}
-              className="border-blue-300 text-blue-600 hover:bg-blue-50"
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
-              <Github className="w-4 h-4 mr-2" />
-              GitHub
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              </svg>
+              <span className="ml-2">Google</span>
             </Button>
           </div>
         </CardContent>

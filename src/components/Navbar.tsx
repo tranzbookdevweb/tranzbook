@@ -37,7 +37,7 @@ export function Navbar({ user }: NavbarProps) {
       console.error('Error signing out:', error);
     }
   };
-
+console.log('photo',user?.photoURL)
   const getDisplayName = () => {
     if (user?.displayName) return user.displayName;
     if (user?.email) return user.email.split('@')[0];

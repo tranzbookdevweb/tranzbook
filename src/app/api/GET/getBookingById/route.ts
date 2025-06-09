@@ -7,24 +7,27 @@ export async function GET(req: NextRequest) {
   try {
     // Get session cookie
     const cookieStore = cookies();
-    const sessionCookie = cookieStore.get("__session")?.value;
+    const sessionCookie = cookieStore.get("session")?.value;
 
     if (!sessionCookie) {
       return NextResponse.json(
-        { message: "User not authenticated" },
+        { error: "No session found" },
         { status: 401 }
       );
     }
 
-    // Verify session cookie
+    // Verify session cookie with revocation check
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
 
     // Fetch user data
-    const userRecord = await adminAuth.getUser(decodedClaims.uid);
+    const userRecord = await adminAuth.getUser(decodedClaims.sub);
 
     if (!userRecord) {
+      // Clear invalid session cookie
+      const cookieStore = cookies();
+      cookieStore.delete("session");
       return NextResponse.json(
-        { message: "User not authenticated" },
+        { error: "Invalid session" },
         { status: 401 }
       );
     }
@@ -72,10 +75,13 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(bookings, { status: 200 });
   } catch (error: any) {
-    console.error("Error fetching bookings:", error);
+    console.error("Session verification or booking fetch error:", error);
+    // Clear invalid session cookie
+    const cookieStore = cookies();
+    cookieStore.delete("session");
     return NextResponse.json(
-      { message: "Failed to fetch bookings", error: error.message },
-      { status: 500 }
+      { error: "Invalid session or failed to fetch bookings", details: error.message },
+      { status: 401 }
     );
   }
 }

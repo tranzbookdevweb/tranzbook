@@ -70,20 +70,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // Get session cookie
     const cookieStore = cookies();
-    const sessionCookie = cookieStore.get('__session')?.value;
+    const sessionCookie = cookieStore.get('session')?.value;
 
     if (!sessionCookie) {
       return NextResponse.json(
-        { error: 'User not authenticated' },
+        { error: 'No session found' },
         { status: 401, headers: noStoreHeaders }
       );
     }
 
-    // Verify session cookie
+    // Verify session cookie with revocation check
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
 
     // Fetch user data
-    const userRecord = await adminAuth.getUser(decodedClaims.uid);
+    const userRecord = await adminAuth.getUser(decodedClaims.sub);
 
     if (!userRecord || !userRecord.email) {
       return NextResponse.json(
@@ -276,9 +276,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ trips }, { status: 200, headers: noStoreHeaders });
   } catch (error) {
     console.error('Error fetching trips:', error);
+
+    // Clear invalid session cookie
+    const cookieStore = cookies();
+    cookieStore.delete('session');
+
     return NextResponse.json(
-      { error: 'Failed to fetch trips. Please try again later.' },
-      { status: 500, headers: noStoreHeaders }
+      { error: 'Invalid session or failed to fetch trips' },
+      { status: 401, headers: noStoreHeaders }
     );
   }
 }

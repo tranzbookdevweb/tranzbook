@@ -1,80 +1,108 @@
-///api/auth/session
 import { adminAuth } from '@/lib/firebase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { checkUserExists, createOrUpdateUser } from '../login-callback/route';
 
 export async function POST(request: NextRequest) {
   try {
-    const { idToken, phoneNumber } = await request.json();
+    const { idToken, csrfToken, phoneNumber, userData } = await request.json();
 
     if (!idToken) {
       return NextResponse.json({ error: 'ID token is required' }, { status: 400 });
     }
 
-    // Verify the ID token
+    const cookieStore = cookies();
+    const storedCsrfToken = cookieStore.get('csrfToken')?.value;
+
+    if (!csrfToken || csrfToken !== storedCsrfToken) {
+      return NextResponse.json({ error: 'UNAUTHORIZED REQUEST!' }, { status: 401 });
+    }
+
     const decodedToken = await adminAuth.verifyIdToken(idToken);
 
-    // Create session cookie (expires in 5 days)
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days in milliseconds
+    const currentTime = new Date().getTime() / 1000;
+    const authTime = decodedToken.auth_time;
+
+    if (currentTime - authTime > 5 * 60) {
+      return NextResponse.json({ error: 'Recent sign in required!' }, { status: 401 });
+    }
+
+    const firebaseEmail = decodedToken.email;
+    const firebasePhone = decodedToken.phone_number || phoneNumber;
+
+    const { exists, user: existingUser } = await checkUserExists(firebaseEmail, firebasePhone);
+
+    let dbUser;
+    if (exists && existingUser) {
+      dbUser = await createOrUpdateUser({
+        firebaseUid: decodedToken.uid,
+        email: firebaseEmail,
+        firstName: userData?.firstName || existingUser.firstName || '',
+        lastName: userData?.lastName || existingUser.lastName || '',
+        phoneNumber: firebasePhone || userData?.phoneNumber,
+        profileImage: userData?.profileImage || existingUser.profileImage,
+      });
+    } else {
+      if ((userData?.provider === 'google' || decodedToken.phone_number) && !userData?.phoneNumber) {
+        return NextResponse.json({ 
+          error: 'Phone number is required for new users',
+          requiresUserData: true,
+          firebaseUid: decodedToken.uid
+        }, { status: 400 });
+      }
+      dbUser = await createOrUpdateUser({
+        firebaseUid: decodedToken.uid,
+        email: firebaseEmail,
+        firstName: userData?.firstName || '',
+        lastName: userData?.lastName || '',
+        phoneNumber: firebasePhone || userData?.phoneNumber,
+        profileImage: userData?.profileImage,
+      });
+    }
+
+    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
-    // Set the session cookie
-    const cookieStore = cookies();
-    cookieStore.set('__session', sessionCookie, {
-      maxAge: expiresIn / 1000, // Convert to seconds
+    const options = {
+      maxAge: expiresIn / 1000,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       path: '/',
-    });
+    };
 
-    // Store phoneNumber in a cookie if provided
+    cookieStore.set('session', sessionCookie, options);
     if (phoneNumber) {
-      cookieStore.set('__phoneNumber', phoneNumber, {
-        maxAge: expiresIn / 1000, // Match session cookie expiration
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
+      cookieStore.set('phoneNumber', phoneNumber, {
+        ...options,
+        httpOnly: false,
       });
     }
 
     return NextResponse.json({
-      success: true,
-      message: 'Session created successfully',
+      status: 'success',
       userId: decodedToken.uid,
+      user: dbUser,
+      isNewUser: !exists
     });
- } catch (error) {
-      if (error instanceof Error) {
-     
-  console.error('Full error object:', error);
-  console.error('Error code:', error.message);
-  console.error('Error message:', error.message);
-  
-  let errorMessage = 'Failed to create session';
-  let statusCode = 401;
-  
-  if (error.message === 'auth/id-token-expired') {
-    errorMessage = 'Token has expired';
-  } else if (error.message === 'auth/invalid-id-token') {
-    errorMessage = 'Invalid token format';
-  } else if (error.message === 'auth/project-not-found') {
-    errorMessage = 'Firebase project configuration error';
-    statusCode = 500;
-  }
-  
-  return NextResponse.json({ error: errorMessage }, { status: statusCode });
-}} }
-
-export async function DELETE() {
-  try {
-    const cookieStore = cookies();
-    cookieStore.delete('__session');
-    cookieStore.delete('__phoneNumber'); // Clean up phoneNumber cookie
-
-    return NextResponse.json({ success: true, message: 'Session cleared' });
   } catch (error) {
-    console.error('Session deletion error:', error);
-    return NextResponse.json({ error: 'Failed to clear session' }, { status: 500 });
+    console.error('Session creation error:', error);
+    
+    if (error instanceof Error) {
+      const errorCode = (error as any).code;
+      
+      switch (errorCode) {
+        case 'auth/id-token-expired':
+          return NextResponse.json({ error: 'Token has expired' }, { status: 401 });
+        case 'auth/invalid-id-token':
+          return NextResponse.json({ error: 'Invalid token format' }, { status: 401 });
+        default:
+          return NextResponse.json({ 
+            error: error.message || 'UNAUTHORIZED REQUEST!' 
+          }, { status: 401 });
+      }
+    }
+    
+    return NextResponse.json({ error: 'UNAUTHORIZED REQUEST!' }, { status: 401 });
   }
 }

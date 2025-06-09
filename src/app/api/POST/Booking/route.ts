@@ -53,8 +53,8 @@ interface TripResponse {
       availableSeats: number;
       bookedSeats: number[];
     } | null;
-}}
-
+}
+}
 interface TripOccurrence {
   id: string;
   occurrenceDate: Date;
@@ -287,7 +287,7 @@ const createAdminNotificationEmail = (booking: any, reference: string) => {
           <div style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #e5e7eb;">
             ${Array.isArray(booking.passengerDetails) ? 
               booking.passengerDetails.map((passenger: any, index: number) => `
-                <div style="margin-bottom: ${index < booking.passengerDetails.length - 1 ? '15px' : '0'}; ${index < booking.passengerDetails.length - 1 ? 'border-bottom: 1px solid #e5e7eb; padding-bottom: 15px;' : ''}">
+                <2799d67a-62e0-4041-bba1-62ef110fa01c
                   <p><strong>Passenger ${index + 1}:</strong> ${passenger.name} (Age: ${passenger.age})</p>
                   <p><strong>Phone:</strong> ${passenger.phoneNumber}</p>
                   <p><strong>Emergency Contact:</strong> ${passenger.kinName} - ${passenger.kinContact}</p>
@@ -486,24 +486,27 @@ export async function POST(req: NextRequest) {
 
     // Get session cookie
     const cookieStore = cookies();
-    const sessionCookie = cookieStore.get('__session')?.value;
+    const sessionCookie = cookieStore.get('session')?.value;
 
     if (!sessionCookie) {
       return NextResponse.json(
-        { message: "User not authenticated" },
+        { message: "No session found" },
         { status: 401 }
       );
     }
 
-    // Verify session cookie
+    // Verify session cookie with revocation check
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
 
     // Fetch user data
-    const userRecord = await adminAuth.getUser(decodedClaims.uid);
+    const userRecord = await adminAuth.getUser(decodedClaims.sub);
 
     if (!userRecord) {
+      // Clear invalid session cookie
+      const cookieStore = cookies();
+      cookieStore.delete('session');
       return NextResponse.json(
-        { message: "User not authenticated" },
+        { message: "Invalid session" },
         { status: 401 }
       );
     }
@@ -719,9 +722,12 @@ export async function POST(req: NextRequest) {
     }, { status: 201 });
   } catch (error) {
     console.error('Booking creation error:', error);
+    // Clear invalid session cookie
+    const cookieStore = cookies();
+    cookieStore.delete('session');
     return NextResponse.json({ 
-      error: 'Failed to create booking',
+      error: 'Invalid session or failed to create booking',
       details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    }, { status: 401 });
   }
 }
