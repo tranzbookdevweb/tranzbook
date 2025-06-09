@@ -29,31 +29,42 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   disabled,
   passengerDetailsFilled
 }) => {
-  const [email, setEmail] = useState<string | null>(null);
+  const [userContact, setUserContact] = useState<string | null>(null);
+  const [contactType, setContactType] = useState<'email' | 'phone' | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Fetch user email from the API
-    const fetchEmail = async () => {
+    // Fetch user contact info from the API
+    const fetchUserContact = async () => {
       try {
         const response = await fetch("/api/getEmail");
         if (!response.ok) {
-          throw new Error("Failed to fetch email");
+          throw new Error("Failed to fetch user contact");
         }
         const data = await response.json();
-        setEmail(data.email);
+        
+        // Set the contact and determine type
+        if (data.email) {
+          setUserContact(data.email);
+          setContactType('email');
+        } else if (data.phoneNumber) {
+          setUserContact(data.phoneNumber);
+          setContactType('phone');
+        } else {
+          console.error("No email or phone number available");
+        }
       } catch (error) {
-        console.error("Error fetching email:", error);
+        console.error("Error fetching user contact:", error);
       }
     };
 
-    fetchEmail();
+    fetchUserContact();
   }, []);
 
   const handlePayments = usePaystackPayment({
     channels: ["mobile_money", "card", "bank", "bank_transfer"],
     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY! as string,
-    email: email || "default@example.com", // Use fetched email or fallback
+    email: contactType === 'email' ? userContact! : `${userContact}@temp.com`, // Paystack requires email format
     currency: "GHS",
     amount: busFare * selectedSeats.length * 100,
   });
@@ -75,7 +86,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   };
 
   const handleButtonClick = () => {
-    if (email && passengerDetailsFilled && selectedSeats.length > 0) {
+    if (userContact && passengerDetailsFilled && selectedSeats.length > 0) {
       handlePayments({ onSuccess, onClose });
     }
   };
@@ -86,7 +97,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
       return "Select Seats First";
     } else if (!passengerDetailsFilled) {
       return "Please Fill Passenger Details";
-    } else if (!email) {
+    } else if (!userContact) {
       return "Loading...";
     } else {
       return `Pay GHS ${(selectedSeats.length * busFare).toLocaleString("en-US")}`;
@@ -97,7 +108,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     <Button
       onClick={handleButtonClick}
       className={className}
-      disabled={disabled || !passengerDetailsFilled || selectedSeats.length === 0 || !email}
+      disabled={disabled || !passengerDetailsFilled || selectedSeats.length === 0 || !userContact}
       variant="default"
     >
       {getButtonText()}

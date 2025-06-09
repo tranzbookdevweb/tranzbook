@@ -24,16 +24,25 @@ export async function GET() {
 
     // Fetch user data
     const userRecord = await adminAuth.getUser(decodedClaims.sub);
+    console.log('user email', userRecord.email);
+    console.log('user phone', userRecord.phoneNumber);
 
-    if (!userRecord.email) {
+    // Use email if available, otherwise use phone number
+    const userContact = userRecord.email || userRecord.phoneNumber;
+    
+    if (!userContact) {
       return NextResponse.json(
-        { error: "Email not found" },
+        { error: "Neither email nor phone number found" },
         { status: 401, headers: noStoreHeaders }
       );
     }
 
     return NextResponse.json(
-      { email: userRecord.email },
+      { 
+        email: userRecord.email,
+        phoneNumber: userRecord.phoneNumber,
+        contact: userContact // The contact to use for payment
+      },
       { status: 200, headers: noStoreHeaders }
     );
   } catch (error) {
