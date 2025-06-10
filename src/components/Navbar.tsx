@@ -22,6 +22,7 @@ import {
 import { logout } from '@/lib/auth';
 import { CampaignOutlined, Work } from '@mui/icons-material';
 import { ArrowRight, Calendar,  ChevronDown, HelpCircleIcon, MapPin, Menu, Phone, Users, } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -371,19 +372,15 @@ export function Navbar({ user }: NavbarProps) {
                   </SheetTrigger>
                   <SheetContent 
                     side="right" 
-                    className="w-full sm:w-96 z-[999999] overflow-y-scroll p-0 border-0 bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 backdrop-blur-xl"
+                    className="w-full sm:w-96 z-[999999] overflow-y-scroll p-0 border-0 bg-white backdrop-blur-xl"
                   >
-                    <div className="relative bg-gradient-to-r from-[#e1f6fb] to-indigo-600 p-6 pb-8">
+                    <div className="relative bg-[#0066ff] p-6 pb-8">
                       <div className="absolute inset-0 bg-black/10"></div>
                       <div className="relative z-10">
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                              <MapPin className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                              <h2 className="text-white font-bold text-lg">Tranzbook</h2>
-                            </div>
+                        <Image src='/altlogowhite.png' className='h-8 w-full' width={50} height={20} alt=''/>
+                      
                           </div>
                         </div>
                         {user && (
@@ -450,11 +447,11 @@ export function Navbar({ user }: NavbarProps) {
                             <AccordionItem value="resources" className="border-0">
                               <AccordionTrigger className="group flex items-center justify-between p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-blue-100/50 hover:bg-white/80 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] hover:no-underline">
                                 <div className="flex items-center space-x-4">
-                                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                                  <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg">
                                     <Calendar className="w-5 h-5 text-white" />
                                   </div>
                                   <div>
-                                    <p className="font-semibold text-gray-900 group-hover:text-purple-700 transition-colors">
+                                    <p className="font-semibold text-left text-gray-900 group-hover:text-orange-600 transition-colors">
                                       Resources
                                     </p>
                                     <p className="text-sm text-gray-500">
