@@ -318,7 +318,7 @@ function Whycards({ activeButton }: WhycardsProps) {
             <div className="text-center">
           
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-w-4xl max-h-[85vh] bg-white overflow-hidden">
+                <DialogContent className="sm:max-w-lg z-[999999] justify-center bg-white overflow-hidden">
                   <DialogHeader className="pb-4 border-b">
                     <DialogTitle className="text-2xl font-bold text-gray-900">
                       Register Your Cargo Company
