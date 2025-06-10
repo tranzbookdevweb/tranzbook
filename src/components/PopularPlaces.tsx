@@ -78,7 +78,7 @@ export function PopularPlace() {
 
   // Mobile slider settings - one card at a time
   const mobileSliderSettings = {
-    dots: true,
+    dots: false,
     infinite: locations.length > 1,
     speed: 500,
     slidesToShow: 1,

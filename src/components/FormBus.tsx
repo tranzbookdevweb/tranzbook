@@ -140,8 +140,8 @@ export default function FormBus() {
   const isFormValid = fromLocation && toLocation && date && ticketQuantity > 0;
 
   return (
-    <div className="grid max-lg:grid-cols-1 border-[#fdb022] my-5 w-full max-lg:rounded-t-[1pc] max-lg:rounded-b-none rounded-[1pc] border-2 grid-cols-[1fr_auto] justify-items-center justify-center items-center shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <form onSubmit={handleSubmit} className="grid grid-cols-5 w-full max-lg:grid-cols-2">
+    <div className="grid max-lg:grid-cols-1 border-[#fdb022] my-5  w-full max-lg:rounded-t-[1pc] max-lg:rounded-b-none rounded-[1pc] border-2 grid-cols-[1fr_auto] justify-items-center justify-center items-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <form onSubmit={handleSubmit} className="grid grid-cols-5 max-sm:max-w-6xl mx-auto w-full max-lg:grid-cols-2">
         <div className="flex items-center lg:rounded-l-[1pc] max-lg:rounded-tl-[1pc] bg-white border-r-2 max-lg:border-none border-[#48A0ff] p-3 hover:bg-gray-50 transition-colors duration-200">
           <PanoramaFishEyeRounded className="text-blue-500 text-xl mr-2 flex-shrink-0" />
           <div className="flex text-gray-600 flex-col w-full">

@@ -372,7 +372,7 @@ export function Navbar({ user }: NavbarProps) {
                   </SheetTrigger>
                   <SheetContent 
                     side="right" 
-                    className="w-full sm:w-96 z-[999999] overflow-y-scroll p-0 border-0 bg-white backdrop-blur-xl"
+                    className="w-full sm:max-w-2xl z-[999999] overflow-y-scroll p-0 border-0 bg-white backdrop-blur-xl"
                   >
                     <div className="relative bg-[#0066ff] p-6 pb-8">
                       <div className="absolute inset-0 bg-black/10"></div>
