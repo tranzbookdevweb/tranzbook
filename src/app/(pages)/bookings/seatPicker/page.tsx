@@ -14,6 +14,8 @@ import {
   FoodBank,
 } from "@mui/icons-material";
 import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
+
 // Type definitions for better TypeScript support
 type StepStatus = 'completed' | 'active' | 'pending';
 interface StepStyles {
@@ -22,6 +24,7 @@ interface StepStyles {
   description: string;
   connector: string;
 }
+
 // Enhanced Progress Bar Component with mobile-first design
 const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean }> = ({ 
   currentStep = 1, 
@@ -50,12 +53,14 @@ const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean
       icon: <CreditCard size={16} />
     }
   ];
+
   const getStepStatus = (stepId: number): StepStatus => {
     if (isCompleted) return 'completed';
     if (stepId < currentStep) return 'completed';
     if (stepId === currentStep) return 'active';
     return 'pending';
   };
+
   const getStepStyles = (status: StepStatus): StepStyles => {
     switch (status) {
       case 'completed':
@@ -88,6 +93,7 @@ const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean
         };
     }
   };
+
   return (
     <div className="w-full bg-gradient-to-br from-slate-50 to-blue-50 border-b shadow-sm">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
@@ -160,6 +166,7 @@ const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean
     </div>
   );
 };
+
 // Interfaces (keeping your existing ones)
 interface Bus {
   id: string;
@@ -175,11 +182,13 @@ interface Bus {
   seatBelts: boolean;
   onboardFood: boolean;
 }
+
 interface Driver {
   id: string;
   firstName: string;
   lastName: string;
 }
+
 interface Route {
   id: string;
   startCity: { id: string; name: string };
@@ -187,12 +196,14 @@ interface Route {
   duration: number;
   distance: number;
 }
+
 interface SeatAvailability {
   date: string;
   availableSeats: number;
   bookedSeats: number[];
   status: string;
 }
+
 interface PassengerDetail {
   name: string;
   phoneNumber: string;
@@ -201,6 +212,7 @@ interface PassengerDetail {
   kinContact: string;
   kinEmail?: string;
 }
+
 interface Trip {
   id: string;
   date: string | null;
@@ -211,9 +223,11 @@ interface Trip {
   route: Route;
   seatAvailability: SeatAvailability[];
 }
+
 // Enhanced Trip Info Header Component - Mobile Responsive
 const TripInfoHeader: React.FC<{ tripData: Trip }> = ({ tripData }) => {
   const { route, departureTime, bus } = tripData;
+  const router = useRouter();
   
   function calculateArrivalTime(departureTime: string, duration: number): string {
     const [hours, minutes] = departureTime.split(":").map(Number);
@@ -224,18 +238,23 @@ const TripInfoHeader: React.FC<{ tripData: Trip }> = ({ tripData }) => {
     const arrivalMinutes = departureDate.getMinutes().toString().padStart(2, "0");
     return `${arrivalHours}:${arrivalMinutes}`;
   }
+
   const arrivalTime = calculateArrivalTime(departureTime, route.duration);
+
   return (
     <div className="bg-white border-b shadow-sm">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-6">
         <div className="flex items-center justify-between flex-wrap gap-2 sm:gap-4">
-          <button className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+          <button 
+            onClick={() => router.back()}
+            className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
             <ArrowLeft size={16} className="sm:w-5 sm:h-5" />
             <span className="font-medium text-sm sm:text-base">Back</span>
           </button>
           
           {/* Mobile: Stack vertically, Desktop: Horizontal */}
-          <div className="flex  items-center space-x-4 md:space-x-8 w-full sm:w-auto">
+          <div className="flex items-center space-x-4 md:space-x-8 w-full sm:w-auto">
             <div className="flex items-center space-x-1 sm:space-x-2">
               <Route size={16} className="text-blue-600 sm:w-5 sm:h-5" />
               <span className="font-semibold text-gray-900 text-sm sm:text-base">
@@ -262,8 +281,10 @@ const TripInfoHeader: React.FC<{ tripData: Trip }> = ({ tripData }) => {
     </div>
   );
 };
+
 const PageContainer: React.FC = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const tripId = searchParams.get("tripId");
   const dateParam = searchParams.get("date");
   const baseApiUrl = `/api/GET/getTripById?id=${tripId}${dateParam ? `&date=${dateParam}` : ''}`;
@@ -291,6 +312,7 @@ const PageContainer: React.FC = () => {
     if (selectedSeats.length > 0 && passengerDetailsFilled && !isBooked) return 3;
     return 3;
   };
+
   const fetchTripData = async () => {
     if (isFetching.current) {
       console.log("Fetch already in progress, skipping...");
@@ -336,6 +358,7 @@ const PageContainer: React.FC = () => {
       isFetching.current = false;
     }
   };
+
   useEffect(() => {
     if (!tripId || !dateParam) {
       console.log("Missing tripId or dateParam:", { tripId, dateParam });
@@ -343,9 +366,11 @@ const PageContainer: React.FC = () => {
     }
     fetchTripData();
   }, [tripId, dateParam]);
+
   useEffect(() => {
     setTicketLimitReached(selectedSeats.length >= ticketQuantity);
   }, [selectedSeats, ticketQuantity]);
+
   useEffect(() => {
     if (selectedSeats.length > 0) {
       const newPassengerDetails = Array(selectedSeats.length).fill({
@@ -362,6 +387,7 @@ const PageContainer: React.FC = () => {
       setPassengerDetails([]);
     }
   }, [selectedSeats.length]);
+
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -376,6 +402,31 @@ const PageContainer: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSidebar]);
+
+  // Check if ticket quantity exceeds available seats
+  if (tripData && ticketQuantity > remainingSeats) {
+    return (
+      <main className='min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center'>
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 max-w-md w-full text-center">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            Unable to Process Booking
+          </h2>
+          <p className="text-gray-600 mb-6">
+            The requested number of tickets ({ticketQuantity}) exceeds the available seats ({remainingSeats}) for this trip.
+            Please select fewer tickets or choose a different trip.
+          </p>
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <ArrowLeft size={16} className="mr-2" />
+            Go Back
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   if (!tripData) {
     return (
       <main className='min-h-screen bg-gradient-to-br from-gray-50 to-blue-50'>
@@ -388,12 +439,13 @@ const PageContainer: React.FC = () => {
             <BusDetailsSkeleton />
           </section>
           <section className='flex flex-col items-center justify-center flex-1 bg-white p-8'>
-         <SeatSelectionSkeleton/>
+            <SeatSelectionSkeleton/>
           </section>
         </div>
       </main>
     );
   }
+
   const {
     price: busFare,
     departureTime,
@@ -401,6 +453,7 @@ const PageContainer: React.FC = () => {
     driver,
     route,
   } = tripData;
+
   function calculateArrivalTime(departureTime: string, duration: number): string {
     const [hours, minutes] = departureTime.split(":").map(Number);
     const departureDate = new Date();
@@ -410,7 +463,9 @@ const PageContainer: React.FC = () => {
     const arrivalMinutes = departureDate.getMinutes().toString().padStart(2, "0");
     return `${arrivalHours}:${arrivalMinutes}`;
   }
+
   const tripArrivalTime = calculateArrivalTime(departureTime, route.duration);
+
   const busExtras = [
     bus.wifi && { name: "Wi-Fi", icon: <Wifi size={12} /> },
     bus.airConditioning && {
@@ -434,6 +489,7 @@ const PageContainer: React.FC = () => {
       icon: <FoodBank className='text-[17px]' />,
     },
   ].filter((extra) => extra !== false);
+
   const handleSeatSelection = (seatId: string) => {
     if (selectedSeats.includes(seatId)) {
       setSelectedSeats((prev) => prev.filter((s) => s !== seatId));
@@ -451,9 +507,11 @@ const PageContainer: React.FC = () => {
     
     setSelectedSeats((prev) => [...prev, seatId]);
   };
+
   const handleClearSeats = () => {
     setSelectedSeats([]);
   };
+
   const handleSelectAllSeats = () => {
     const availableSeats = Array.from(
       { length: bus.capacity },
@@ -468,6 +526,7 @@ const PageContainer: React.FC = () => {
     console.log(`Selecting ${seatsToSelect.length} of ${availableSeats.length} available seats (limit: ${ticketQuantity})`);
     setSelectedSeats(seatsToSelect);
   };
+
   const handleBooking = async () => {
     if (selectedSeats.length === 0) {
       toast({
@@ -559,6 +618,7 @@ const PageContainer: React.FC = () => {
       });
     }
   };
+
   return (
     <main className='min-h-screen bg-gradient-to-br from-gray-50 to-blue-50'>
       {/* Trip Info Header */}
@@ -569,9 +629,10 @@ const PageContainer: React.FC = () => {
         currentStep={getCurrentStep()} 
         isCompleted={isBooked}
       />
+      
       {/* Main Content Area */}
       <div className='max-w-6xl mx-auto px-4 py-8'>
-        <div className='grid grid-cols-1 lg:grid-cols-5  gap-8 min-h-screen'>
+        <div className='grid grid-cols-1 lg:grid-cols-5 gap-8 min-h-screen'>
           {/* Enhanced Sidebar */}
           <div className='lg:col-span-2 max-lg:hidden'>
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 sticky top-8">
@@ -653,7 +714,9 @@ const PageContainer: React.FC = () => {
               )}
             </div>
           </div>
-           <div className='lg:col-span-2 lg:hidden'>
+          
+          {/* Mobile Sidebar */}
+          <div className='lg:col-span-2 lg:hidden'>
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 sticky top-8">
               <BusDetails
                 busImage={busImage}
@@ -694,6 +757,7 @@ const PageContainer: React.FC = () => {
     </main>
   );
 };
+
 const PageContent = () => (
   <Suspense fallback={
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
@@ -706,4 +770,5 @@ const PageContent = () => (
     <PageContainer />
   </Suspense>
 );
+
 export default PageContent;

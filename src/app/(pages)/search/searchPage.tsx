@@ -3,7 +3,7 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { BookingFilterAccordion } from '@/components/FilterComponent';
 import FormBus from '@/components/FormBus';
-import { ArrowRight, Calendar, Clock, Filter, Loader2, MapPin } from 'lucide-react';
+import { ArrowRight, Calendar, Clock, Filter, Loader2, MapPin, Shield } from 'lucide-react';
 import NoBusFound from '@/app/admin/components/NoBusFound';
 import { useSearchParams } from 'next/navigation';
 import { format, addMinutes, parse } from 'date-fns';
@@ -479,48 +479,46 @@ const [error, setError] = useState<string>('');
   >
     Book
   </Button>
-)}                       <DialogContent className="sm:max-w-[425px] bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+)}
+       <DialogContent className="sm:max-w-[425px] bg-white rounded-lg shadow-lg">
   <div className="p-6">
     <DialogHeader className="text-center mb-6">
-      <DialogTitle className="text-xl font-semibold text-gray-800">Authentication Required</DialogTitle>
-      <DialogDescription className="text-gray-600 text-center">
-        {error ? (
-          <div className="space-y-2">
-            <p className="text-red-600 font-medium">Session Error</p>
-            <p>{error}</p>
-            <p className="mt-2">Please log in again to continue.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <p>Complete your booking with a verified account.</p>
-            <p className="text-gray-500 text-sm">We&apos;ll need you to log in to proceed with your trip reservation.</p>
-          </div>
-        )}
+      <div className="flex items-center justify-center mb-2">
+        <img src="/logoalt.png" alt="TranzBook" className="h-10" />
+      </div>
+      <DialogTitle className="text-xl text-center font-bold text-black">Login Required to Continue</DialogTitle>
+      <DialogDescription className="text-gray-600 justify-center text-center">
+        <div className="space-y-2 text-center justify-center">
+          <p>To keep your data secure, please sign in before proceeding.</p>
+        </div>
       </DialogDescription>
     </DialogHeader>
     
     <div className="flex justify-center gap-4 mt-4">
-      <Button 
+ <Button 
         variant="outline" 
-        className="bg-white border-gray-300 hover:bg-gray-50 text-gray-700 transition-all duration-200 ease-in-out"
+        className="bg-white px-6 border-gray-300 rounded-[12px] hover:bg-gray-50 text-gray-700 transition-all duration-200 ease-in-out"
         onClick={() => setOpenDialog(false)}
       >
         Cancel
       </Button>
       <Button 
-        className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 ease-in-out"
+        className="bg-blue-600 px-8 rounded-[12px] hover:bg-blue-700 text-white transition-all duration-200 ease-in-out"
         onClick={() => {
           setOpenDialog(false);
           window.location.href = '/login';
         }}
       >
-        Continue to Login
+        Log in to Continue
       </Button>
     </div>
   </div>
   
-  <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-    <p className="text-xs text-gray-500 text-center">Your data is secure with us. We never share your information.</p>
+  <div className="items-center text-center pb-4">
+    <div className="flex items-center justify-center text-xs text-gray-500">
+      <Shield className="w-3 h-3 mr-1" />
+      <span>We respect your privacy. Your information is safe and never shared.</span>
+    </div>
   </div>
 </DialogContent>
                       </Dialog>
