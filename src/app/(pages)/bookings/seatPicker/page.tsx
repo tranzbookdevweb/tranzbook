@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useEffect, useState, Suspense, useRef } from "react";
+import React, { useEffect, useState, useRef, Suspense } from "react";
 import BusDetails from "../_components/busDetails";
 import SeatSelection from "../_components/seatSelection";
 import Ticket from "../_components/ticket";
@@ -15,17 +14,14 @@ import {
   FoodBank,
 } from "@mui/icons-material";
 import { useToast } from "@/components/ui/use-toast";
-
 // Type definitions for better TypeScript support
 type StepStatus = 'completed' | 'active' | 'pending';
-
 interface StepStyles {
   circle: string;
   title: string;
   description: string;
   connector: string;
 }
-
 // Enhanced Progress Bar Component with mobile-first design
 const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean }> = ({ 
   currentStep = 1, 
@@ -54,14 +50,12 @@ const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean
       icon: <CreditCard size={16} />
     }
   ];
-
   const getStepStatus = (stepId: number): StepStatus => {
     if (isCompleted) return 'completed';
     if (stepId < currentStep) return 'completed';
     if (stepId === currentStep) return 'active';
     return 'pending';
   };
-
   const getStepStyles = (status: StepStatus): StepStyles => {
     switch (status) {
       case 'completed':
@@ -94,7 +88,6 @@ const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean
         };
     }
   };
-
   return (
     <div className="w-full bg-gradient-to-br from-slate-50 to-blue-50 border-b shadow-sm">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
@@ -108,7 +101,6 @@ const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean
               }}
             />
           </div>
-
           {/* Steps Container - Mobile Responsive */}
           <div className="relative flex justify-between items-start">
             {steps.map((step, index) => {
@@ -133,7 +125,6 @@ const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean
                       </div>
                     )}
                   </div>
-
                   {/* Step Content - Mobile responsive text */}
                   <div className="mt-2 sm:mt-4 md:mt-6 text-center max-w-24 sm:max-w-32 md:max-w-40">
                     <h3 className={`text-xs sm:text-sm md:text-base lg:text-lg font-bold transition-all duration-300 ${styles.title}`}>
@@ -145,7 +136,6 @@ const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean
                       {step.description}
                     </p>
                   </div>
-
                   {/* Step Number Badge - Responsive sizing */}
                   <div className={`
                     absolute -top-1 -right-1 sm:-top-2 sm:-right-2 md:-top-3 md:-right-3 
@@ -166,44 +156,10 @@ const BookingProgressBar: React.FC<{ currentStep?: number; isCompleted?: boolean
             })}
           </div>
         </div>
-
-        {/* Enhanced Progress Summary - Mobile responsive */}
-        <div className="mt-6 sm:mt-10 bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                <div>
-                  <p className="text-xs sm:text-sm font-medium text-gray-600">Current Step</p>
-                  <p className="text-sm sm:text-lg md:text-xl font-bold text-gray-900">
-                    {isCompleted ? '🎉 Completed!' : `${steps[currentStep - 1]?.shortTitle || steps[currentStep - 1]?.title}`}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-xs sm:text-sm font-medium text-gray-600">Progress</p>
-                <p className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
-                  {isCompleted ? '100%' : `${Math.round((currentStep / steps.length) * 100)}%`}
-                </p>
-              </div>
-            </div>
-            
-            {/* Enhanced Progress Bar - Mobile responsive */}
-            <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 shadow-inner">
-              <div 
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 sm:h-3 rounded-full transition-all duration-700 ease-out shadow-sm relative overflow-hidden"
-                style={{ width: isCompleted ? '100%' : `${(currentStep / steps.length) * 100}%` }}
-              >
-                <div className="absolute inset-0 bg-white opacity-30 animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
-
 // Interfaces (keeping your existing ones)
 interface Bus {
   id: string;
@@ -219,13 +175,11 @@ interface Bus {
   seatBelts: boolean;
   onboardFood: boolean;
 }
-
 interface Driver {
   id: string;
   firstName: string;
   lastName: string;
 }
-
 interface Route {
   id: string;
   startCity: { id: string; name: string };
@@ -233,14 +187,12 @@ interface Route {
   duration: number;
   distance: number;
 }
-
 interface SeatAvailability {
   date: string;
   availableSeats: number;
   bookedSeats: number[];
   status: string;
 }
-
 interface PassengerDetail {
   name: string;
   phoneNumber: string;
@@ -249,7 +201,6 @@ interface PassengerDetail {
   kinContact: string;
   kinEmail?: string;
 }
-
 interface Trip {
   id: string;
   date: string | null;
@@ -260,7 +211,6 @@ interface Trip {
   route: Route;
   seatAvailability: SeatAvailability[];
 }
-
 // Enhanced Trip Info Header Component - Mobile Responsive
 const TripInfoHeader: React.FC<{ tripData: Trip }> = ({ tripData }) => {
   const { route, departureTime, bus } = tripData;
@@ -274,9 +224,7 @@ const TripInfoHeader: React.FC<{ tripData: Trip }> = ({ tripData }) => {
     const arrivalMinutes = departureDate.getMinutes().toString().padStart(2, "0");
     return `${arrivalHours}:${arrivalMinutes}`;
   }
-
   const arrivalTime = calculateArrivalTime(departureTime, route.duration);
-
   return (
     <div className="bg-white border-b shadow-sm">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-6">
@@ -287,7 +235,7 @@ const TripInfoHeader: React.FC<{ tripData: Trip }> = ({ tripData }) => {
           </button>
           
           {/* Mobile: Stack vertically, Desktop: Horizontal */}
-          <div className="flex  items-start items-center  space-x-4 md:space-x-8 w-full sm:w-auto">
+          <div className="flex  items-center space-x-4 md:space-x-8 w-full sm:w-auto">
             <div className="flex items-center space-x-1 sm:space-x-2">
               <Route size={16} className="text-blue-600 sm:w-5 sm:h-5" />
               <span className="font-semibold text-gray-900 text-sm sm:text-base">
@@ -314,7 +262,6 @@ const TripInfoHeader: React.FC<{ tripData: Trip }> = ({ tripData }) => {
     </div>
   );
 };
-
 const PageContainer: React.FC = () => {
   const searchParams = useSearchParams();
   const tripId = searchParams.get("tripId");
@@ -344,7 +291,6 @@ const PageContainer: React.FC = () => {
     if (selectedSeats.length > 0 && passengerDetailsFilled && !isBooked) return 3;
     return 3;
   };
-
   const fetchTripData = async () => {
     if (isFetching.current) {
       console.log("Fetch already in progress, skipping...");
@@ -360,13 +306,11 @@ const PageContainer: React.FC = () => {
       const data: Trip = await response.json();
       console.log("API Response:", JSON.stringify(data, null, 2));
       setTripData(data);
-
       if (data.bus.image) {
         setBusImage(
           `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/images/${data.bus.image}`
         );
       }
-
       if (dateParam && data.seatAvailability.length > 0) {
         const normalizedDateParam = new Date(dateParam).toISOString().slice(0, 10);
         const availability = data.seatAvailability.find(
@@ -392,7 +336,6 @@ const PageContainer: React.FC = () => {
       isFetching.current = false;
     }
   };
-
   useEffect(() => {
     if (!tripId || !dateParam) {
       console.log("Missing tripId or dateParam:", { tripId, dateParam });
@@ -400,11 +343,9 @@ const PageContainer: React.FC = () => {
     }
     fetchTripData();
   }, [tripId, dateParam]);
-
   useEffect(() => {
     setTicketLimitReached(selectedSeats.length >= ticketQuantity);
   }, [selectedSeats, ticketQuantity]);
-
   useEffect(() => {
     if (selectedSeats.length > 0) {
       const newPassengerDetails = Array(selectedSeats.length).fill({
@@ -421,7 +362,6 @@ const PageContainer: React.FC = () => {
       setPassengerDetails([]);
     }
   }, [selectedSeats.length]);
-
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -433,11 +373,9 @@ const PageContainer: React.FC = () => {
         setShowSidebar(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSidebar]);
-
   if (!tripData) {
     return (
       <main className='min-h-screen bg-gradient-to-br from-gray-50 to-blue-50'>
@@ -456,7 +394,6 @@ const PageContainer: React.FC = () => {
       </main>
     );
   }
-
   const {
     price: busFare,
     departureTime,
@@ -464,7 +401,6 @@ const PageContainer: React.FC = () => {
     driver,
     route,
   } = tripData;
-
   function calculateArrivalTime(departureTime: string, duration: number): string {
     const [hours, minutes] = departureTime.split(":").map(Number);
     const departureDate = new Date();
@@ -474,7 +410,6 @@ const PageContainer: React.FC = () => {
     const arrivalMinutes = departureDate.getMinutes().toString().padStart(2, "0");
     return `${arrivalHours}:${arrivalMinutes}`;
   }
-
   const tripArrivalTime = calculateArrivalTime(departureTime, route.duration);
   const busExtras = [
     bus.wifi && { name: "Wi-Fi", icon: <Wifi size={12} /> },
@@ -499,7 +434,6 @@ const PageContainer: React.FC = () => {
       icon: <FoodBank className='text-[17px]' />,
     },
   ].filter((extra) => extra !== false);
-
   const handleSeatSelection = (seatId: string) => {
     if (selectedSeats.includes(seatId)) {
       setSelectedSeats((prev) => prev.filter((s) => s !== seatId));
@@ -517,11 +451,9 @@ const PageContainer: React.FC = () => {
     
     setSelectedSeats((prev) => [...prev, seatId]);
   };
-
   const handleClearSeats = () => {
     setSelectedSeats([]);
   };
-
   const handleSelectAllSeats = () => {
     const availableSeats = Array.from(
       { length: bus.capacity },
@@ -536,7 +468,6 @@ const PageContainer: React.FC = () => {
     console.log(`Selecting ${seatsToSelect.length} of ${availableSeats.length} available seats (limit: ${ticketQuantity})`);
     setSelectedSeats(seatsToSelect);
   };
-
   const handleBooking = async () => {
     if (selectedSeats.length === 0) {
       toast({
@@ -547,11 +478,11 @@ const PageContainer: React.FC = () => {
       return;
     }
     
-    if (selectedSeats.length > ticketQuantity) {
+    if (selectedSeats.length !== ticketQuantity) {
       toast({
         variant: "destructive",
-        title: "Too many seats",
-        description: `You can only book up to ${ticketQuantity} seat${ticketQuantity > 1 ? 's' : ''}`
+        title: "Incomplete selection",
+        description: `Please select exactly ${ticketQuantity} seat${ticketQuantity > 1 ? 's' : ''} for your booking`
       });
       return;
     }
@@ -582,19 +513,16 @@ const PageContainer: React.FC = () => {
       const generateReference = (): string => {
         return Math.random().toString(36).substr(2, 6).toUpperCase();
       };
-
       const reference = generateReference();
       setBookingReference(reference);
       
       const seatNumbers = selectedSeats.map((seat) => parseInt(seat, 10));
-
       const bookingData = {
         reference,
         tripId,
         seatNumber: seatNumbers,
         passengerDetails: passengerDetails.slice(0, selectedSeats.length)
       };
-
       console.log("Sending booking request with data:", bookingData);
       const response = await fetch(
         `/api/POST/Booking?currentDate=${currentDate.toISOString()}`,
@@ -604,7 +532,6 @@ const PageContainer: React.FC = () => {
           body: JSON.stringify(bookingData),
         }
       );
-
       if (response.ok) {
         toast({
           title: "Success!",
@@ -632,7 +559,6 @@ const PageContainer: React.FC = () => {
       });
     }
   };
-
   return (
     <main className='min-h-screen bg-gradient-to-br from-gray-50 to-blue-50'>
       {/* Trip Info Header */}
@@ -644,7 +570,7 @@ const PageContainer: React.FC = () => {
         isCompleted={isBooked}
       />
       {/* Main Content Area */}
-      <div className='max-w-6xl mx-auto  px-4 py-8'>
+      <div className='max-w-6xl mx-auto px-4 py-8'>
         <div className='grid grid-cols-1 lg:grid-cols-5  gap-8 min-h-screen'>
           {/* Enhanced Sidebar */}
           <div className='lg:col-span-2 max-lg:hidden'>
@@ -768,7 +694,6 @@ const PageContainer: React.FC = () => {
     </main>
   );
 };
-
 const PageContent = () => (
   <Suspense fallback={
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
@@ -781,5 +706,4 @@ const PageContent = () => (
     <PageContainer />
   </Suspense>
 );
-
 export default PageContent;

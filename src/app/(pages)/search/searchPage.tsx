@@ -3,11 +3,10 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { BookingFilterAccordion } from '@/components/FilterComponent';
 import FormBus from '@/components/FormBus';
-import { ArrowRight, Calendar, Clock, Filter, MapPin } from 'lucide-react';
+import { ArrowRight, Calendar, Clock, Filter, Loader2, MapPin } from 'lucide-react';
 import NoBusFound from '@/app/admin/components/NoBusFound';
 import { useSearchParams } from 'next/navigation';
 import { format, addMinutes, parse } from 'date-fns';
-
 // Shadcn components
 import {
   Pagination,
@@ -22,20 +21,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import SkeletonLoader from './SkeletonLoader';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 type CompanyData = {
   id: string;
   name: string;
   email?: string;
   logo?: string;
 };
-
 type SeatAvailability = {
   date: string;
   availableSeats: number;
   bookedSeats: number[];
 };
-
 type Trip = {
   id: string;
   date: string | null;
@@ -96,9 +99,7 @@ type Trip = {
   } | null;
   seatAvailability: SeatAvailability[];
 };
-
 const defaultLogo = '/images/default-logo.png';
-
 const SearchResults = () => {
   const [allResults, setAllResults] = useState<Trip[]>([]);
   const [filteredResults, setFilteredResults] = useState<Trip[]>([]);
@@ -106,18 +107,49 @@ const SearchResults = () => {
   const [sort, setSort] = useState('cheapest');
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [selectedTime, setSelectedTime] = useState<string>('');
-  const [error, setError] = useState('');
+const [error, setError] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [availableCompanies, setAvailableCompanies] = useState<CompanyData[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
   const resultsPerPage = 15;
   
   const searchParams = useSearchParams();
   const fromLocation = searchParams.get("fromLocation") || "";
   const toLocation = searchParams.get("toLocation") || "";
   const date = searchParams.get("date") || "";
-   const ticketQuantity = searchParams.get("ticketQuantity") || "";
-
+  const ticketQuantity = searchParams.get("ticketQuantity") || "";
+  // Check if user is logged in, adapted from previous fetchUserContact
+  useEffect(() => {
+    const fetchUserContact = async () => {
+      try {
+        const response = await fetch("/api/getEmail");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to fetch user contact");
+        }
+        const data = await response.json();
+        
+        // Check if email or phoneNumber exists to confirm logged-in status
+        if (data.email || data.phoneNumber) {
+          setIsLoggedIn(true);
+        } else {
+          console.error("No email or phone number available");
+          setIsLoggedIn(false);
+        }
+      } catch (error) {
+  console.error("Error fetching user contact:", error);
+  setIsLoggedIn(false);
+  // Ensure error is always a string
+  setError(error instanceof Error ? error.message : String(error));
+  // Show dialog when there's an error
+  setOpenDialog(true);
+}
+    };
+    fetchUserContact();
+  }, []);
   // Format duration to hours and minutes
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -127,7 +159,6 @@ const SearchResults = () => {
     if (mins === 0) return `${hours} hr${hours > 1 ? 's' : ''}`;
     return `${hours} hr${hours > 1 ? 's' : ''} ${mins} min${mins > 1 ? 's' : ''}`;
   };
-
   // Calculate arrival time based on departure time and duration
   const calculateArrivalTime = (departureTime: string, durationInMinutes: number) => {
     try {
@@ -138,7 +169,6 @@ const SearchResults = () => {
       return "N/A";
     }
   };
-
   // Determine time period based on departure time
   const getTimePeriod = (time: string): string => {
     const hour = parseInt(time.split(':')[0]);
@@ -148,7 +178,6 @@ const SearchResults = () => {
     if (hour >= 17 && hour < 21) return 'evening';
     return 'night';
   };
-
   const fetchResults = async () => {
     try {
       setLoading(true);
@@ -182,7 +211,6 @@ const SearchResults = () => {
       setLoading(false);
     }
   };
-
   // Apply filters client-side
   useEffect(() => {
     if (!allResults.length) return;
@@ -220,11 +248,9 @@ const SearchResults = () => {
     setTotalPages(Math.ceil(results.length / resultsPerPage));
     setPage(1);
   }, [allResults, selectedCompanies, selectedTime, sort]);
-
   useEffect(() => {
     fetchResults();
   }, [fromLocation, toLocation, date, sort]);
-
   // Handle filters
   const handleCompanyFilterChange = (companies: string[]) => {
     setSelectedCompanies(companies);
@@ -233,14 +259,12 @@ const SearchResults = () => {
   const handleTimeFilterChange = (time: string) => {
     setSelectedTime(time);
   };
-
   // Get current page results
   const getCurrentPageResults = () => {
     const startIndex = (page - 1) * resultsPerPage;
     const endIndex = startIndex + resultsPerPage;
     return filteredResults.slice(startIndex, endIndex);
   };
-
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Not specified";
     
@@ -250,7 +274,6 @@ const SearchResults = () => {
       return dateString;
     }
   };
-
   // Get available seats for the specific date
   const getAvailableSeats = (trip: Trip, searchDate: string) => {
     const availability = trip.seatAvailability.find(
@@ -258,10 +281,8 @@ const SearchResults = () => {
     );
     return availability ? availability.availableSeats : trip.bus.capacity;
   };
-
   const renderPagination = () => {
     if (totalPages <= 1) return null;
-
     return (
       <Pagination className="mt-6">
         <PaginationContent className="flex flex-wrap justify-center">
@@ -300,11 +321,9 @@ const SearchResults = () => {
       </Pagination>
     );
   };
-
   if (loading) {
     return <SkeletonLoader />;
   }
-
   return filteredResults.length > 0 ? (
     <div className="h-full mx-auto px-4 py-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
@@ -392,7 +411,6 @@ const SearchResults = () => {
                           </div>
                         </div>
                       </div>
-
                       {/* Travel time display */}
                       <div className="bg-gray-50 p-2 sm:p-3 rounded-lg mb-3 sm:mb-4">
                         <div className="flex items-center justify-between">
@@ -435,15 +453,77 @@ const SearchResults = () => {
                       <div className="text-xl sm:text-2xl font-bold text-blue-600">
                         {trip.currency} {trip.price}
                       </div>
-                      <Link
-                        href={{
-                          pathname: "/bookings/seatPicker",
-                          query: { tripId: trip.id, date: date, ticketQuantity: ticketQuantity },
-                        }}
-                        className="bg-blue-500 hover:bg-blue-600 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-white text-sm sm:text-base font-medium transition-colors inline-block text-center min-w-20 sm:min-w-24"
-                      >
-                        Book
-                      </Link>
+                      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                        {isLoggedIn ? (
+  <Link
+    href={{
+      pathname: "/bookings/seatPicker",
+      query: { tripId: trip.id, date: date, ticketQuantity: ticketQuantity },
+    }}
+    className="bg-blue-500 hover:bg-blue-600 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-white text-sm sm:text-base font-medium transition-colors inline-block text-center min-w-20 sm:min-w-24"
+    onClick={() => setIsBooking(true)}
+  >
+    {isBooking ? (
+      <div className="flex items-center gap-2">
+        <Loader2 className="animate-spin" size={16} />
+        <span>Processing...</span>
+      </div>
+    ) : (
+      <span>Book</span>
+    )}
+  </Link>
+) : (
+  <Button
+    onClick={() => setOpenDialog(true)}
+    className="bg-blue-500 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-white text-sm sm:text-base font-medium inline-block text-center min-w-20 sm:min-w-24 hover:bg-blue-600"
+  >
+    Book
+  </Button>
+)}                       <DialogContent className="sm:max-w-[425px] bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+  <div className="p-6">
+    <DialogHeader className="text-center mb-6">
+      <DialogTitle className="text-xl font-semibold text-gray-800">Authentication Required</DialogTitle>
+      <DialogDescription className="text-gray-600 text-center">
+        {error ? (
+          <div className="space-y-2">
+            <p className="text-red-600 font-medium">Session Error</p>
+            <p>{error}</p>
+            <p className="mt-2">Please log in again to continue.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <p>Complete your booking with a verified account.</p>
+            <p className="text-gray-500 text-sm">We&apos;ll need you to log in to proceed with your trip reservation.</p>
+          </div>
+        )}
+      </DialogDescription>
+    </DialogHeader>
+    
+    <div className="flex justify-center gap-4 mt-4">
+      <Button 
+        variant="outline" 
+        className="bg-white border-gray-300 hover:bg-gray-50 text-gray-700 transition-all duration-200 ease-in-out"
+        onClick={() => setOpenDialog(false)}
+      >
+        Cancel
+      </Button>
+      <Button 
+        className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 ease-in-out"
+        onClick={() => {
+          setOpenDialog(false);
+          window.location.href = '/login';
+        }}
+      >
+        Continue to Login
+      </Button>
+    </div>
+  </div>
+  
+  <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+    <p className="text-xs text-gray-500 text-center">Your data is secure with us. We never share your information.</p>
+  </div>
+</DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </div>
@@ -459,12 +539,13 @@ const SearchResults = () => {
     <NoBusFound />
   );
 };
-
 const SearchPage = () => {
   return (
     <div>
-      <div className="w-full h-full">
-        <FormBus />
+      <div className="flex-1 flex items-center justify-center ">
+    <div className="w-full max-w-7xl">        
+      <FormBus />
+        </div>
       </div>
       <Suspense fallback={<div className="p-4"><SkeletonLoader /></div>}>
         <SearchResults />
@@ -472,5 +553,4 @@ const SearchPage = () => {
     </div>
   );
 };
-
 export default SearchPage;

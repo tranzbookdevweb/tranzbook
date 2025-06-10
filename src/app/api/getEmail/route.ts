@@ -1,3 +1,4 @@
+//api/GET/getEmail
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { adminAuth } from "@/lib/firebase-admin";

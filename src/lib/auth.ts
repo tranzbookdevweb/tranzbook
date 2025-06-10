@@ -333,32 +333,47 @@ export async function loginWithGoogle(
 }
 
 // Logout
+// auth.ts
 export async function logout() {
   try {
+    // Get CSRF token for the DELETE request
+    const csrfToken = getCSRFToken();
+
+    // Sign out from Firebase
     await signOut(auth);
-    
-    const response = await fetch('/api/auth/session', { 
+
+    // Clear server-side session
+    const response = await fetch('/api/auth/session', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-      }
+        'X-CSRF-Token': csrfToken, // Include CSRF token
+      },
     });
-    
+
     if (!response.ok) {
-      console.warn('Failed to clear server session, but client logout successful');
+      const errorData = await response.json();
+      console.warn('Failed to clear server session:', errorData.error || response.statusText);
+      throw new Error('Failed to clear server session');
     }
-    
+
+    // Clear CSRF token cookie
     document.cookie = 'csrfToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    
+
+    // Clean up reCAPTCHA
     if ((window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier.clear();
-      (window as any).recaptchaVerifier = null;
+      try {
+        (window as any).recaptchaVerifier.clear();
+        (window as any).recaptchaVerifier = null; // Fixed typo
+      } catch (error) {
+        console.warn('Error clearing reCAPTCHA:', error);
+      }
     }
-    
+
     return { success: true };
   } catch (error) {
     console.error('Logout error:', error);
-    throw error;
+    throw new Error('Logout failed. Please try again.');
   }
 }
 

@@ -1,3 +1,4 @@
+//api/auth/session
 import { adminAuth } from '@/lib/firebase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
@@ -104,5 +105,31 @@ export async function POST(request: NextRequest) {
     }
     
     return NextResponse.json({ error: 'UNAUTHORIZED REQUEST!' }, { status: 401 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    // Get CSRF token from headers
+    const csrfToken = request.headers.get('X-CSRF-Token');
+    const cookieStore = cookies();
+    const storedCsrfToken = cookieStore.get('csrfToken')?.value;
+
+    // Validate CSRF token
+    if (!csrfToken || csrfToken !== storedCsrfToken) {
+      return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 401 });
+    }
+
+    // Clear session cookie
+    cookieStore.delete('session');
+    cookieStore.delete('phoneNumber');
+
+    // Clear CSRF token cookie (optional, since client also clears it)
+    cookieStore.delete('csrfToken');
+
+    return NextResponse.json({ status: 'success' }, { status: 200 });
+  } catch (error) {
+    console.error('Session deletion error:', error);
+    return NextResponse.json({ error: 'Failed to clear session' }, { status: 500 });
   }
 }
