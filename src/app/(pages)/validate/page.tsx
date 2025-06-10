@@ -271,7 +271,36 @@ const TicketLookupPage: React.FC = () => {
                 </div>
               </div>
             </div>
-
+  {ticketData.passengerDetails && ticketData.passengerDetails.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <Users className="text-blue-600" size={24} />
+                    Passenger Details
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    {ticketData.passengerDetails.map((passenger: PassengerDetail, index: number) => (
+                      <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
+                        <h4 className="font-semibold text-gray-900 mb-2">{passenger.name}</h4>
+                        <div className="space-y-1 text-sm text-gray-600">
+                          {passenger.email && (
+                            <div className="flex items-center gap-2">
+                              <Mail size={16} />
+                              <span>{passenger.email}</span>
+                            </div>
+                          )}
+                          {passenger.phoneNumber && (
+                            <div className="flex items-center gap-2">
+                              <Phone size={16} />
+                              <span>{passenger.phoneNumber}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             {/* Trip Details */}
             <div className="grid lg:grid-cols-2 gap-8">
               <div className="bg-white rounded-2xl shadow-lg p-8">
@@ -358,36 +387,7 @@ const TicketLookupPage: React.FC = () => {
 
             {/* Passenger & Driver Info */}
             <div className="grid lg:grid-cols-2 gap-8">
-              {ticketData.passengerDetails && ticketData.passengerDetails.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                    <Users className="text-blue-600" size={24} />
-                    Passenger Details
-                  </h3>
-                  
-                  <div className="space-y-6">
-                    {ticketData.passengerDetails.map((passenger: PassengerDetail, index: number) => (
-                      <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
-                        <h4 className="font-semibold text-gray-900 mb-2">{passenger.name}</h4>
-                        <div className="space-y-1 text-sm text-gray-600">
-                          {passenger.email && (
-                            <div className="flex items-center gap-2">
-                              <Mail size={16} />
-                              <span>{passenger.email}</span>
-                            </div>
-                          )}
-                          {passenger.phoneNumber && (
-                            <div className="flex items-center gap-2">
-                              <Phone size={16} />
-                              <span>{passenger.phoneNumber}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+            
 
               {ticketData.driver && (
                 <div className="bg-white rounded-2xl shadow-lg p-8">
