@@ -1,7 +1,7 @@
+import prisma from '@/app/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -220,59 +220,3 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Alternative function if you want to use it as a regular function instead of API route
-export async function getBookingByReference(reference: string) {
-  try {
-    const booking = await prisma.booking.findUnique({
-      where: { reference },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-            phoneNumber: true,
-          },
-        },
-        trip: {
-          include: {
-            route: {
-              include: {
-                startCity: true,
-                endCity: true,
-                branch: {
-                  include: {
-                    company: true,
-                  },
-                },
-              },
-            },
-            bus: true,
-            driver: true,
-          },
-        },
-        passengerDetails: true,
-      },
-    });
-
-    if (!booking) {
-      throw new Error('Booking not found');
-    }
-
-    return booking;
-  } catch (error) {
-    console.error('Error fetching booking:', error);
-    throw error;
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-// Utility function to validate booking reference format
-export function validateBookingReference(reference: string): boolean {
-  // Assuming reference format is something like TB-XXXXXXXX or similar
-  // Adjust this regex based on your actual reference format
-  const referenceRegex = /^[A-Z0-9]{6,20}$/i;
-  return referenceRegex.test(reference);
-}
