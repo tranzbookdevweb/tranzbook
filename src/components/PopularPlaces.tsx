@@ -271,7 +271,7 @@ export function PopularPlace() {
             <Slider {...desktopSliderSettings}>
               {desktopChunks.map((chunk, slideIndex) => (
                 <div key={slideIndex}>
-                  <div className="grid grid-cols-3 gap-4 lg:gap-6 px-2">
+                  <div className="grid grid-cols-3 max-lg:grid-cols-2 gap-4 lg:gap-6 px-2">
                     {chunk.map((location, index) => (
                       <DesktopLocationCard key={`desktop-${slideIndex}-${index}`} location={location} index={index} />
                     ))}
@@ -280,7 +280,7 @@ export function PopularPlace() {
               ))}
             </Slider>
           ) : (
-            <div className="grid grid-cols-3 gap-4 lg:gap-6">
+            <div className="grid grid-cols-3 max-lg:grid-cols-2  gap-4 lg:gap-6">
               {locations.slice(0, 9).map((location, index) => (
                 <DesktopLocationCard key={`desktop-single-${index}`} location={location} index={index} />
               ))}
