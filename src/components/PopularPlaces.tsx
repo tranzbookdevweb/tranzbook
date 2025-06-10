@@ -200,7 +200,7 @@ export function PopularPlace() {
       }}
       className="block"
     >
-      <div className="relative w-full h-[180px] lg:h-[200px] rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 group cursor-pointer">
+      <div className="relative w-full h-[180px] lg:h-[200px] rounded-[1pc] overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 group cursor-pointer">
         {/* Background Image */}
         <img
           src={location.image}
