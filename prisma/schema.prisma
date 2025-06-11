@@ -227,6 +227,7 @@ enum Currency {
   INR  // Indian Rupee (₹)
 
   // African Currencies
+  MRO  //(Mauritanian Ouguiya)
   NGN  // Nigerian Naira (₦)
   KES  // Kenyan Shilling (KSh)
   ZAR  // South African Rand (R)
