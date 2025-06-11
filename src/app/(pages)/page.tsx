@@ -1,4 +1,3 @@
-// src/app/(pages)/page.tsx
 "use client"
 import Bus from '@/components/homeNavbuttons/Bus';
 import Cargo from '@/components/homeNavbuttons/Cargo';
@@ -9,7 +8,8 @@ import { useTheme } from "next-themes"
 import Faq from '../../components/Faq';
 import Partner from '@/components/Partner';
 import { PopularPlace } from '@/components/PopularPlaces';
-import { Helmet } from 'react-helmet'; // You'll need to install this package
+import { Helmet } from 'react-helmet';
+import TranzbookBusLoader from './Busloader';
 
 type Props = {}
 
@@ -19,14 +19,29 @@ enum ButtonType {
 }
 
 export default function UpperHome({}: Props) {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const [activeButton, setActiveButton] = useState<ButtonType>(ButtonType.Bus);
   const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Tracks loader completion
+  const [showLoader, setShowLoader] = useState(false); // Tracks if loader should be shown
 
-  // Ensure hydration match
+  // Check sessionStorage for initial load and handle hydration
   useEffect(() => {
-    setMounted(true);
+    // Check if loader has been shown in this session
+    const hasLoaderBeenShown = sessionStorage.getItem('loaderShown');
+    if (hasLoaderBeenShown) {
+      setShowLoader(false);
+      setIsLoading(false); // Skip loader if already shown
+    } else {
+      setShowLoader(true); // Show loader for first load
+    }
+    setMounted(true); // Mark as mounted for hydration
   }, []);
+
+  const handleLoaderComplete = () => {
+    sessionStorage.setItem('loaderShown', 'true'); // Mark loader as shown
+    setIsLoading(false); // Loader is done
+  };
 
   const handleButtonClick = (button: ButtonType) => {
     setActiveButton(button);
@@ -45,7 +60,6 @@ export default function UpperHome({}: Props) {
     }
   };
 
-  // Bus service structured data
   const busServiceData = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -58,11 +72,10 @@ export default function UpperHome({}: Props) {
     },
     "areaServed": {
       "@type": "Country",
-      "name": "Multiple Locations" 
+      "name": "Multiple Locations"
     }
   };
 
-  // Cargo service structured data
   const cargoServiceData = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -79,7 +92,14 @@ export default function UpperHome({}: Props) {
     }
   };
 
-  if (!mounted) return null;
+  // Show loader only if it's the first load, not mounted, or still loading
+  if (!mounted || (showLoader && isLoading)) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <TranzbookBusLoader onComplete={handleLoaderComplete} />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -127,7 +147,7 @@ export default function UpperHome({}: Props) {
       <main className='flex flex-col w-full h-full items-center overflow-x-hidden'>
         <h1 className="sr-only">{activeButton === ButtonType.Bus ? 'Tranzbook - Online Bus Booking Services' : 'Tranzbook - Cargo Delivery Services'}</h1>
         
-        <div className={`bg-[#DEF5FB] ${theme === 'dark'? 'bg-gray-900':''} w-full rounded-b-[2pc] pb-20`} >
+        <div className={`bg-[#DEF5FB] ${theme === 'dark' ? 'bg-gray-900' : ''} w-full rounded-b-[2pc] pb-20`} >
           <section aria-labelledby="booking-options">
             <h2 id="booking-options" className="sr-only">Booking Options</h2>
             <div className='flex p-2 flex-col items-center'>
@@ -157,20 +177,20 @@ export default function UpperHome({}: Props) {
               </div>
             </div>
             <div className='Bus' role="region" aria-live="polite">
-              {activeButton === ButtonType.Bus && <Bus/>}
-              {activeButton === ButtonType.Cargo && <Cargo/> }
+              {activeButton === ButtonType.Bus && <Bus />}
+              {activeButton === ButtonType.Cargo && <Cargo />}
             </div>
           </section>
         </div>
 
         <section aria-labelledby="services-section">
           <h2 id="services-section" className="sr-only">Our Services</h2>
-          <Widgets activeButton={activeButton}/>
+          <Widgets activeButton={activeButton} />
         </section>
         
         <section aria-labelledby="why-section">
           <h2 id="why-section" className="sr-only">Why Choose Tranzbook</h2>
-          <Why activeButton={activeButton}/>
+          <Why activeButton={activeButton} />
         </section>
         
         <section aria-labelledby="popular-places">
@@ -180,12 +200,12 @@ export default function UpperHome({}: Props) {
         
         <section aria-labelledby="partners">
           <h2 id="partners" className="sr-only">Our Partners</h2>
-          <Partner/>
+          <Partner />
         </section>
       
         <section id='Faq' aria-labelledby="faq-section">
           <h2 id="faq-section" className="sr-only">Frequently Asked Questions</h2>
-          <Faq activeButton={activeButton}/>
+          <Faq activeButton={activeButton} />
         </section>
       </main>
     </>
