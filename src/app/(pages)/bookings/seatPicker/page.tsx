@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useRef, Suspense } from "react";
 import BusDetails from "../_components/busDetails";
 import SeatSelection from "../_components/seatSelection";
-import Ticket from "../_components/ticket";
 import { BusDetailsSkeleton } from "../_components/Skeletons/busDetailsSkeleton";
 import { SeatSelectionSkeleton } from "../_components/Skeletons/seatSelectionSkeleton";
 import { CircularProgress } from "@mui/material";
@@ -15,6 +14,7 @@ import {
 } from "@mui/icons-material";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import Tickets from "../_components/ticket";
 
 // Type definitions for better TypeScript support
 type StepStatus = 'completed' | 'active' | 'pending';
@@ -674,7 +674,7 @@ const PageContainer: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden min-h-[600px]">
               {isBooked ? (
                 <div className="p-8">
-                  <Ticket
+                  <Tickets
                     ticketId={tripData.id}
                     busNumber={bus?.plateNumber ?? ""}
                     busCompany={bus.company.name}
