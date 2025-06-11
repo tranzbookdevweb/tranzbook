@@ -22,11 +22,6 @@ type Company = {
   name: string;
 };
 
-type city = {
-    id: string;
-    name: string;
-  };
-
 async function fetchCompanies() {
   try {
     const response = await fetch('/api/GET/getbusCompany');
@@ -40,25 +35,12 @@ async function fetchCompanies() {
   }
 }
 
-async function fetchcitys() {
-    try {
-      const response = await fetch('/api/GET/getLocation');
-      if (!response.ok) {
-        throw new Error('Failed to fetch companies');
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching companies:', error);
-      return [];
-    }
-  }
 function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [city, setcity] = useState('');
+  const [city, setCity] = useState('');
   const [companyId, setCompanyId] = useState('');
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [cityData, setcitys] = useState<city[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,15 +48,6 @@ function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
     const fetchData = async () => {
       const companiesData = await fetchCompanies();
       setCompanies(companiesData);
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const citysData = await fetchcitys();
-      setcitys(citysData);
     };
 
     fetchData();
@@ -111,6 +84,13 @@ function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
 
       const data = await response.json();
       console.log('Data received:', data);
+      
+      // Reset form
+      setName('');
+      setAddress('');
+      setCity('');
+      setCompanyId('');
+      
       onAddSuccess();
       alert('Branch added successfully!');
     } catch (error) {
@@ -129,72 +109,68 @@ function BranchSheet({ onAddSuccess }: { onAddSuccess: () => void }) {
         </Button>
       </SheetTrigger>
       <SheetContent className='z-[999]'>
-      <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
-        <SheetHeader>
-          <SheetTitle>Add Branch</SheetTitle>
-          <SheetDescription>Click save when you&apos;re done.</SheetDescription>
-        </SheetHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="Name" className="text-left">Name</Label>
-              <Input
-                id="Name"
-                placeholder="Branch Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="col-span-3"
-              />
+        <ScrollArea className="h-full max-h-full w-full rounded-md border p-5">
+          <SheetHeader>
+            <SheetTitle>Add Branch</SheetTitle>
+            <SheetDescription>Click save when you&apos;re done.</SheetDescription>
+          </SheetHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label htmlFor="Name" className="text-left">Name</Label>
+                <Input
+                  id="Name"
+                  placeholder="Branch Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label htmlFor="Address" className="text-left">Address</Label>
+                <Input
+                  id="Address"
+                  placeholder="Address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label htmlFor="City" className="text-left">City</Label>
+                <Input
+                  id="City"
+                  placeholder="Enter city name"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-1 items-center gap-4">
+                <Label htmlFor="CompanyId" className="text-left">Company</Label>
+                <Select value={companyId} onValueChange={setCompanyId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a company" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[99999]">
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="Address" className="text-left">Address</Label>
-              <Input
-                id="Address"
-                placeholder="Address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-1 items-center gap-4">
-            <Select value={city} onValueChange={setcity}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a city" />
-                </SelectTrigger>
-                <SelectContent className="z-[999]">
-                  {cityData.map((city) => (
-                    <SelectItem key={city.id} value={city.id}>
-                      {city.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-1 items-center gap-4">
-              <Label htmlFor="CompanyId" className="text-left">Company</Label>
-              <Select value={companyId} onValueChange={setCompanyId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a company" />
-                </SelectTrigger>
-                <SelectContent className="z-[99999]">
-                  {companies.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          {error && <p className="text-red-500">{error}</p>}
-          <SheetFooter>
-            <SheetClose asChild>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Adding...' : 'Save changes'}
-              </Button>
-            </SheetClose>
-          </SheetFooter>
-        </form>
+            {error && <p className="text-red-500">{error}</p>}
+            <SheetFooter>
+              <SheetClose asChild>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Adding...' : 'Save changes'}
+                </Button>
+              </SheetClose>
+            </SheetFooter>
+          </form>
         </ScrollArea>
       </SheetContent>
     </Sheet>

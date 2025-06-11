@@ -56,6 +56,7 @@ const QRCode: React.FC<{ value: string; size?: number }> = ({ value, size = 120 
 };
 
 // Dialog Component
+// Dialog Component
 const Dialog: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -64,14 +65,14 @@ const Dialog: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed z-[999999] inset-0  flex items-center justify-center">
+    <div className="fixed z-[999999] inset-0 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-[1pc] shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors z-10"
+          className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors z-10"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
         {children}
       </div>
@@ -107,311 +108,200 @@ const ticketContent = `
         <style>
           body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            background: #f9fafb;
-            color: #111827;
+            margin: 0;
+            padding: 20px;
+            background: #f8fafc;
+            color: #1f2937;
           }
           .ticket {
-            max-width: 800px;
+            max-width: 400px;
             margin: 0 auto;
             background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
             overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           }
           .header {
-            background: linear-gradient(to right, #3b82f6, #2563eb);
-            padding: 16px;
+            background: #4f46e5;
             color: white;
+            padding: 16px;
             text-align: center;
           }
           .header h1 {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
-            margin: 0;
+            margin: 0 0 4px 0;
           }
           .header p {
-            font-size: 14px;
-            margin: 4px 0;
-            color: #bfdbfe;
+            font-size: 12px;
+            margin: 0;
+            opacity: 0.9;
           }
-          .content {
-            padding: 24px;
-          }
-          .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-          }
-          .section-title::before {
-            content: "•";
-            margin-right: 8px;
-            color: #2563eb;
-          }
-          .journey-section {
-            background: linear-gradient(to right, #eff6ff, #dcfce7);
+          .route-section {
             padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 24px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
           }
           .route {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            justify-content: space-between;
+            margin-bottom: 8px;
           }
           .route-point {
-            text-align: center;
-            flex: 1;
-          }
-          .route-point p {
-            margin: 0;
-          }
-          .route-point .location {
-            font-weight: bold;
             font-size: 16px;
+            font-weight: bold;
+            color: #1f2937;
           }
-          .route-point .time {
+          .route-time {
             font-size: 12px;
-            color: #4b5563;
+            color: #6b7280;
+            margin-top: 2px;
           }
-          .route-line {
-            display: flex;
-            align-items: center;
-            flex: 1;
-            justify-content: center;
-          }
-          .route-line .line {
-            width: 80px;
-            height: 2px;
-            background: linear-gradient(to right, #3b82f6, #22c55e);
-            position: relative;
-            margin: 0 12px;
-          }
-          .route-line .line::before {
-            content: "🚌";
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
+          .route-arrow {
+            color: #6b7280;
             font-size: 12px;
-            background: #f9fafb;
-            padding: 0 4px;
           }
-          .duration {
-            text-align: center;
-            font-size: 14px;
-            color: #4b5563;
-            background: white;
-            padding: 4px 12px;
-            border-radius: 9999px;
-            display: inline-flex;
-            align-items: center;
-          }
-          .duration::before {
-            content: "⏰";
-            margin-right: 4px;
-          }
-          .grid-container {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
-          }
-          .info-card {
-            background: white;
-            border: 1px solid #e5e7eb;
+          .passenger-section {
             padding: 16px;
-            border-radius: 8px;
+            border-bottom: 1px solid #e5e7eb;
           }
-          .info-row {
+          .section-title {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+          }
+          .passenger-info {
+            margin-bottom: 12px;
+          }
+          .passenger-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 2px;
+          }
+          .passenger-details {
+            font-size: 12px;
+            color: #6b7280;
+          }
+          .bus-section {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          .bus-info {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
-            font-size: 14px;
           }
-          .info-row .label {
-            color: #6b7280;
-          }
-          .info-row .value {
-            font-weight: 500;
-          }
-          .qr-section {
-            text-align: center;
-            padding: 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            background: white;
-          }
-          .qr-section img {
-            width: 160px;
-            height: 160px;
-            margin-bottom: 12px;
-          }
-          .qr-section p {
+          .bus-label {
             font-size: 12px;
             color: #6b7280;
-            margin: 0;
           }
-          .notes-section {
-            background: #fefce8;
-            border: 1px solid #fef08a;
+          .bus-value {
+            font-size: 12px;
+            font-weight: 500;
+            color: #1f2937;
+          }
+          .price-section {
             padding: 16px;
-            border-radius: 8px;
-            margin-top: 24px;
+            text-align: right;
+            background: #f9fafb;
           }
-          .notes-section ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-size: 14px;
-            color: #713f12;
+          .price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
           }
-          .notes-section li {
-            margin-bottom: 4px;
+          .qr-section {
+            padding: 16px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
           }
-          .notes-section li::before {
-            content: "•";
-            margin-right: 8px;
-            color: #eab308;
+          .qr-code {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 8px;
           }
-          @media print {
-            body { margin: 0; }
-            .ticket { box-shadow: none; border: none; }
+          .qr-text {
+            font-size: 10px;
+            color: #6b7280;
+          }
+          .footer {
+            padding: 12px 16px;
+            background: #f9fafb;
+            text-align: center;
+            font-size: 10px;
+            color: #6b7280;
           }
         </style>
       </head>
       <body>
         <div class="ticket">
           <div class="header">
-            <h1>${ticketData.busCompany}</h1>
-            <p>Bus Ticket</p>
-            <p>Reference: ${ticketData.reference}</p>
-            <p>${dateString}</p>
+            <h1>Royal VVIP</h1>
+            <p>E-Ticket Confirmation</p>
           </div>
 
-          <div class="content">
-            <div class="journey-section">
-              <h3 class="section-title">Journey Details</h3>
-              <div class="route">
-                <div class="route-point">
-                  <p class="location">${ticketData.busRoute.origin}</p>
-                  <p class="time">${ticketData.tripDepartureTime}</p>
-                </div>
-                <div class="route-line">
-                  <div class="line"></div>
-                </div>
-                <div class="route-point">
-                  <p class="location">${ticketData.busRoute.destination}</p>
-                  <p class="time">${ticketData.tripArrivalTime}</p>
-                </div>
-              </div>
-              <div class="duration">
-                ${Math.floor(ticketData.tripDuration / 60)}h ${ticketData.tripDuration % 60}m
-              </div>
-            </div>
-
-            <div class="grid-container">
+          <div class="route-section">
+            <div class="route">
               <div>
-                <div class="info-card">
-                  <h4 class="section-title">Passenger Information</h4>
-                  <div class="info-row">
-                    <span class="label">Name:</span>
-                    <span class="value">${passenger.name}</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="label">Phone:</span>
-                    <span class="value">${passenger.phoneNumber}</span>
-                  </div>
-                  ${passenger.email ? `
-                    <div class="info-row">
-                      <span class="label">Email:</span>
-                      <span class="value">${passenger.email}</span>
-                    </div>
-                  ` : ''}
-                  <div class="info-row">
-                    <span class="label">Seat:</span>
-                    <span class="value">${seat}</span>
-                  </div>
-                </div>
-
-                <div class="info-card" style="margin-top: 16px;">
-                  <h4 class="section-title">Emergency Contact</h4>
-                  <div class="info-row">
-                    <span class="label">Name:</span>
-                    <span class="value">${passenger.kinName}</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="label">Phone:</span>
-                    <span class="value">${passenger.kinContact}</span>
-                  </div>
-                  ${passenger.kinEmail ? `
-                    <div class="info-row">
-                      <span class="label">Email:</span>
-                      <span class="value">${passenger.kinEmail}</span>
-                    </div>
-                  ` : ''}
-                </div>
-
-                <div class="info-card" style="margin-top: 16px;">
-                  <h4 class="section-title">Bus Information</h4>
-                  <div class="info-row">
-                    <span class="label">Company:</span>
-                    <span class="value">${ticketData.busCompany}</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="label">Bus Number:</span>
-                    <span class="value">${ticketData.busNumber}</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="label">Bus Type:</span>
-                    <span class="value">${ticketData.busDescription}</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="label">Seat:</span>
-                    <span class="value">${seat}</span>
-                  </div>
-                </div>
+                <div class="route-point">${ticketData.busRoute.origin}</div>
+                <div class="route-time">${ticketData.tripDepartureTime}</div>
               </div>
-
+              <div class="route-arrow">→</div>
               <div>
-                <div class="qr-section">
-                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(`https://tranzbook.co/validate?ref=${ticketData.reference}`)}" alt="QR Code">
-                  <p>Scan to validate ticket</p>
-                  <p style="font-family: monospace; color: #9ca3af;">${ticketData.reference}</p>
-                </div>
-
-                <div class="info-card" style="margin-top: 16px;">
-                  <h4 class="section-title">Fare Details</h4>
-                  <div class="info-row">
-                    <span class="label">Base Fare:</span>
-                    <span class="value">${ticketData.currency} ${(ticketData.totalCost / ticketData.passengerDetails.length).toFixed(2)}</span>
-                  </div>
-                  <div class="info-row" style="border-top: 1px solid #e5e7eb; padding-top: 8px; font-weight: 600;">
-                    <span>Total:</span>
-                    <span>${ticketData.currency} ${(ticketData.totalCost / ticketData.passengerDetails.length).toFixed(2)}</span>
-                  </div>
-                </div>
+                <div class="route-point">${ticketData.busRoute.destination}</div>
+                <div class="route-time">${ticketData.tripArrivalTime}</div>
               </div>
             </div>
+          </div>
 
-            <div class="notes-section">
-              <h4 class="section-title">Important Information</h4>
-              <ul>
-                <li>Arrive 30 minutes before departure time</li>
-                <li>Present valid government-issued ID along with this ticket</li>
-                <li>Ticket is non-transferable and non-refundable</li>
-                <li>Keep your ticket safe until journey completion</li>
-              </ul>
+          <div class="passenger-section">
+            <div class="section-title">Passenger & Seat(s)</div>
+            <div class="passenger-info">
+              <div class="passenger-name">${passenger.name} (Seat ${seat})</div>
+              <div class="passenger-details">
+                Phone: ${passenger.phoneNumber}<br>
+                ${passenger.email ? `Email: ${passenger.email}` : ''}
+              </div>
             </div>
+          </div>
+
+          <div class="bus-section">
+            <div class="section-title">Bus Info</div>
+            <div class="bus-info">
+              <span class="bus-label">Type:</span>
+              <span class="bus-value">${ticketData.busDescription}</span>
+            </div>
+          </div>
+
+          <div class="price-section">
+            <div class="section-title">Price</div>
+            <div class="price">${ticketData.currency} ${(ticketData.totalCost / ticketData.passengerDetails.length).toFixed(2)}</div>
+          </div>
+
+          <div class="qr-section">
+            <div class="section-title">Important Information</div>
+            <p class="qr-text">• Arrive 30 minutes before boarding</p>
+            <p class="qr-text">• Present this e-ticket or QR code at the boarding point</p>
+            <p class="qr-text">• Valid government-issued ID required during verification</p>
+            <div class="qr-code">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(`https://tranzbook.co/validate?ref=${ticketData.reference}`)}" alt="QR Code" style="width: 100%; height: 100%;">
+            </div>
+            <p class="qr-text">Scan for Verification</p>
+          </div>
+
+          <div class="footer">
+            <img src="/pictures/logo.png" alt="Tranzbook" style="height: 16px; margin-bottom: 4px;"><br>
+            Powered by Tranzbook Technologies<br>
+            Booking Ref: ${ticketData.reference}
           </div>
         </div>
       </body>
     </html>
-  `;
+    `;
+
 
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -573,183 +463,98 @@ const ticketContent = `
       </div>
 
       {/* Detailed View Dialog */}
-      <Dialog isOpen={showDialog} onClose={() => setShowDialog(false)}>
-        <div className="p-6">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Ticket Details</h2>
-            <div className="flex items-center text-gray-600">
-              <Users className="w-4 h-4 mr-1" />
-              <span>{passenger.name} • Seat {seat}</span>
+  <Dialog isOpen={showDialog} onClose={() => setShowDialog(false)}>
+        <div className="bg-indigo-600 text-white px-4 py-3 text-center">
+          <h2 className="text-lg font-bold">Royal VVIP</h2>
+          <p className="text-xs opacity-90">E-Ticket Confirmation</p>
+          <p className="text-xs opacity-75">{dateString}</p>
+        </div>
+
+        <div className="px-4 py-3 text-center border-b border-gray-100">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <div className="font-semibold text-gray-900">{ticketData.busRoute.origin}</div>
+              <div className="text-xs text-gray-500">{ticketData.tripDepartureTime}</div>
+            </div>
+            <div className="text-gray-400 text-sm">→</div>
+            <div>
+              <div className="font-semibold text-gray-900">{ticketData.busRoute.destination}</div>
+              <div className="text-xs text-gray-500">{ticketData.tripArrivalTime}</div>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Trip Info */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Route Card */}
-              <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                  <MapPin className="w-5 h-5 mr-2 text-blue-600" />
-                  Journey Details
-                </h3>
-                <div className="flex items-center justify-between">
-                  <div className="text-center">
-                    <p className="font-bold text-lg text-gray-900">{ticketData.busRoute.origin}</p>
-                    <p className="text-sm text-gray-600">{ticketData.tripDepartureTime}</p>
-                  </div>
-                  <div className="flex items-center px-4">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <div className="w-20 h-0.5 bg-gradient-to-r from-blue-500 to-green-500 mx-3"></div>
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-bold text-lg text-gray-900">{ticketData.busRoute.destination}</p>
-                    <p className="text-sm text-gray-600">{ticketData.tripArrivalTime}</p>
-                  </div>
-                </div>
-                <div className="text-center mt-3">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-white text-gray-700">
-                    <Clock className="w-4 h-4 mr-1" />
-                    {Math.floor(ticketData.tripDuration / 60)}h {ticketData.tripDuration % 60}m
-                  </span>
-                </div>
-              </div>
-
-              {/* Passenger & Emergency Contact */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    <User className="w-5 h-5 mr-2 text-blue-600" />
-                    Passenger Information
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Name:</span>
-                      <span className="font-medium">{passenger.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Phone:</span>
-                      <span className="font-medium">{passenger.phoneNumber}</span>
-                    </div>
-                    {passenger.email && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Email:</span>
-                        <span className="font-medium text-xs">{passenger.email}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    <Phone className="w-5 h-5 mr-2 text-green-600" />
-                    Emergency Contact
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Name:</span>
-                      <span className="font-medium">{passenger.kinName}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Phone:</span>
-                      <span className="font-medium">{passenger.kinContact}</span>
-                    </div>
-                    {passenger.kinEmail && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Email:</span>
-                        <span className="font-medium text-xs">{passenger.kinEmail}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Bus Details */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                  <Bus className="w-5 h-5 mr-2 text-purple-600" />
-                  Bus Information
-                </h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Company:</span>
-                    <span className="font-medium">{ticketData.busCompany}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Bus Number:</span>
-                    <span className="font-medium">{ticketData.busNumber}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Bus Type:</span>
-                    <span className="font-medium">{ticketData.busDescription}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Seat:</span>
-                    <span className="font-medium">{seat}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - QR Code & Actions */}
-            <div className="space-y-6">
-              <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-                <h4 className="font-semibold text-gray-900 mb-4">Validation QR Code</h4>
-                <div className="flex justify-center mb-4">
-<QRCode 
-  value={`https://tranzbook.co/validate?ref=${ticketData.reference}`} 
-  size={160} 
-/>                </div>
-                <p className="text-xs text-gray-500 mb-2">
-                  Scan to validate ticket
-                </p>
-                <p className="text-xs font-mono text-gray-400">
-                  {ticketData.reference}
-                </p>
-              </div>
-
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-900 mb-3">Fare Details</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Base Fare:</span>
-                    <span>{ticketData.currency} {individualFare.toFixed(2)}</span>
-                  </div>
-                  <div className="border-t pt-2 flex justify-between font-semibold">
-                    <span>Total:</span>
-                    <span className="text-lg">{ticketData.currency} {individualFare.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <button
-                  onClick={generatePDF}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center"
-                >
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share Ticket
-                </button>
-              </div>
+        <div className="px-4 py-3 border-b border-gray-100">
+          <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Passenger & Seat(s)</div>
+          <div className="mb-3">
+            <div className="font-semibold text-gray-900">{passenger.name} (Seat {seat})</div>
+            <div className="text-xs text-gray-600 mt-1">
+              Phone: {passenger.phoneNumber}
+              {passenger.email && (
+                <>
+                  <br />
+                  Email: {passenger.email}
+                </>
+              )}
             </div>
           </div>
+        </div>
 
-          {/* Important Notes */}
-          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h4 className="font-semibold text-yellow-800 mb-2">Important Information</h4>
-            <ul className="text-sm text-yellow-700 space-y-1">
-              <li>• Arrive 30 minutes before departure time</li>
-              <li>• Present valid government-issued ID along with this ticket</li>
-              <li>• Ticket is non-transferable and non-refundable</li>
-              <li>• Keep your ticket safe until journey completion</li>
-            </ul>
+        <div className="px-4 py-3 border-b border-gray-100">
+          <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Bus Info</div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Type:</span>
+            <span className="font-medium text-gray-900">{ticketData.busDescription}</span>
+          </div>
+        </div>
+
+        <div className="px-4 py-3 bg-gray-50 text-right border-b border-gray-100">
+          <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Price</div>
+          <div className="text-lg font-bold text-gray-900">
+            {ticketData.currency} {individualFare.toFixed(2)}
+          </div>
+        </div>
+
+        <div className="px-4 py-3 border-b border-gray-100">
+          <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Important Information</div>
+          <div className="text-xs text-gray-600 space-y-1">
+            <p>• Arrive 30 minutes before boarding</p>
+            <p>• Present this e-ticket or QR code at the boarding point</p>
+            <p>• Valid government-issued ID required during verification</p>
+          </div>
+        </div>
+
+        <div className="px-4 py-3 text-center border-b border-gray-100">
+          <div className="mb-2">
+            <QRCode value={`https://tranzbook.co/validate?ref=${ticketData.reference}`} size={120} />
+          </div>
+          <p className="text-xs text-gray-500">Scan for Verification</p>
+        </div>
+
+        <div className="px-4 py-3 bg-gray-50 text-center">
+          <div className="mb-2">
+            <img src="/pictures/logo.png" alt="Tranzbook" className="h-4 mx-auto mb-1" />
+          </div>
+          <p className="text-xs text-gray-500">Powered by Tranzbook Technologies</p>
+          <p className="text-xs text-gray-400 mt-1">Booking Ref: {ticketData.reference}</p>
+        </div>
+
+        <div className="px-4 py-3 bg-white border-t border-gray-100">
+          <div className="flex justify-center space-x-2">
+            <button
+              onClick={generatePDF}
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors flex items-center justify-center"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition-colors flex items-center justify-center"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share Ticket
+            </button>
           </div>
         </div>
       </Dialog>

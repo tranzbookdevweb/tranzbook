@@ -268,7 +268,7 @@ model TripDate {
 
 model City {
   id           String   @id @default(uuid())
-  name         String
+  name         String   @unique
   imageUrl     String?
   country      String
   currency     Currency @default(USD)
