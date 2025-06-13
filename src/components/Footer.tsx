@@ -6,7 +6,7 @@ import Image from "next/image";
 export default function Footer() {
   // Maintaining original links and hrefs
   const otherPages = [
-    { name: "Home", href: "/home" },
+    { name: "Home", href: "/" },
     { name: "About Us", href: "/about-us" },
     { name: "Careers", href: "/career" },
     { name: "Blog", href: "/blog" },

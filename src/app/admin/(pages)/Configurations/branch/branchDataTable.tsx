@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Table,
   TableBody,
@@ -10,12 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  CaretSortIcon,
-  ChevronDownIcon,
-  Pencil2Icon,
-  TrashIcon,
-} from "@radix-ui/react-icons";
+import { ChevronDownIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -49,22 +44,16 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import BranchSheet from '@/app/admin/components/Sheetpop/Priveleges/BranchSheet';
 
-// Updated interface to match the database schema
 interface Branch {
   id: string;
   name: string;
   address: string;
-  phoneNumber?: string;
+  phoneNumber: string | null;
   city: string;
   companyId: string;
-  company?: {
-    id: string;
+  company: {
     name: string;
-    email: string;
-    logo?: string;
   };
-  admins?: any[];
-  routes?: any[];
   createdAt: string;
   updatedAt: string;
 }
@@ -76,75 +65,101 @@ export function BranchDataTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [editingRow, setEditingRow] = useState<string | null>(null);
-  const [editData, setEditData] = useState<Partial<Branch>>({});
+  const [editData, setEditData] = useState<{ name?: string; address?: string }>({});
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [branchToDelete, setBranchToDelete] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const getBranches = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/GET/getBranches');
-      if (!response.ok) {
-        throw new Error('Failed to fetch branches');
-      }
-      const data = await response.json();
-      setData(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error fetching branches:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch branches",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+  // Refs for input fields to maintain focus
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const addressInputRef = useRef<HTMLInputElement>(null);
+
+  // Memoized input components to prevent re-renders
+  const EditableNameCell = React.memo(({ branch, isEditing }: { branch: Branch; isEditing: boolean }) => {
+    if (isEditing) {
+      return (
+        <Input
+          key={`name-${branch.id}`}
+          value={editData.name !== undefined ? editData.name : branch.name}
+          onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSaveEdit(branch.id);
+            } else if (e.key === 'Escape') {
+              handleCancelEdit();
+            }
+          }}
+          className="w-full"
+        />
+      );
     }
+    return <div>{branch.name}</div>;
+  });
+
+  const EditableAddressCell = React.memo(({ branch, isEditing }: { branch: Branch; isEditing: boolean }) => {
+    if (isEditing) {
+      return (
+        <Input
+          key={`address-${branch.id}`}
+          value={editData.address !== undefined ? editData.address : branch.address}
+          onChange={(e) => setEditData(prev => ({ ...prev, address: e.target.value }))}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSaveEdit(branch.id);
+            } else if (e.key === 'Escape') {
+              handleCancelEdit();
+            }
+          }}
+          className="w-full"
+        />
+      );
+    }
+    return <div>{branch.address}</div>;
+  });
+
+  EditableNameCell.displayName = 'EditableNameCell';
+  EditableAddressCell.displayName = 'EditableAddressCell';
+
+  // Move function definitions before columns
+  const handleCancelEdit = useCallback(() => {
+    setEditingRow(null);
+    setEditData({});
   }, []);
 
-  useEffect(() => {
-    getBranches();
-  }, [getBranches]);
+  const handleEdit = useCallback((id: string) => {
+    const branch = data.find(b => b.id === id);
+    if (branch) {
+      setEditingRow(id);
+      setEditData({
+        name: branch.name,
+        address: branch.address
+      });
+    }
+  }, [data]);
 
-  const handleAddSuccess = () => {
-    getBranches();
-  };
+  const handleDeleteClick = useCallback((id: string) => {
+    setBranchToDelete(id);
+    setDeleteDialogOpen(true);
+  }, []);
 
-  const handleEdit = (id: string) => {
-    setEditingRow(id);
-    setEditData({});
-  };
-
-  const handleSaveEdit = async (id: string) => {
+  const handleSaveEdit = useCallback(async (id: string) => {
     try {
       const originalBranch = data.find(branch => branch.id === id);
       if (!originalBranch) return;
       
-      // Create the updated branch data, ensuring required fields are present
-      const updatedBranch = {
+      const updatePayload = {
         name: editData.name !== undefined ? editData.name : originalBranch.name,
         address: editData.address !== undefined ? editData.address : originalBranch.address,
-        phoneNumber: editData.phoneNumber !== undefined ? editData.phoneNumber : originalBranch.phoneNumber,
-        city: editData.city !== undefined ? editData.city : originalBranch.city,
-        companyId: editData.companyId !== undefined ? editData.companyId : originalBranch.companyId,
+        phoneNumber: originalBranch.phoneNumber,
+        city: originalBranch.city,
+        companyId: originalBranch.companyId
       };
-
-      // Validate required fields
-      if (!updatedBranch.name || !updatedBranch.address || !updatedBranch.city || !updatedBranch.companyId) {
-        toast({
-          title: "Error",
-          description: "Name, address, city, and company are required fields",
-          variant: "destructive",
-        });
-        return;
-      }
       
       const response = await fetch(`/api/GET/getBranches?id=${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedBranch),
+        body: JSON.stringify(updatePayload),
       });
 
       if (!response.ok) {
@@ -152,12 +167,9 @@ export function BranchDataTable() {
         throw new Error(errorData.error || 'Failed to update branch');
       }
 
-      // Reset editing state
       setEditingRow(null);
       setEditData({});
-      
-      // Refresh data
-      getBranches();
+      await fetchBranches();
       
       toast({
         title: "Success",
@@ -171,47 +183,28 @@ export function BranchDataTable() {
         variant: "destructive",
       });
     }
-  };
+  }, [data, editData]);
 
-  const handleDeleteClick = (id: string) => {
-    setBranchToDelete(id);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!branchToDelete) return;
-    
+  const fetchBranches = useCallback(async () => {
     try {
-      const response = await fetch(`/api/GET/getBranches?id=${branchToDelete}`, {
-        method: 'DELETE',
-      });
-
+      const response = await fetch('/api/GET/getBranches');
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete branch');
+        throw new Error('Failed to fetch branches');
       }
-
-      // Refresh data
-      getBranches();
-      
-      toast({
-        title: "Success",
-        description: "Branch deleted successfully",
-      });
+      const result = await response.json();
+      setData(result);
     } catch (error) {
-      console.error('Error deleting branch:', error);
+      console.error('Error fetching branches:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete branch",
+        description: "Failed to fetch branches",
         variant: "destructive",
       });
-    } finally {
-      setDeleteDialogOpen(false);
-      setBranchToDelete(null);
     }
-  };
+  }, []);
 
-  const columns: ColumnDef<Branch>[] = [
+  // Define columns for Branch data
+  const columns: ColumnDef<Branch>[] = React.useMemo(() => [
     {
       accessorKey: "Sno",
       header: "Sr No",
@@ -219,32 +212,11 @@ export function BranchDataTable() {
     },
     {
       accessorKey: "name",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Name
-            <CaretSortIcon className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "Branch Name",
       cell: ({ row }) => {
         const branch = row.original;
         const isEditing = editingRow === branch.id;
-        
-        if (isEditing) {
-          return (
-            <Input
-              value={editData.name !== undefined ? editData.name : branch.name}
-              onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-              className="w-full"
-              placeholder="Branch name"
-            />
-          );
-        }
-        return <div className="font-medium">{branch.name}</div>;
+        return <EditableNameCell branch={branch} isEditing={isEditing} />;
       },
     },
     {
@@ -253,77 +225,30 @@ export function BranchDataTable() {
       cell: ({ row }) => {
         const branch = row.original;
         const isEditing = editingRow === branch.id;
-        
-        if (isEditing) {
-          return (
-            <Input
-              value={editData.address !== undefined ? editData.address : branch.address}
-              onChange={(e) => setEditData({ ...editData, address: e.target.value })}
-              className="w-full"
-              placeholder="Branch address"
-            />
-          );
-        }
-        return <div className="max-w-[200px] truncate">{branch.address}</div>;
+        return <EditableAddressCell branch={branch} isEditing={isEditing} />;
       },
     },
     {
       accessorKey: "phoneNumber",
-      header: "Phone",
+      header: "Phone Number",
       cell: ({ row }) => {
         const branch = row.original;
-        const isEditing = editingRow === branch.id;
-        
-        if (isEditing) {
-          return (
-            <Input
-              value={editData.phoneNumber !== undefined ? editData.phoneNumber : (branch.phoneNumber || '')}
-              onChange={(e) => setEditData({ ...editData, phoneNumber: e.target.value })}
-              className="w-full"
-              placeholder="Phone number"
-            />
-          );
-        }
         return <div>{branch.phoneNumber || 'N/A'}</div>;
       },
     },
     {
       accessorKey: "city",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            City
-            <CaretSortIcon className="ml-2 h-4 w-4" />
-          </Button>
-        )
-      },
+      header: "City",
       cell: ({ row }) => {
         const branch = row.original;
-        const isEditing = editingRow === branch.id;
-        
-        if (isEditing) {
-          return (
-            <Input
-              value={editData.city !== undefined ? editData.city : branch.city}
-              onChange={(e) => setEditData({ ...editData, city: e.target.value })}
-              className="w-full"
-              placeholder="City"
-            />
-          );
-        }
         return <div>{branch.city}</div>;
       },
     },
     {
-      accessorKey: "company",
+      id: "companyName",
       header: "Company",
-      cell: ({ row }) => {
-        const branch = row.original;
-        return <div className="font-medium">{branch.company?.name || 'N/A'}</div>;
-      },
+      accessorFn: (row) => row.company.name,
+      cell: ({ row }) => <div>{row.original.company.name}</div>,
     },
     {
       id: "actions",
@@ -339,18 +264,13 @@ export function BranchDataTable() {
                 size="sm" 
                 variant="default" 
                 onClick={() => handleSaveEdit(branch.id)}
-                disabled={loading}
               >
                 Save
               </Button>
               <Button 
                 size="sm" 
                 variant="outline" 
-                onClick={() => {
-                  setEditingRow(null);
-                  setEditData({});
-                }}
-                disabled={loading}
+                onClick={() => handleCancelEdit()}
               >
                 Cancel
               </Button>
@@ -361,7 +281,7 @@ export function BranchDataTable() {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" disabled={loading}>
+              <Button variant="ghost" size="sm">
                 Actions
                 <ChevronDownIcon className="ml-2 h-4 w-4" />
               </Button>
@@ -387,7 +307,47 @@ export function BranchDataTable() {
         );
       },
     },
-  ];
+  ], [editingRow, editData, handleSaveEdit, handleCancelEdit, handleEdit, handleDeleteClick]);
+
+  useEffect(() => {
+    fetchBranches();
+  }, [fetchBranches]);
+
+  const handleAddSuccess = () => {
+    fetchBranches();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!branchToDelete) return;
+    
+    try {
+      const response = await fetch(`/api/GET/getBranches?id=${branchToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete branch');
+      }
+
+      await fetchBranches();
+      
+      toast({
+        title: "Success",
+        description: "Branch deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting branch:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete branch",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setBranchToDelete(null);
+    }
+  };
 
   const table = useReactTable({
     data,
@@ -409,24 +369,14 @@ export function BranchDataTable() {
   });
 
   return (
-    <div className="space-y-4">
+    <div>
       <BranchSheet onAddSuccess={handleAddSuccess} />
       <div className="w-full">
-        <div className="flex items-center py-4 space-x-2">
+        <div className="flex items-center py-4">
           <Input
-            placeholder="Filter by name..."
+            placeholder="Filter by Branch Name..."
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-          <Input
-            placeholder="Filter by city..."
-            value={(table.getColumn("city")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("city")?.setFilterValue(event.target.value)
-            }
+            onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
           <DropdownMenu>
@@ -436,63 +386,40 @@ export function BranchDataTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
+              {table.getAllColumns().filter((column) => column.getCanHide()).map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {column.id}
+                </DropdownMenuCheckboxItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        
         <div className="rounded-md border">
           <Table>
-            <TableCaption>
-              {loading ? "Loading branches..." : "A list of all branches."}
-            </TableCaption>
+            <TableCaption>All available branches</TableCaption>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
+                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -500,25 +427,23 @@ export function BranchDataTable() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-24 text-center">
-                    {loading ? "Loading..." : "No branches found."}
+                    No results.
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
-        
         <div className="flex items-center justify-end space-x-2 py-4">
           <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+            {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
           <div className="space-x-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage() || loading}
+              disabled={!table.getCanPreviousPage()}
             >
               Previous
             </Button>
@@ -526,7 +451,7 @@ export function BranchDataTable() {
               variant="outline"
               size="sm"
               onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage() || loading}
+              disabled={!table.getCanNextPage()}
             >
               Next
             </Button>
@@ -534,33 +459,20 @@ export function BranchDataTable() {
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Branch</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this branch? This action cannot be undone.
-              {data.find(b => b.id === branchToDelete)?.admins?.length ? 
-                " Note: This branch has associated admins that must be reassigned first." : ""}
-              {data.find(b => b.id === branchToDelete)?.routes?.length ? 
-                " Note: This branch has associated routes that must be removed first." : ""}
+              Are you sure you want to delete this branch? This action cannot be undone if the branch has no associated admins or routes.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setDeleteDialogOpen(false)}
-              disabled={loading}
-            >
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDeleteConfirm}
-              disabled={loading}
-            >
-              {loading ? "Deleting..." : "Delete"}
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
