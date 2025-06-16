@@ -120,7 +120,7 @@ export function Navbar({ user }: NavbarProps) {
               <Link href="/" className="group">
                 <div className="relative overflow-hidden rounded-xl p-2 transition-all duration-300 group-hover:bg-white/30 group-hover:shadow-lg group-hover:scale-105">
                   <img 
-                    src="/pictures/logoNav.png" 
+                    src="/logoalt.png" 
                     width={80} 
                     height={80} 
                     alt="Logo"

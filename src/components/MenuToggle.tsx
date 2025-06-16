@@ -29,7 +29,7 @@ export async function MenuSheet() {
       <SheetContent className="z-[999] bg-[#DEF5FB] dark:bg-gray-900 min-w-[280px]">
         <SheetHeader className="flex items-center justify-center">
           <SheetTitle>
-            <Image src='/pictures/logoNav.png' width={120} height={120} alt='Logo' className="mx-auto"/>
+            <Image src='/pictures/logoalt.png' width={120} height={120} alt='Logo' className="mx-auto"/>
           </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col space-y-6 p-6 text-center">

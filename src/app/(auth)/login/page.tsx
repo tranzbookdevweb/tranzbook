@@ -235,7 +235,7 @@ function Login() {
       <Card className="w-full max-w-md bg-white shadow-lg">
         <CardHeader>
           <div className="flex justify-center mb-4">
-            <Image src="/pictures/logoNav.png" width={100} height={100} alt="Logo" />
+            <Image src="/logoalt.png" width={100} height={100} alt="Logo" />
           </div>
           <CardTitle className="text-2xl text-center text-blue-600">Sign In</CardTitle>
           <CardDescription className="text-center">
