@@ -694,6 +694,7 @@ const PageContainer: React.FC = () => {
                     reference={bookingReference}
                     isBooked={isBooked}
                     passengerDetails={passengerDetails}
+                    companyLogo={bus.company.logo} // Pass companyLogo
                   />
                 </div>
               ) : (

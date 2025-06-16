@@ -28,7 +28,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navItems = [
     { name: 'My Journeys', href: '/my-journeys', icon: Bus },
-    { name: 'Sign Out', href: '/api/auth/signout', icon: LogOut },
   ];
 
   const handleLinkClick = () => {

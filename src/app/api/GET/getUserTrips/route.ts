@@ -4,6 +4,15 @@ import { adminAuth } from '@/lib/firebase-admin';
 import prisma from '@/app/lib/db';
 
 // Define interfaces for type safety
+interface PassengerDetail {
+  name: string;
+  phoneNumber: string;
+  email?: string;
+  kinName: string;
+  kinContact: string;
+  kinEmail?: string;
+}
+
 interface TripResponse {
   id: string;
   tripId: string;
@@ -14,13 +23,16 @@ interface TripResponse {
   currency: string;
   status: 'upcoming' | 'completed' | 'cancelled';
   seatNumbers: number[];
+  passengers: PassengerDetail[];
   tripDetails: {
     departureTime: string;
+    arrivalTime?: string;
     basePrice: number;
     commission: number;
     commissionType: string;
     recurring: boolean;
     daysOfWeek: number[] | null;
+    duration?: number;
     bus: {
       plateNumber: string;
       capacity: number;
@@ -60,6 +72,24 @@ interface TripOccurrence {
   status: string;
   availableSeats: number;
   bookedSeats: number[];
+}
+
+// Helper function to calculate arrival time
+function calculateArrivalTime(departureTime: string, date: string, duration: number): string {
+  // Parse departure time (assumed format: HH:mm)
+  const [hours, minutes] = departureTime.split(':').map(Number);
+  
+  // Combine date and departure time
+  const departureDateTime = new Date(date);
+  departureDateTime.setHours(hours, minutes, 0, 0);
+  
+  // Add duration (in minutes) to departure time
+  const arrivalDateTime = new Date(departureDateTime.getTime() + duration * 60 * 1000);
+  
+  // Format arrival time as HH:mm
+  const arrivalHours = String(arrivalDateTime.getHours()).padStart(2, '0');
+  const arrivalMinutes = String(arrivalDateTime.getMinutes()).padStart(2, '0');
+  return `${arrivalHours}:${arrivalMinutes}`;
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -105,15 +135,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Fetch bookings
+    // Fetch bookings with passenger details
     const bookings = await prisma.booking.findMany({
       where: { userId: dbUser.id },
       select: {
         id: true,
+        reference: true,
         status: true,
         date: true,
         seatNumber: true,
         totalAmount: true,
+        passengerDetails: {
+          select: {
+            name: true,
+            phoneNumber: true,
+            email: true,
+            kinName: true,
+            kinContact: true,
+            kinEmail: true,
+          },
+        },
         trip: {
           select: {
             id: true,
@@ -215,8 +256,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         }
       }
 
+      // Calculate arrival time if duration and departure time are available
+      const arrivalTime = trip.departureTime && trip.route.duration && tripDate
+        ? calculateArrivalTime(trip.departureTime, tripDate, trip.route.duration)
+        : undefined;
+
       return {
         id: booking.id,
+        reference: booking.reference,
         tripId: trip.id,
         company: trip.bus?.company?.name ?? 'Unknown',
         route: `${trip.route.startCity.name}, ${trip.route.startCity.country} to ${trip.route.endCity.name}, ${trip.route.endCity.country}`,
@@ -225,13 +272,23 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         currency: trip.currency,
         status,
         seatNumbers: booking.seatNumber,
+        passengers: booking.passengerDetails.map((pd) => ({
+          name: pd.name,
+          phoneNumber: pd.phoneNumber,
+          email: pd.email ?? undefined,
+          kinName: pd.kinName,
+          kinContact: pd.kinContact,
+          kinEmail: pd.kinEmail ?? undefined,
+        })),
         tripDetails: {
           departureTime: trip.departureTime,
+          arrivalTime, // Set calculated arrival time
           basePrice: trip.price,
           commission: trip.commission,
           commissionType: trip.commissionType,
           recurring: trip.recurring,
           daysOfWeek: trip.recurring ? trip.daysOfWeek : null,
+          duration: trip.route.duration,
           bus: trip.bus
             ? {
                 plateNumber: trip.bus.plateNumber ?? 'N/A',

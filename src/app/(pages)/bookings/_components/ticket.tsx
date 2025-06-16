@@ -29,6 +29,7 @@ interface TicketProps {
   totalCost: number;
   isBooked: boolean;
   passengerDetails: PassengerDetail[];
+  companyLogo: string; // Add companyLogo to the interface
 }
 
 // QR Code Component
@@ -56,7 +57,6 @@ const QRCode: React.FC<{ value: string; size?: number }> = ({ value, size = 120 
 };
 
 // Dialog Component
-// Dialog Component
 const Dialog: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -67,7 +67,7 @@ const Dialog: React.FC<{
   return (
     <div className="fixed z-[999999] inset-0 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors z-10"
@@ -93,215 +93,143 @@ const TicketCard: React.FC<{
   };
 
   const generatePDF = () => {
-    const routeString = `${ticketData.busRoute.origin} - ${ticketData.busRoute.destination}`;
     const dateString = ticketData.currentDate.toLocaleDateString("en-US", {
       day: "numeric",
       month: "long",
       year: "numeric",
       weekday: "long",
     });
-const ticketContent = `
+
+    const ticketContent = `
     <!DOCTYPE html>
     <html>
-      <head>
-        <title>Bus Ticket - ${passenger.name}</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f8fafc;
-            color: #1f2937;
-          }
-          .ticket {
-            max-width: 400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          }
-          .header {
-            background: #4f46e5;
-            color: white;
-            padding: 16px;
-            text-align: center;
-          }
-          .header h1 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 0 0 4px 0;
-          }
-          .header p {
-            font-size: 12px;
-            margin: 0;
-            opacity: 0.9;
-          }
-          .route-section {
-            padding: 16px;
-            text-align: center;
-            border-bottom: 1px solid #e5e7eb;
-          }
-          .route {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-          }
-          .route-point {
-            font-size: 16px;
-            font-weight: bold;
-            color: #1f2937;
-          }
-          .route-time {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 2px;
-          }
-          .route-arrow {
-            color: #6b7280;
-            font-size: 12px;
-          }
-          .passenger-section {
-            padding: 16px;
-            border-bottom: 1px solid #e5e7eb;
-          }
-          .section-title {
-            font-size: 12px;
-            color: #6b7280;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-          }
-          .passenger-info {
-            margin-bottom: 12px;
-          }
-          .passenger-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 2px;
-          }
-          .passenger-details {
-            font-size: 12px;
-            color: #6b7280;
-          }
-          .bus-section {
-            padding: 16px;
-            border-bottom: 1px solid #e5e7eb;
-          }
-          .bus-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-          }
-          .bus-label {
-            font-size: 12px;
-            color: #6b7280;
-          }
-          .bus-value {
-            font-size: 12px;
-            font-weight: 500;
-            color: #1f2937;
-          }
-          .price-section {
-            padding: 16px;
-            text-align: right;
-            background: #f9fafb;
-          }
-          .price {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1f2937;
-          }
-          .qr-section {
-            padding: 16px;
-            text-align: center;
-            border-top: 1px solid #e5e7eb;
-          }
-          .qr-code {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 8px;
-          }
-          .qr-text {
-            font-size: 10px;
-            color: #6b7280;
-          }
-          .footer {
-            padding: 12px 16px;
-            background: #f9fafb;
-            text-align: center;
-            font-size: 10px;
-            color: #6b7280;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="ticket">
-          <div class="header">
-            <h1>Royal VVIP</h1>
-            <p>E-Ticket Confirmation</p>
-          </div>
-
-          <div class="route-section">
-            <div class="route">
-              <div>
-                <div class="route-point">${ticketData.busRoute.origin}</div>
-                <div class="route-time">${ticketData.tripDepartureTime}</div>
-              </div>
-              <div class="route-arrow">→</div>
-              <div>
-                <div class="route-point">${ticketData.busRoute.destination}</div>
-                <div class="route-time">${ticketData.tripArrivalTime}</div>
-              </div>
+    <head>
+      <meta charset="utf-8">
+      <title>Bus Ticket - ${ticketData.reference}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; }
+        .ticket { max-width: 800px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .company-logo { width: 50px; height: 50px; background: white; border-radius: 8px; padding: 5px; object-fit: contain; }
+        .header h1 { font-size: 28px; font-weight: bold; }
+        .header p { font-size: 14px; opacity: 0.9; }
+        .route-section { background: #f8fafc; padding: 30px; border-bottom: 1px solid #e5e7eb; text-align: center; }
+        .route-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; }
+        .route-point { text-align: center; }
+        .route-point h3 { font-size: 20px; color: #1f2937; margin-bottom: 8px; }
+        .route-point p { color: #6b7280; font-size: 14px; }
+        .route-arrow { width: 60px; height: 2px; background: #3b82f6; position: relative; }
+        .route-arrow::after { content: ''; position: absolute; right: -8px; top: -4px; width: 0; height: 0; border-left: 10px solid #3b82f6; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+        .passenger-section { padding: 30px; border-bottom: 1px solid #e5e7eb; }
+        .section-title { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; }
+        .passenger-list { background: #f9fafb; padding: 20px; border-radius: 8px; }
+        .passenger-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e5e7eb; }
+        .passenger-item:last-child { border-bottom: none; }
+        .passenger-name { font-weight: 600; color: #1f2937; }
+        .seat-number { color: #6b7280; }
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 30px; border-bottom: 1px solid #e5e7eb; }
+        .detail-item h4 { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .detail-item p { font-size: 16px; font-weight: 600; color: #1f2937; }
+        .info-section { padding: 30px; background: #f8fafc; display: flex; gap: 30px; align-items: flex-start; }
+        .info-content { flex: 1; }
+        .info-title { font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 15px; }
+        .info-list { list-style: none; }
+        .info-list li { color: #6b7280; font-size: 14px; margin-bottom: 8px; padding-left: 20px; position: relative; }
+        .info-list li::before { content: '•'; color: #3b82f6; font-weight: bold; position: absolute; left: 0; }
+        .qr-section { text-align: center; }
+        .qr-code { width: 120px; height: 120px; margin-bottom: 10px; }
+        .qr-text { font-size: 12px; color: #6b7280; }
+        .footer { background: #f1f5f9; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; }
+        .footer-left { display: flex; align-items: center; gap: 10px; }
+        .footer-text { font-size: 12px; color: #6b7280; }
+        .total-amount { color: #059669; font-weight: bold; font-size: 18px; }
+      </style>
+    </head>
+    <body>
+      <div class="ticket">
+        <!-- Header -->
+        <div class="header">
+          <div class="header-left">
+            <img src="${ticketData.companyLogo ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${ticketData.companyLogo}` : ''}" alt="Company Logo" class="company-logo">
+            <div>
+              <h1>${ticketData.busCompany}</h1>
+              <p>E-Ticket Confirmation</p>
             </div>
           </div>
-
-          <div class="passenger-section">
-            <div class="section-title">Passenger & Seat(s)</div>
-            <div class="passenger-info">
-              <div class="passenger-name">${passenger.name} (Seat ${seat})</div>
-              <div class="passenger-details">
-                Phone: ${passenger.phoneNumber}<br>
-                ${passenger.email ? `Email: ${passenger.email}` : ''}
-              </div>
-            </div>
-          </div>
-
-          <div class="bus-section">
-            <div class="section-title">Bus Info</div>
-            <div class="bus-info">
-              <span class="bus-label">Type:</span>
-              <span class="bus-value">${ticketData.busDescription}</span>
-            </div>
-          </div>
-
-          <div class="price-section">
-            <div class="section-title">Price</div>
-            <div class="price">${ticketData.currency} ${(ticketData.totalCost / ticketData.passengerDetails.length).toFixed(2)}</div>
-          </div>
-
-          <div class="qr-section">
-            <div class="section-title">Important Information</div>
-            <p class="qr-text">• Arrive 30 minutes before boarding</p>
-            <p class="qr-text">• Present this e-ticket or QR code at the boarding point</p>
-            <p class="qr-text">• Valid government-issued ID required during verification</p>
-            <div class="qr-code">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(`https://tranzbook.co/validate?ref=${ticketData.reference}`)}" alt="QR Code" style="width: 100%; height: 100%;">
-            </div>
-            <p class="qr-text">Scan for Verification</p>
-          </div>
-
-          <div class="footer">
-            <img src="/pictures/logo.png" alt="Tranzbook" style="height: 16px; margin-bottom: 4px;"><br>
-            Powered by Tranzbook Technologies<br>
-            Booking Ref: ${ticketData.reference}
+          <div style="text-align: right;">
+            <p style="font-size: 16px; font-weight: 600;">${dateString}</p>
+            <p style="font-size: 12px; opacity: 0.8;">Ticket #${ticketData.reference}</p>
           </div>
         </div>
-      </body>
+
+        <!-- Route Information -->
+        <div class="route-section">
+          <div class="route-grid">
+            <div class="route-point">
+              <h3>${ticketData.busRoute.origin}</h3>
+              <p>${ticketData.tripDepartureTime}</p>
+            </div>
+            <div class="route-arrow"></div>
+            <div class="route-point">
+              <h3>${ticketData.busRoute.destination}</h3>
+              <p>${ticketData.tripArrivalTime}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passenger Details -->
+        <div class="passenger-section">
+          <div class="section-title">Passenger(s) & Seat(s)</div>
+          <div class="passenger-list">
+            <div class="passenger-item">
+              <span class="passenger-name">${passenger.name}</span>
+              <span class="seat-number">Seat ${seat}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trip Details -->
+        <div class="details-grid">
+          <div class="detail-item">
+            <h4>Bus Type</h4>
+            <p>${ticketData.busDescription}</p>
+          </div>
+          <div class="detail-item">
+            <h4>Individual Price</h4>
+            <p class="total-amount">${ticketData.currency} ${individualFare.toFixed(2)}</p>
+          </div>
+        </div>
+
+        <!-- Important Information with QR Code -->
+        <div class="info-section">
+          <div class="info-content">
+            <div class="info-title">Important Information</div>
+            <ul class="info-list">
+              <li>Arrive 30 minutes prior to departure for smooth boarding</li>
+              <li>Present this e-ticket at the boarding point</li>
+              <li>Valid government-issued ID required during verification</li>
+              <li>Contact us immediately if you need to make any changes</li>
+            </ul>
+          </div>
+          <div class="qr-section">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`https://tranzbook.co/validate?ref=${ticketData.reference}`)}" alt="QR Code" class="qr-code">
+            <p class="qr-text">Scan for Verification</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+          <div class="footer-left">
+            <span class="footer-text">Powered by TRANZBOOK INC</span>
+          </div>
+          <span class="footer-text">Booking Ref: ${ticketData.reference}</span>
+        </div>
+      </div>
+    </body>
     </html>
     `;
-
 
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -316,14 +244,6 @@ const ticketContent = `
   };
 
   const handleShare = async () => {
-    const routeString = `${ticketData.busRoute.origin} - ${ticketData.busRoute.destination}`;
-    const dateString = ticketData.currentDate.toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      weekday: "long",
-    });
-    
     const url = `https://tranzbook.co/validate?ref=${ticketData.reference}`;
     try {
       if (navigator.share) {
@@ -338,7 +258,6 @@ const ticketContent = `
       }
     } catch (err) {
       console.log('Failed to share/copy URL');
-      // Fallback: show URL in alert
       alert(`Share this URL: ${url}`);
     }
   };
@@ -462,85 +381,105 @@ const ticketContent = `
         </div>
       </div>
 
-      {/* Detailed View Dialog */}
-  <Dialog isOpen={showDialog} onClose={() => setShowDialog(false)}>
-        <div className="bg-indigo-600 text-white px-4 py-3 text-center">
-          <h2 className="text-lg font-bold">Royal VVIP</h2>
-          <p className="text-xs opacity-90">E-Ticket Confirmation</p>
-          <p className="text-xs opacity-75">{dateString}</p>
-        </div>
-
-        <div className="px-4 py-3 text-center border-b border-gray-100">
-          <div className="flex items-center justify-between mb-2">
+      {/* Updated Detailed View Dialog */}
+      <Dialog isOpen={showDialog} onClose={() => setShowDialog(false)}>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <img
+              src={ticketData.companyLogo ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${ticketData.companyLogo}` : ''}
+              alt="Company Logo"
+              className="w-10 h-10 bg-white rounded-md p-1 object-contain"
+            />
             <div>
-              <div className="font-semibold text-gray-900">{ticketData.busRoute.origin}</div>
-              <div className="text-xs text-gray-500">{ticketData.tripDepartureTime}</div>
-            </div>
-            <div className="text-gray-400 text-sm">→</div>
-            <div>
-              <div className="font-semibold text-gray-900">{ticketData.busRoute.destination}</div>
-              <div className="text-xs text-gray-500">{ticketData.tripArrivalTime}</div>
+              <h2 className="text-xl font-bold">{ticketData.busCompany}</h2>
+              <p className="text-sm opacity-90">E-Ticket Confirmation</p>
             </div>
           </div>
+          <div className="text-right">
+            <p className="text-sm font-semibold">{dateString}</p>
+            <p className="text-xs opacity-80">Ticket #{ticketData.reference}</p>
+          </div>
         </div>
 
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Passenger & Seat(s)</div>
-          <div className="mb-3">
-            <div className="font-semibold text-gray-900">{passenger.name} (Seat {seat})</div>
-            <div className="text-xs text-gray-600 mt-1">
-              Phone: {passenger.phoneNumber}
-              {passenger.email && (
-                <>
-                  <br />
-                  Email: {passenger.email}
-                </>
-              )}
+        {/* Route Section */}
+        <div className="bg-gray-50 px-6 py-5 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="text-center flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">{ticketData.busRoute.origin}</h3>
+              <p className="text-sm text-gray-600">{ticketData.tripDepartureTime}</p>
+            </div>
+            <div className="px-4">
+              <div className="w-12 h-0.5 bg-blue-500 relative">
+                <div className="absolute -right-1 -top-1 w-0 h-0 border-l-4 border-l-blue-500 border-t-2 border-t-transparent border-b-2 border-b-transparent"></div>
+              </div>
+            </div>
+            <div className="text-center flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">{ticketData.busRoute.destination}</h3>
+              <p className="text-sm text-gray-600">{ticketData.tripArrivalTime}</p>
             </div>
           </div>
         </div>
 
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Bus Info</div>
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Type:</span>
-            <span className="font-medium text-gray-900">{ticketData.busDescription}</span>
+        {/* Passenger Details */}
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Passenger(s) & Seat(s)</div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="flex justify-between items-center">
+              <span className="font-semibold text-gray-900">{passenger.name}</span>
+              <span className="text-gray-600">Seat {seat}</span>
+            </div>
           </div>
         </div>
 
-        <div className="px-4 py-3 bg-gray-50 text-right border-b border-gray-100">
-          <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Price</div>
-          <div className="text-lg font-bold text-gray-900">
-            {ticketData.currency} {individualFare.toFixed(2)}
+        {/* Trip Details Grid */}
+        <div className="grid grid-cols-2 gap-6 px-6 py-4 border-b border-gray-200">
+          <div>
+            <h4 className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">Bus Type</h4>
+            <p className="text-base font-semibold text-gray-900">{ticketData.busDescription}</p>
+          </div>
+          <div>
+            <h4 className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">Individual Price</h4>
+            <p className="text-base font-bold text-green-600">{ticketData.currency} {individualFare.toFixed(2)}</p>
           </div>
         </div>
 
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Important Information</div>
-          <div className="text-xs text-gray-600 space-y-1">
-            <p>• Arrive 30 minutes before boarding</p>
-            <p>• Present this e-ticket or QR code at the boarding point</p>
-            <p>• Valid government-issued ID required during verification</p>
+        {/* Important Information with QR Code */}
+        <div className="px-6 py-5 bg-gray-50 flex gap-6">
+          <div className="flex-1">
+            <h3 className="text-base font-semibold text-gray-900 mb-3">Important Information</h3>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li className="flex items-start">
+                <span className="text-blue-500 font-bold mr-2">•</span>
+                Arrive 30 minutes prior to departure for smooth boarding
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-500 font-bold mr-2">•</span>
+                Present this e-ticket at the boarding point
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-500 font-bold mr-2">•</span>
+                Valid government-issued ID required during verification
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-500 font-bold mr-2">•</span>
+                Contact us immediately if you need to make any changes
+              </li>
+            </ul>
           </div>
-        </div>
-
-        <div className="px-4 py-3 text-center border-b border-gray-100">
-          <div className="mb-2">
+          <div className="text-center">
             <QRCode value={`https://tranzbook.co/validate?ref=${ticketData.reference}`} size={120} />
+            <p className="text-xs text-gray-500 mt-2">Scan for Verification</p>
           </div>
-          <p className="text-xs text-gray-500">Scan for Verification</p>
         </div>
 
-        <div className="px-4 py-3 bg-gray-50 text-center">
-          <div className="mb-2">
-            <img src="/pictures/logo.png" alt="Tranzbook" className="h-4 mx-auto mb-1" />
-          </div>
-          <p className="text-xs text-gray-500">Powered by Tranzbook Technologies</p>
-          <p className="text-xs text-gray-400 mt-1">Booking Ref: {ticketData.reference}</p>
+        <div className="bg-gray-100 px-6 py-4 flex justify-between items-center border-t border-gray-200">
+          <span className="text-xs text-gray-500">Powered by TRANZBOOK INC</span>
+          <span className="text-xs text-gray-500">Booking Ref: {ticketData.reference}</span>
         </div>
 
-        <div className="px-4 py-3 bg-white border-t border-gray-100">
-          <div className="flex justify-center space-x-2">
+        <div className="px-6 py-4 bg-white border-t border-gray-200">
+          <div className="flex gap-3">
             <button
               onClick={generatePDF}
               className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition-colors flex items-center justify-center"
