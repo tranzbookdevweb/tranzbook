@@ -482,7 +482,7 @@ const createCustomerConfirmationEmail = (booking: any, reference: string, userEm
             <div style="display: flex; align-items: center; justify-content: space-between;">
               <div>
                 <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;">TRANZBOOK</h1>
-                <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Transport Solutions</p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">INC</p>
               </div>
               <div style="text-align: right;">
                 <div style="background-color: rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;">
@@ -642,7 +642,7 @@ const createIndividualPassengerEmail = (booking: any, reference: string, passeng
             <div style="display: flex; align-items: center; justify-content: space-between;">
               <div>
                 <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;">TRANZBOOK</h1>
-                <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Transport Solutions</p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">INC</p>
               </div>
               <div style="text-align: right;">
                 <div style="background-color: rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;">
