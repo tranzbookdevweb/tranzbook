@@ -130,8 +130,8 @@ export default function FormBus() {
   };
 
   const handleTicketQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || 1;
-    if (value >= 1 && value <= 10) { // Add reasonable limit
+    const value = parseInt(e.target.value) || 0;
+    if (value >= 0 && value <= 30) { // Add reasonable limit
       setTicketQuantity(value);
     }
   };
@@ -193,7 +193,7 @@ export default function FormBus() {
             <div className="flex items-center">
               <input
                 type="number"
-                min="1"
+                min="0"
                 max="10"
                 value={ticketQuantity}
                 onChange={handleTicketQuantityChange}
