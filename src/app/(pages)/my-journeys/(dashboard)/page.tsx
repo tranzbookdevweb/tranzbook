@@ -34,8 +34,9 @@ interface PassengerDetail {
 interface Trip {
   id: string;
   tripId: string;
-  reference: string; // Added to match API
+  reference: string;
   company: string;
+  companyLogo?: string; // Added to match API
   route: string;
   date: string;
   totalAmount: number;
@@ -50,7 +51,7 @@ interface Trip {
     commission: number;
     commissionType: string;
     recurring: boolean;
-    daysOfWeek: number[] | null; // Updated to match API
+    daysOfWeek: number[] | null;
     duration?: number;
     bus: any;
     route: any;
@@ -190,26 +191,35 @@ const JourneyCard: React.FC<{
   };
 
   const individualFare = trip.totalAmount / trip.passengers.length;
-const routeParts = trip.route.split(' to '); // Changed from ' - ' to ' to '
-const origin = routeParts[0];
-const destination = routeParts[1] || 'Destination';
+  const routeParts = trip.route.split(' to ');
+  const origin = routeParts[0];
+  const destination = routeParts[1] || 'Destination';
 
   const handleViewDetails = () => {
     setShowDialog(true);
   };
 
   const generatePDF = () => {
+    const dateString = new Date(trip.date).toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      weekday: "long",
+    });
+
     const ticketContent = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
-      <title>Journey Ticket - ${trip.reference}</title>
+      <title>Bus Ticket - ${trip.reference}</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; }
         .ticket { max-width: 800px; margin: 20px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .header { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .company-logo { width: 50px; height: 50px; background: white; border-radius: 8px; padding: 5px; object-fit: contain; }
         .header h1 { font-size: 28px; font-weight: bold; }
         .header p { font-size: 14px; opacity: 0.9; }
         .route-section { background: #f8fafc; padding: 30px; border-bottom: 1px solid #e5e7eb; text-align: center; }
@@ -247,16 +257,18 @@ const destination = routeParts[1] || 'Destination';
     <body>
       <div class="ticket">
         <div class="header">
-          <div>
-            <h1>${trip.company}</h1>
-            <p>Journey Ticket</p>
+          <div class="header-left">
+            <img src="${trip.companyLogo ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.companyLogo}` : ''}" alt="Company Logo" class="company-logo">
+            <div>
+              <h1>${trip.company}</h1>
+              <p>E-Ticket Confirmation</p>
+            </div>
           </div>
           <div style="text-align: right;">
-            <p style="font-size: 16px; font-weight: 600;">${formatFullDate(trip.date)}</p>
-            <p style="font-size: 12px; opacity: 0.8;">Ticket #${trip.id}</p>
+            <p style="font-size: 16px; font-weight: 600;">${dateString}</p>
+            <p style="font-size: 12px; opacity: 0.8;">Ticket #${trip.reference}</p>
           </div>
         </div>
-
         <div class="route-section">
           <div class="route-grid">
             <div class="route-point">
@@ -270,9 +282,8 @@ const destination = routeParts[1] || 'Destination';
             </div>
           </div>
         </div>
-
         <div class="passenger-section">
-          <div class="section-title">Passenger & Seat</div>
+          <div class="section-title">Passenger(s) & Seat(s)</div>
           <div class="passenger-list">
             <div class="passenger-item">
               <span class="passenger-name">${passenger.name}</span>
@@ -280,7 +291,6 @@ const destination = routeParts[1] || 'Destination';
             </div>
           </div>
         </div>
-
         <div class="details-grid">
           <div class="detail-item">
             <h4>Bus Type</h4>
@@ -288,16 +298,15 @@ const destination = routeParts[1] || 'Destination';
           </div>
           <div class="detail-item">
             <h4>Individual Price</h4>
-            <p class="total-amount">${currencySymbols[trip.currency] || ''}${individualFare.toFixed(2)} ${trip.currency}</p>
+            <p class="total-amount">${currencySymbols[trip.currency] || ''}${individualFare.toFixed(2)}</p>
           </div>
         </div>
-
         <div class="info-section">
           <div class="info-content">
             <div class="info-title">Important Information</div>
             <ul class="info-list">
               <li>Arrive 30 minutes prior to departure for smooth boarding</li>
-              <li>Present this ticket at the boarding point</li>
+              <li>Present this e-ticket at the boarding point</li>
               <li>Valid government-issued ID required during verification</li>
               <li>Contact us immediately if you need to make any changes</li>
             </ul>
@@ -307,12 +316,11 @@ const destination = routeParts[1] || 'Destination';
             <p class="qr-text">Scan for Verification</p>
           </div>
         </div>
-
         <div class="footer">
           <div class="footer-left">
             <span class="footer-text">Powered by TRANZBOOK INC</span>
           </div>
-          <span class="footer-text">Journey Ref: ${trip.reference}</span>
+          <span class="footer-text">Booking Ref: ${trip.reference}</span>
         </div>
       </div>
     </body>
@@ -458,7 +466,7 @@ const destination = routeParts[1] || 'Destination';
             </div>
           </div>
 
-          {trip.status === 'upcoming' && (
+          {/* {trip.status === 'upcoming' && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <button
                 onClick={() => onCancelTrip(trip.id)}
@@ -467,19 +475,26 @@ const destination = routeParts[1] || 'Destination';
                 Cancel Journey
               </button>
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
       <Dialog isOpen={showDialog} onClose={() => setShowDialog(false)}>
-        <div className={`bg-gradient-to-r ${statusInfo.gradientFrom} ${statusInfo.gradientTo} text-white px-6 py-4 flex justify-between items-center`}>
-          <div>
-            <h2 className="text-xl font-bold">{trip.company}</h2>
-            <p className="text-sm opacity-90">Journey Details</p>
+        <div className="bg-gradient-to-r from-blue-800 to-blue-600 text-white px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <img
+              src={trip.companyLogo ? `https://dzviyoyyyopfsokiylmm.supabase.co/storage/v1/object/public/${trip.companyLogo}` : ''}
+              alt="Company Logo"
+              className="w-10 h-10 bg-white rounded-md p-1 object-contain"
+            />
+            <div>
+              <h2 className="text-xl font-bold">{trip.company}</h2>
+              <p className="text-sm opacity-90">E-Ticket Confirmation</p>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-sm font-semibold">{formatDate(trip.date)}</p>
-            <p className="text-xs opacity-80">ID #{trip.reference}</p>
+            <p className="text-xs opacity-80">Ticket #{trip.reference}</p>
           </div>
         </div>
 
@@ -502,24 +517,12 @@ const destination = routeParts[1] || 'Destination';
         </div>
 
         <div className="px-6 py-4 border-b border-gray-200">
-          <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Passenger & Seat</div>
+          <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Passenger(s) & Seat(s)</div>
           <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center">
               <span className="font-semibold text-gray-900">{passenger.name}</span>
               <span className="text-gray-600">Seat {seat}</span>
             </div>
-            {passenger.phoneNumber && (
-              <div className="flex items-center text-sm text-gray-600 mb-1">
-                <Phone className="w-4 h-4 mr-2" />
-                {passenger.phoneNumber}
-              </div>
-            )}
-            {passenger.email && (
-              <div className="flex items-center text-sm text-gray-600">
-                <Mail className="w-4 h-4 mr-2" />
-                {passenger.email}
-              </div>
-            )}
           </div>
         </div>
 
@@ -530,7 +533,7 @@ const destination = routeParts[1] || 'Destination';
           </div>
           <div>
             <h4 className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">Individual Price</h4>
-            <p className="text-base font-bold text-green-600">{currencySymbols[trip.currency] || ''}{individualFare.toFixed(2)} {trip.currency}</p>
+            <p className="text-base font-bold text-green-600">{currencySymbols[trip.currency] || ''}{individualFare.toFixed(2)}</p>
           </div>
         </div>
 
@@ -544,7 +547,7 @@ const destination = routeParts[1] || 'Destination';
               </li>
               <li className="flex items-start">
                 <span className="text-blue-500 font-bold mr-2">•</span>
-                Present this ticket at the boarding point
+                Present this e-ticket at the boarding point
               </li>
               <li className="flex items-start">
                 <span className="text-blue-500 font-bold mr-2">•</span>
@@ -564,7 +567,7 @@ const destination = routeParts[1] || 'Destination';
 
         <div className="bg-gray-100 px-6 py-4 flex justify-between items-center border-t border-gray-200">
           <span className="text-xs text-gray-500">Powered by TRANZBOOK INC</span>
-          <span className="text-xs text-gray-500">Journey Ref: {trip.reference}</span> {/* Updated to use reference */}
+          <span className="text-xs text-gray-500">Booking Ref: {trip.reference}</span>
         </div>
 
         <div className="px-6 py-4 bg-white border-t border-gray-200">
@@ -664,13 +667,11 @@ const MyJourneys: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
       <div className="w-full max-w-6xl mx-auto px-4">
-        {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">My Journeys</h1>
           <p className="text-gray-600">Manage and view your upcoming and past bus journeys</p>
         </div>
 
-        {/* Status Tabs */}
         <div className="flex justify-center mb-8 border-b border-gray-200">
           {Object.keys(statusConfig).map((status) => (
             <button
@@ -689,7 +690,6 @@ const MyJourneys: React.FC = () => {
           ))}
         </div>
 
-        {/* Error State */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 text-center text-red-700">
             <AlertCircle className="w-5 h-5 inline-block mr-2" />
@@ -697,7 +697,6 @@ const MyJourneys: React.FC = () => {
           </div>
         )}
 
-        {/* Loading State */}
         {isPageLoading && (
           <div className="text-center text-gray-600">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -705,7 +704,6 @@ const MyJourneys: React.FC = () => {
           </div>
         )}
 
-        {/* No Journeys State */}
         {!isPageLoading && filteredTrips.length === 0 && !error && (
           <div className="text-center text-gray-600 bg-white rounded-lg p-8 border border-gray-200">
             <Bus className="w-12 h-12 mx-auto mb-4 text-gray-400" />
@@ -716,12 +714,10 @@ const MyJourneys: React.FC = () => {
           </div>
         )}
 
-        {/* Journeys List */}
         {!isPageLoading && filteredTrips.length > 0 && (
           <div className="space-y-8">
             {filteredTrips.map((trip) => (
               <div key={trip.id} className="space-y-6">
-                {/* Trip Summary Card */}
                 <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="text-center">
@@ -747,7 +743,6 @@ const MyJourneys: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Passenger Tickets */}
                 <div className="space-y-6">
                   {trip.passengers.map((passenger, index) => (
                     <JourneyCard
@@ -765,7 +760,6 @@ const MyJourneys: React.FC = () => {
           </div>
         )}
 
-        {/* Footer */}
         <div className="mt-12 text-center text-gray-500 text-sm">
           <p>Need help? Contact our customer support</p>
           <p className="mt-1">Powered by TRANZBOOK INC</p>

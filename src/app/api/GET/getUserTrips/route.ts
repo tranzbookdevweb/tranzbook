@@ -17,6 +17,7 @@ interface TripResponse {
   id: string;
   tripId: string;
   company: string;
+  companyLogo?: string;
   route: string;
   date: string;
   totalAmount: number;
@@ -180,7 +181,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
                 seatBelts: true,
                 onboardFood: true,
                 company: {
-                  select: { name: true },
+                  select: {
+                    name: true,
+                    logo: true,
+                  },
                 },
               },
             },
@@ -266,6 +270,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         reference: booking.reference,
         tripId: trip.id,
         company: trip.bus?.company?.name ?? 'Unknown',
+        companyLogo: trip.bus?.company?.logo ?? undefined,
         route: `${trip.route.startCity.name}, ${trip.route.startCity.country} to ${trip.route.endCity.name}, ${trip.route.endCity.country}`,
         date: tripDate ?? '',
         totalAmount: booking.totalAmount ?? 0,
@@ -282,7 +287,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         })),
         tripDetails: {
           departureTime: trip.departureTime,
-          arrivalTime, // Set calculated arrival time
+          arrivalTime,
           basePrice: trip.price,
           commission: trip.commission,
           commissionType: trip.commissionType,
