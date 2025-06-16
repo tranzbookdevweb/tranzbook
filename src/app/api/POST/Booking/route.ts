@@ -397,7 +397,7 @@ const createAdminNotificationEmail = (booking:any, reference:string) => {
                   <table style="width: 100%; font-size: 14px;">
                     <tr>
                       <td style="padding: 4px 0; font-weight: 600; width: 140px;">Age:</td>
-                      <td style="padding: 4px 0;">${booking.passengerDetails.age}</td>
+                      <td style="padding: 4px 0;">${booking.passengerDetails.email}</td>
                     </tr>
                     <tr>
                       <td style="padding: 4px 0; font-weight: 600;">Phone:</td>
