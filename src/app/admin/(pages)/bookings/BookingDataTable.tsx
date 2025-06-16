@@ -93,7 +93,7 @@ interface BookingData {
   passengers: {
     id: string;
     name: string;
-    age: string;
+    email: string;
     phoneNumber: string;
     kinName: string;
     kinContact: string;
@@ -275,7 +275,7 @@ export function BookingDataTable() {
                 </div>
                 <div className="text-right">
                   <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-                    Age: {passenger.age}
+                    Email: {passenger.email}
                   </span>
                 </div>
               </div>
