@@ -17,7 +17,6 @@
     "@mui/icons-material": "^5.15.12",
     "@mui/material": "^5.15.12",
     "@paystack/inline-js": "^2.22.1",
-    "@prisma/client": "^5.11.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -90,7 +89,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@prisma/client": "^5.19.1",
+    "@prisma/client": "^6.10.1",
     "@types/bcrypt": "^5.0.2",
     "@types/formidable": "^3.4.5",
     "@types/html-to-text": "^9.0.4",
@@ -106,7 +105,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.1.2",
     "postcss": "^8",
-    "prisma": "^5.20.0",
+    "prisma": "^6.10.1",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }
