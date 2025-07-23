@@ -1,23 +1,23 @@
 'use client'
 import React from 'react';
-// import FormNew from './FormNew';
 import { Cursor, useTypewriter } from 'react-simple-typewriter';
 import Image from 'next/image';
 import FormBus from '../FormBus';
 
-const Bus: React.FC = () => {
+const BusComponent: React.FC = () => {
   const [text, count] = useTypewriter({
     words: ['Check Bus Schedules, Compare Prices and Book Ticket Online'],
     loop: false,
-    delaySpeed: 3000,
-  
+    delaySpeed: 10000,
   });
 
   return (
-    <div className='flex flex-col items-center overflow-x-hidden w-[100%] justify-center '>
+    <div className='flex flex-col bg-[#def5fb] items-center overflow-x-hidden w-[100%] justify-center font-tangosans'>
       <div className='flex flex-col items-center text-center'>
-        <h4 className='text-[#FDB022] text-[4vh] max-sm:text-[3vh] max-md:text-[2.4vh] font-bold'>Save Money, Save Time, Travel with Ease</h4>
-        <h5 className='text-[#475467] text-[2vh] max-lg:text-[1.9vh] w-full font-semibold'>
+        <h1 className='w-[844px] h-[148px] font-extrabold text-[64px] leading-[70px] flex items-end text-center text-[#123C7B] flex-none order-0 flex-grow-0 max-w-[90vw] max-sm:text-[32px] max-sm:leading-[36px] max-md:text-[48px] max-md:leading-[52px] font-tangosans'>
+          Save Money, Save Time, Travel with Ease
+        </h1>
+        <h5 className='text-[#475467] text-[20px] my-3 max-lg:text-[1.9vh] w-full font-medium font-tangosans'>
           <span>{text}<Cursor /></span>
         </h5>
       </div>
@@ -26,15 +26,15 @@ const Bus: React.FC = () => {
       </div>
       <div>
         <Image
-        width='50'
-        className='w-full'
-        height={100}
+          width={800}
+          height={400}
+          className='w-full h-auto'
           src='/pictures/busIlustration 1.svg'
-          alt=''
+          alt='Bus illustration'
         />
       </div>
     </div>
   );
 }
 
-export default Bus;
+export default BusComponent;

@@ -1,103 +1,92 @@
-'use client';
-import * as React from 'react';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+"use client"
+
+import * as React from "react"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 interface Location {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 interface ComboboxFormProps {
-  onLocationSelect: (location: string) => void;
-  disabledOptions?: string[];
-  locationType: 'Select Origin' | 'Select Destination';
+  onLocationSelect: (location: string) => void
+  disabledOptions?: string[]
+  locationType: "Select Origin" | "Select Destination"
+  value?: string // Add value prop to make it controlled
 }
 
-export function ComboboxForm({
-  onLocationSelect,
-  disabledOptions = [],
-  locationType,
-}: ComboboxFormProps) {
-  const [open, setOpen] = React.useState(false);
-  const [locations, setLocations] = React.useState<Location[]>([]);
-  const [selectedLocation, setSelectedLocation] = React.useState<Location | null>(null);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+export function ComboboxForm({ onLocationSelect, disabledOptions = [], locationType, value = "" }: ComboboxFormProps) {
+  const [open, setOpen] = React.useState(false)
+  const [locations, setLocations] = React.useState<Location[]>([])
+  const [loading, setLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
-  // Fetch locations from API only once on mount
   React.useEffect(() => {
     const fetchLocations = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        const response = await fetch('/api/GET/getLocation', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
+        setLoading(true)
+        setError(null)
+        const response = await fetch("/api/GET/getLocation", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        })
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch locations: ${response.statusText}`);
+          throw new Error(`Failed to fetch locations: ${response.statusText}`)
         }
 
-        const data = await response.json();
+        const data = await response.json()
         if (!Array.isArray(data)) {
-          throw new Error('Unexpected API response: Data is not an array');
+          throw new Error("Unexpected API response: Data is not an array")
         }
 
-        setLocations(data);
+        setLocations(data)
       } catch (error) {
-        console.error('Error fetching locations:', error);
-        setError('Failed to load locations. Please try again.');
-        setLocations([]);
+        console.error("Error fetching locations:", error)
+        setError("Failed to load locations. Please try again.")
+        setLocations([])
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchLocations();
-  }, []); // Empty dependency array ensures this runs only once
+    fetchLocations()
+  }, [])
 
   const handleLocationSelect = (locationName: string) => {
-    const foundLocation = locations.find((loc) => loc.name === locationName) || null;
-    setSelectedLocation(foundLocation);
-    setOpen(false);
-    onLocationSelect(locationName);
-  };
+    setOpen(false)
+    onLocationSelect(locationName)
+  }
 
-  const placeholder =
-    locationType === 'Select Origin'
-      ? selectedLocation?.name || 'Select Origin'
-      : selectedLocation?.name || 'Select Destination';
+  const getPrefix = () => {
+    return locationType === "Select Origin" ? "From:" : "To:"
+  }
+
+  const getDisplayText = () => {
+    const prefix = getPrefix()
+    if (value) {
+      return `${prefix} ${value}`
+    }
+    return `${prefix} ${locationType === "Select Origin" ? "Origin" : "Destination"}`
+  }
 
   return (
-    <div className="flex items-center w-full space-x-4">
+    <div className="w-full">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <div className="w-full cursor-pointer">
-            {selectedLocation ? (
-              <span>{selectedLocation.name}</span>
+          <button
+            type="button"
+            className="w-full text-left text-sm text-gray-600 hover:text-gray-800 transition-colors cursor-pointer p-2 rounded-md hover:bg-gray-50"
+          >
+            {value ? (
+              <span className="text-gray-800 font-medium">{getDisplayText()}</span>
             ) : (
-              <span className="text-gray-500">{placeholder}</span>
+              <span className="text-gray-500">{getDisplayText()}</span>
             )}
-          </div>
+          </button>
         </PopoverTrigger>
-        <PopoverContent
-          className="p-0 z-[99] bg-white text-[#fdb022] font-semibold"
-          side="top"
-          align="start"
-        >
+        <PopoverContent className="p-0 z-[99] bg-white w-64" side="bottom" align="start">
           <Command>
             <CommandInput placeholder="Choose Location" />
             <CommandList>
@@ -127,5 +116,5 @@ export function ComboboxForm({
         </PopoverContent>
       </Popover>
     </div>
-  );
+  )
 }

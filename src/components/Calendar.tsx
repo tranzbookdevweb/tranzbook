@@ -1,4 +1,5 @@
 'use client';
+
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { useForm } from "react-hook-form";
@@ -27,7 +28,15 @@ const FormSchema = z.object({
   }),
 });
 
-export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChange: (date: Date | null) => void, disabledDates?: Date[] }) {
+export function CalendarForm({ 
+  onDateChange, 
+  disabledDates = [], 
+  calendarType = 'departure' 
+}: { 
+  onDateChange: (date: Date | null) => void, 
+  disabledDates?: Date[], 
+  calendarType?: 'departure' | 'return' 
+}) {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
@@ -66,14 +75,14 @@ export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChang
                   <FormControl>
                     <div
                       className={cn(
-                        "w-full flex items-center justify-between text-left font-normal",
+                        "w-full flex items-center justify-between text-left text-sm font-normal",
                         !field.value && "text-muted-foreground"
                       )}
                     >
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span>Pick a date</span>
+                        <span >{calendarType === 'departure' ? 'Date' : 'Return Date'}</span>
                       )}
                       <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
                     </div>
@@ -94,7 +103,7 @@ export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChang
                       
                       // Get tomorrow's date
                       const tomorrow = new Date(today);
-                      tomorrow.setDate(tomorrow.getDate() );
+                      tomorrow.setDate(tomorrow.getDate());
                       
                       // Disable today and all dates before today
                       if (date < tomorrow) {
@@ -104,7 +113,7 @@ export function CalendarForm({ onDateChange, disabledDates = [] }: { onDateChang
                       // For the return date calendar, disable the selected departure dates
                       // and all dates before them
                       if (disabledDates.length > 0) {
-                        return disabledDates.some(disabledDate => 
+                        return disabledDates.some(disabledDate =>
                           date.getTime() < disabledDate.getTime()
                         );
                       }

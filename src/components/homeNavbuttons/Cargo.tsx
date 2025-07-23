@@ -13,7 +13,7 @@ const Cargo: React.FC = () => {
   });
 
   return (
-    <div className='flex flex-col items-center overflow-x-hidden w-full justify-center'>
+    <div className='flex flex-col bg-[#def5fb] items-center overflow-x-hidden w-full justify-center'>
       <div className='flex flex-col items-center text-center'>
         <h4 className='text-[#FDB022] text-[4vh] max-sm:text-[3vh] max-md:text-[2.4vh] font-bold'>
           Book A Truck, Move Your Goods Easily

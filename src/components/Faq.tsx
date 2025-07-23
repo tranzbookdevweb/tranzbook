@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import RemoveCircleOutlineOutlinedIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'; // Import minus icon
 import Image from 'next/image';
+import { Button } from './ui/button';
 
 interface FaqProps {
-  activeButton: 'Bus' | 'Cargo'; // Accept activeButton as a prop
+  activeButton: 'bus' | 'truck'; // Accept activeButton as a prop
 }
 
 const Faq: React.FC<FaqProps> = ({ activeButton }) => {
@@ -16,13 +17,13 @@ const Faq: React.FC<FaqProps> = ({ activeButton }) => {
   };
 
   return (
-    <div className='flex bg-[#0068D4] w-screen flex-col text-white items-center justify-center'>
+    <div className='flex mb-12 bg-[#F9FAFB] w-screen flex-col text-gray-600 items-center justify-center'>
       <div className='p-[5vh] items-center flex flex-col'>
         <h3 className='text-[3.5vh] font-semibold p-[1vh] text-center'>Frequently Asked Questions</h3>
         <h4 className='font-semibold text-[2vh] p-[2vh] text-center'>Everything you need to know about the product and billing</h4>
 
         {/* FAQ for Bus */}
-        {activeButton === 'Bus' && (
+        {activeButton === 'bus' && (
           <>
             <div className='wrdcontainer'>
               <div className='wrd'>
@@ -137,13 +138,43 @@ const Faq: React.FC<FaqProps> = ({ activeButton }) => {
         )}
 
         {/* FAQ for Cargo */}
-        {activeButton === 'Cargo' && (
+        {activeButton === 'truck' && (
           <>
             {/* Add similar FAQ structure for Cargo questions here */}
           </>
         )}
       </div>
-    </div>
+
+        {/* Contact Section */}
+        <div className="bg-[#123C7B] w-full max-w-5xl mx-auto rounded-2xl p-8 text-center text-white">
+          <div className="flex justify-center mb-4">
+            <div className="flex -space-x-2">
+              <img
+                src="/faqright.png"
+                alt="Team member"
+                className="w-10 h-10 rounded-full border border-gray-600"
+              />
+              <img
+                src="/faqmiddle.png"
+                alt="Team member"
+                className="w-10 h-10 rounded-full"
+              />
+              <img
+                src="/faqleft.png"
+                alt="Team member"
+                className="w-10 h-10 rounded-full border border-gray-600"
+              />
+            </div>
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Still have questions?</h3>
+          <p className="text-blue-100 mb-6">
+            Can&apos;t find the answer you&apos;re looking for? Please chat to our friendly team.
+          </p>
+          <Button className="bg-blue-500 hover:bg-blue-400 text-white font-semibold px-8 py-3 rounded-lg transition-colors">
+            Get in touch
+          </Button>
+        </div>
+      </div>
   );
 };
 

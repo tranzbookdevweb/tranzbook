@@ -71,6 +71,11 @@ const config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out'
+      },
+       fontFamily: {
+        'tangosans': ['TangoSans', 'sans-serif'],
+        // or if you want to make it the default sans font:
+        'sans': ['TangoSans', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif'],
       }
     }
   },

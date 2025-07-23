@@ -2,28 +2,30 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import man from "../../public/pictures/manHomepage.png"; // Ensure the path is correct
+import woman from "../../public/pictures/woman.jpg"; // Ensure the path is correct
 import truck from "../../public/pictures/cargotruck.jpg"; // Ensure the path is correct
 import Whycards from "./Whycards";
 
 interface WhyProps {
-  activeButton: 'Bus' | 'Cargo'; // Accept activeButton as a prop
+  activeButton: 'bus' | 'truck'; // Accept activeButton as a prop
 }
 
 const Why: React.FC<WhyProps> = ({ activeButton }) => {
   return (
     <div className="px-4 py-8 w-full items-center max-w-7xl mx-auto">
-      {/* Intro Section */}
-      <p className="text-center text-lg md:text-xl text-gray-700 mb-10 px-4">
-        {activeButton === 'Bus'
-          ? "Your Comfort, Our Priority. Imagine planning your trip without ever leaving your home. With TranzBook, you can find and book the best buses right from your couch, saving yourself the hassle of crowded bus stations. Wherever you’re headed, just pull out your phone or laptop, and let TranzBook bring the journey to you."
-          : "Move Your World with TranzBook Cargo! Simplify your logistics with TranzBook Cargo, the ultimate solution for seamless cargo transportation within Ghana and across borders. Whether you're a business owner shipping goods or an individual sending packages, we make it effortless, affordable, and reliable."}
-      </p>
 
       {/* Conditional Rendering based on activeButton */}
       <div className="grid grid-cols-2 max-w-5xl mx-auto max-lg:grid-cols-1 gap-5">
+        <motion.div className="flex relative w-full h-full">
+          <Image
+            quality={100}
+            src={activeButton === 'bus' ? woman : truck}
+            alt={activeButton === 'bus' ? "Man with laptop" : "Cargo truck"}
+            className="rounded-xl object-fill w-full max-h-[600px] max-lg:max-h-[500px] max-md:max-h-[350px]"
+          />
+        </motion.div>
         <div>
-          {activeButton === 'Bus' && (
+          {activeButton === 'bus' && (
             <>
               <h4 className="text-2xl font-semibold mb-4">Why Choose TranzBook?</h4>
               <div className="space-y-6">
@@ -43,7 +45,7 @@ const Why: React.FC<WhyProps> = ({ activeButton }) => {
             </>
           )}
 
-          {activeButton === 'Cargo' && (
+          {activeButton === 'truck' && (
             <>
               <h4 className="text-2xl font-semibold mb-4">Why Choose TranzBook for Cargo?</h4>
               <div className="space-y-6">
@@ -72,14 +74,7 @@ const Why: React.FC<WhyProps> = ({ activeButton }) => {
           )}
         </div>
 
-        <motion.div className="flex relative w-full h-full">
-          <Image
-            quality={100}
-            src={activeButton === 'Bus' ? man : truck}
-            alt={activeButton === 'Bus' ? "Man with laptop" : "Cargo truck"}
-            className="rounded-xl object-fill w-full max-h-[600px] max-lg:max-h-[500px] max-md:max-h-[350px]"
-          />
-        </motion.div>
+       
       </div>
       <Whycards activeButton={activeButton} />
       </div>
