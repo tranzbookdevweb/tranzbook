@@ -119,7 +119,7 @@ export function Navbar({ user }: NavbarProps) {
   ]
 
   return (
-    <div className="w-full h-[80px] bg-[#def5fb] border-b border-blue-100">
+    <div className="w-full sticky top-0 z-[99999] left-0 right-0 h-[80px] bg-[#def5fb] border-b border-blue-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex items-center justify-between h-full gap-4">
           {/* Logo Section */}
