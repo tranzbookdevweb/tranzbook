@@ -21,8 +21,47 @@ model User {
   updatedAt          DateTime          @updatedAt
 
   CargoForm CargoForm[]
+
+  TravelersClubMember TravelersClubMember[]
+}
+model TravelersClubMember {
+  id                String   @id @default(uuid())
+  
+  // Personal Information (Step 1)
+  name              String
+  email             String   @unique
+  phoneNumber       String
+  whatsAppNumber    String
+  
+  // Travel Profile (Step 2)
+  departureCity     String
+  destinationCity   String
+  travelFrequency   String   // 'Daily', 'Weekly', '2-3 times per week', etc.
+  travelType        String   // 'Business Travel', 'Leisure/Tourism', etc.
+  
+  // Additional Information (Step 3)
+  suggestions       String?  // Optional field for member suggestions
+  termsAccepted     Boolean  @default(false)
+  joinWhatsApp      Boolean  @default(false)
+  
+  // Metadata
+  status            TravelersClubStatus @default(active)
+  registrationDate  DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Optional: Link to existing User if they already have an account
+  userId            String?
+  user              User?    @relation(fields: [userId], references: [id])
+  
+  @@map("travelers_club_members")
 }
 
+enum TravelersClubStatus {
+  active
+  inactive
+  suspended
+}
 model BusCompany {
   id           String     @id @default(uuid())
   name         String

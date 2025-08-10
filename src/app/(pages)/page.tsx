@@ -12,18 +12,48 @@ import { Helmet } from "react-helmet"
 import { useNavigation, ButtonType } from "@/context/NavigationContext"
 import CheapTicketsTips from "@/components/CheapTickets"
 import ComfortPrioritySection from "@/components/ComfortSection"
+import TranzbookBusLoader from "./Busloader"
+import ContentSkeleton from "./SkeletonLoader"
+
 
 type Props = {}
+
+// Global variable to track if initial loader has been shown
+let hasShownInitialLoader = false;
 
 export default function UpperHome({}: Props) {
   const { theme } = useTheme()
   const { activeButton } = useNavigation()
   const [mounted, setMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isContentLoading, setIsContentLoading] = useState(false)
 
-  // Ensure hydration match
+  // Ensure hydration match and check if loader should show
   useEffect(() => {
     setMounted(true)
+    
+    // Only show bus loader if it hasn't been shown yet in this app session
+    if (!hasShownInitialLoader) {
+      setIsLoading(true)
+    } else {
+      // Show skeleton loader for subsequent loads
+      setIsContentLoading(true)
+      console.log('Showing skeleton loader...') // Debug log
+      // Simulate content loading time
+      const timer = setTimeout(() => {
+        setIsContentLoading(false)
+        console.log('Hiding skeleton loader...') // Debug log
+      }, 1500) // Increased time to 1.5s to make it more visible
+      
+      return () => clearTimeout(timer)
+    }
   }, [])
+
+  // Handle loader completion
+  const handleLoadingComplete = () => {
+    setIsLoading(false)
+    hasShownInitialLoader = true // Update global variable
+  }
 
   // Structured data for SEO
   const structuredData = {
@@ -73,6 +103,17 @@ export default function UpperHome({}: Props) {
   }
 
   if (!mounted) return null
+
+  // Show full bus loader only on first app visit
+  if (isLoading) {
+    return <TranzbookBusLoader onComplete={handleLoadingComplete} />
+  }
+
+  // Show skeleton loader for subsequent content loads
+  if (isContentLoading) {
+    console.log('Rendering skeleton loader...', { activeButton, theme }) // Debug log
+    return <ContentSkeleton activeButton={activeButton} theme={theme} />
+  }
 
   return (
     <>
@@ -170,7 +211,7 @@ export default function UpperHome({}: Props) {
             Our Services
           </h2>
           <Widgets activeButton={activeButton} />
-          <ComfortPrioritySection/>
+          <ComfortPrioritySection activeButton={activeButton}/>
         </section>
  
         <section aria-labelledby="why-section">
@@ -179,20 +220,26 @@ export default function UpperHome({}: Props) {
           </h2>
           <Why activeButton={activeButton} />
         </section>
-
-        <section aria-labelledby="popular-places">
+      {activeButton === ButtonType.Bus && (
+        <>
+         <section aria-labelledby="popular-places">
           <h2 id="popular-places" className="sr-only">
             Popular Destinations
           </h2>
-          <PopularPlace />
+          <PopularPlace/>
         </section>
-
-        <section aria-labelledby="partners">
+             <section aria-labelledby="partners">
           <h2 id="partners" className="sr-only">
             Our Partners
           </h2>
           <Partner />
         </section>
+</>
+        
+      )}
+       
+
+   
 
         <section id="Faq" aria-labelledby="faq-section">
           <h2 id="faq-section" className="sr-only">

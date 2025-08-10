@@ -1,44 +1,40 @@
-'use client';
-
+'use client'
 import React from 'react';
 import { Cursor, useTypewriter } from 'react-simple-typewriter';
 import Image from 'next/image';
-import FormCargo from '../FormCargo'; 
+import FormCargo from '../FormCargo';
 
-const Cargo: React.FC = () => {
-  const [text] = useTypewriter({
+const BusComponent: React.FC = () => {
+  const [text, count] = useTypewriter({
     words: ['Book A Truck, Move Your Goods Easily'],
     loop: false,
-    delaySpeed: 3000,
+    delaySpeed: 10000,
   });
 
   return (
-    <div className='flex flex-col bg-[#def5fb] items-center overflow-x-hidden w-full justify-center'>
+    <div className='flex flex-col bg-[#def5fb] items-center overflow-x-hidden w-[100%] justify-center font-tangosans'>
       <div className='flex flex-col items-center text-center'>
-        <h4 className='text-[#FDB022] text-[4vh] max-sm:text-[3vh] max-md:text-[2.4vh] font-bold'>
-          Book A Truck, Move Your Goods Easily
-        </h4>
-        <h5 className='text-[#475467] text-[2vh] max-lg:text-[1.9vh] w-full font-semibold'>
+        <h1 className='w-[944px]  font-extrabold text-[64px] max-lg:text-[48px] leading-[70px] flex items-end text-center text-[#123C7B] flex-none order-0 flex-grow-0 max-w-[90vw] max-sm:text-[32px] max-sm:leading-[36px] max-md:text-[48px] max-md:leading-[52px] font-tangosans'>
+          Move Goods Smarter. Book Trucks in Minutes.
+        </h1>
+        <h5 className='text-[#475467] text-[20px] my-3 max-lg:text-[1.9vh] w-full font-medium font-tangosans'>
           <span>{text}<Cursor /></span>
         </h5>
       </div>
-      
-      {/* Cargo Truck Illustration */}
-      <div className='w-full'>
-        <Image
-          width={1200}  // Set appropriate width
-          height={500}  // Set appropriate height
-          src='/pictures/TBcargo.svg'
-          alt='Cargo Truck Illustration'
-          className='w-full h-auto'  // Ensure full-width with auto height
-        />
-      </div>
-        {/* Cargo Booking Form */}
       <div>
-        <FormCargo /> 
+        <FormCargo/>
+      </div>
+      <div>
+        <Image
+          width={800}
+          height={400}
+          className='w-full h-auto'
+          src='/pictures/busIlustration 1.svg'
+          alt='Bus illustration'
+        />
       </div>
     </div>
   );
 }
 
-export default Cargo;
+export default BusComponent;
