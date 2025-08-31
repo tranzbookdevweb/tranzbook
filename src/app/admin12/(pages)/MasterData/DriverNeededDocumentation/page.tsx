@@ -9,7 +9,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import AddDriverDoc from '@/app/admin/components/Sheetpop/MasterDataPop/AddDriverDocSheet';
+import AddDriverDoc from '@/app/admin12/components/Sheetpop/MasterDataPop/AddDriverDocSheet';
 
 
 

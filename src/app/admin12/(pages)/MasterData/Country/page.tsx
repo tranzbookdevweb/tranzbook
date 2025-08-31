@@ -1,10 +1,12 @@
-import { DriverRatingDataTable } from '@/app/admin/components/DriverRatingDataTable';
+'use client'
+import { CountryDataTable } from '@/app/admin12/components/countries-data';
 import React from 'react';
 
 const CountryPage: React.FC = () => {
+  
   return (
     <div>
-      <DriverRatingDataTable />
+      <CountryDataTable />
     </div>
   );
 };

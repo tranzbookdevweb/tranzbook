@@ -47,7 +47,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import BusSheet from '@/app/admin/components/Sheetpop/MasterDataPop/VehicleMakeSheet';
+import BusSheet from '@/app/admin12/components/Sheetpop/MasterDataPop/VehicleMakeSheet';
 
 interface Company {
   id: string;

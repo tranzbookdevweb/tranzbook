@@ -42,7 +42,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import BranchSheet from '@/app/admin/components/Sheetpop/Priveleges/BranchSheet';
+import BranchSheet from '@/app/admin12/components/Sheetpop/Priveleges/BranchSheet';
 
 interface Branch {
   id: string;

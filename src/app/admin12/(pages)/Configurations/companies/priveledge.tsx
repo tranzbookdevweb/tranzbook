@@ -34,7 +34,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import BusCompanySheet from '@/app/admin/components/Sheetpop/Priveleges/PriveledgeSheet';
+import BusCompanySheet from '@/app/admin12/components/Sheetpop/Priveleges/PriveledgeSheet';
 
 interface BusCompany {
   id: string;

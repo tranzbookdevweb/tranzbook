@@ -34,7 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import ApprovedDriversSheet from "@/app/admin/components/Sheetpop/ManageDRIVERS/ApprovedDriverSheet"
+import ApprovedDriversSheet from "@/app/admin12/components/Sheetpop/ManageDRIVERS/ApprovedDriverSheet"
 
 type ApprovedData = {
   firstName: string;

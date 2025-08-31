@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { BookingFilterAccordion } from '@/components/FilterComponent';
 import FormBus from '@/components/FormBus';
 import { ArrowRight, Calendar, Clock, Filter, Loader2, MapPin, Shield } from 'lucide-react';
-import NoBusFound from '@/app/admin/components/NoBusFound';
+import NoBusFound from '@/app/admin12/components/NoBusFound';
 import { useSearchParams } from 'next/navigation';
 import { format, addMinutes, parse } from 'date-fns';
 // Shadcn components
